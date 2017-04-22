@@ -29,6 +29,7 @@ def cron_send_temp():
             if order['CardNo'].strip() == userId:
                 openid = wechat_user['openid']
                 data = {}
+                #模版数据字典
                 data['first'] = {
                     "value": float(order['PayMoney']),
                     "color": "#173177"
@@ -75,13 +76,13 @@ def get_wechat_users(orders):
 
 
 def send_temp(openid,data):
-    app_id = 'wxd892ee844883f6a8'
-    secret = '8888eb81688a37912e05ba0520ac4b70'
+    app_id = consts.APPID
+    secret = consts.APPSECRET
     client = WeChatClient(app_id, secret)
 
     message = client.message
     #用户openid
-    user_id = 'ouCqqv7gRJtLb6oUwCvG0QdeJ6Ec'
+    user_id = openid
     #模版id
     template_id = 'LgOhnBWTPdJ2sjjTuCjePq2tdqp2YYWqQlwdIyyh0zE'
     url = ''
@@ -90,6 +91,7 @@ def send_temp(openid,data):
     data = data
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
+
     Log.objects.create(
         errmsg = res_send['errmsg'],
         errcode = res_send['errcode'],
