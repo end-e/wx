@@ -38,10 +38,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'xadmin',
     'crispy_forms',
     'reversion',
     'wxaccess',
+    'api',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,7 +87,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        'HOST': '127.0.0.1'
+        'HOST': '192.168.250.12',
+        # 'HOST': '127.0.0.1'
     }
 }
 
@@ -115,3 +118,41 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+#################################  以下为手工添加的配置  ###################################
+
+#cache
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.cache.RedisCache',
+        'LOCATION': [
+            '127.0.0.1:6379',
+        ],
+
+        "OPTIONS": {
+            'DB':1,
+            "PASSWORD":"kgredis",
+            "CLIENT_CLASS": "redis_cache.client.DefaultClient",
+        },
+        "KEY_PREFIX":'scm',
+        "TIMEOUT":480,
+
+    },
+}
+
+
+#django-crontab任务加载
+CRONJOBS = [
+    # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
+    # ('* */1 * * *', 'api.cron.crontab_get_token'),
+    ('* * * * *', 'api.cron.cron_send_temp'),
+
+    # format 1
+    # ('*/1 * * * *', 'api.cron.my_scheduled_job', '>> /home/xiul/djangoapps/wx/log/scheduled_job.log'),
+
+    # format 2
+    # ('0   0 1 * *', 'myapp.cron.other_scheduled_job', ['myapp']),
+    # ('0   0 * * 0', 'django.core.management.call_command', ['dumpdata', 'auth'], {'indent': 4}, '> /home/xiul/djangoapps/wx/last_sunday_auth_backup.json'),
+]

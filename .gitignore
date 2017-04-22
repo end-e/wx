@@ -141,9 +141,3 @@ fabric.properties
 
 consts.py
 db.sqlite3
-.idea/encodings.xml
-.idea/inspectionProfiles/
-.idea/misc.xml
-.idea/modules.xml
-.idea/wx.iml
-.idea/vcs.xml

@@ -15,4 +15,6 @@ urlpatterns = [
     url(r'^$', WeChatAccessView.as_view()),
     # 测试获取access_token
     url(r'^token/$', GetAccessTokenView.as_view()),
+
+    url(r'^api/', include('api.urls',namespace='api')),
 ]
