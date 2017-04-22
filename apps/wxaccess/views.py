@@ -36,3 +36,4 @@ class GetAccessTokenView(View):
         obj.expires_in = result['expires_in']
         obj.save()
         return HttpResponse(result)
+
