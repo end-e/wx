@@ -1,6 +1,4 @@
 # -*- coding:utf-8 -*-
-import json
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import View
 from wechatpy.utils import check_signature
@@ -36,4 +34,3 @@ class GetAccessTokenView(View):
         obj.expires_in = result['expires_in']
         obj.save()
         return HttpResponse(result)
-
