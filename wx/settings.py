@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'reversion',
     'wxaccess',
-    'api',
+    'api'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -87,8 +87,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        'HOST': '192.168.250.12',
-        # 'HOST': '127.0.0.1'
+        # 'HOST': '192.168.250.12',
+        'HOST': '127.0.0.1'
     }
 }
 
@@ -119,11 +119,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
-
 #################################  以下为手工添加的配置  ###################################
 
-#cache
+# cache
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.cache.RedisCache',
@@ -132,18 +130,17 @@ CACHES = {
         ],
 
         "OPTIONS": {
-            'DB':1,
-            "PASSWORD":"kgredis",
+            'DB': 1,
+            "PASSWORD": "kgredis",
             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
         },
-        "KEY_PREFIX":'scm',
-        "TIMEOUT":480,
+        "KEY_PREFIX": 'scm',
+        "TIMEOUT": 480,
 
     },
 }
 
-
-#django-crontab任务加载
+# django-crontab任务加载
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
     # ('* */1 * * *', 'api.cron.crontab_get_token'),

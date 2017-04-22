@@ -1,6 +1,4 @@
 # -*- coding:utf-8 -*-
-import json
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import View
 from wechatpy.utils import check_signature
