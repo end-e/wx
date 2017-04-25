@@ -1,13 +1,13 @@
 # -*-  coding:utf-8 -*-
-__author__ = ''
-__date__ = '2017/4/19 14:04'
+# __author__ = ''
+# __date__ = '2017/4/19 14:04'
+import datetime
+
 from django.db import connection as conn
 from django.http import HttpResponse
 from wechatpy import WeChatClient
 
-import datetime,json
-
-from .models import AccessToken,Log
+from .models import AccessToken, Log
 from utils import db, consts
 
 
@@ -29,7 +29,7 @@ def cron_send_temp():
             if order['CardNo'].strip() == userId:
                 openid = wechat_user['openid']
                 data = {}
-                #模版数据字典
+                # 模版数据字典
                 data['first'] = {
                     "value": float(order['PayMoney']),
                     "color": "#173177"
@@ -38,7 +38,7 @@ def cron_send_temp():
                     "value": wechat_user['username'],
                     "color": "#173177"
                 }
-                send_temp(openid,data)
+                send_temp(openid, data)
 
 
 def get_user_order():
@@ -75,15 +75,15 @@ def get_wechat_users(orders):
     return wechat_users
 
 
-def send_temp(openid,data):
+def send_temp(openid, data):
     app_id = consts.APPID
     secret = consts.APPSECRET
     client = WeChatClient(app_id, secret)
 
     message = client.message
-    #用户openid
+    # 用户openid
     user_id = openid
-    #模版id
+    # 模版id
     template_id = 'LgOhnBWTPdJ2sjjTuCjePq2tdqp2YYWqQlwdIyyh0zE'
     url = ''
     top_color = '#efefef'
@@ -93,11 +93,10 @@ def send_temp(openid,data):
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
     Log.objects.create(
-        errmsg = res_send['errmsg'],
-        errcode = res_send['errcode'],
-        type = '02',
+        errmsg=res_send['errmsg'],
+        errcode=res_send['errcode'],
+        type='02',
     )
     if res_send['errmsg'] != 'ok':
-        #TODO:记录发送失败日志
+        # TODO:记录发送失败日志
         pass
-

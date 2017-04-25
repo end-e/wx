@@ -1,3 +1,5 @@
+pymysql
+pymssql
 django~=1.8.0
 django-crispy-forms~=1.4.0
 django-reversion~=1.8.3

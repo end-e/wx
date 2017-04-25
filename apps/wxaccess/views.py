@@ -1,9 +1,13 @@
 # -*- coding:utf-8 -*-
+import datetime
+
 from django.http import HttpResponse
 from django.views.generic import View
+from django.core.exceptions import ObjectDoesNotExist
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy import WeChatClient
+
 from apps.utils import consts
 from .models import AccessToken
 
@@ -29,8 +33,14 @@ class GetAccessTokenView(View):
         appsecret = consts.APPSECRET
         component = WeChatClient(appid, appsecret)
         result = component.fetch_access_token()
-        obj = AccessToken()
-        obj.access_token = result['access_token']
-        obj.expires_in = result['expires_in']
-        obj.save()
+
+        try:
+            obj = AccessToken.objects.get(pk=1)
+            obj.access_token = result['access_token']
+            obj.expires_in = result['expires_in']
+            obj.add_time = datetime.datetime.now()
+            obj.save()
+        except ObjectDoesNotExist:
+            AccessToken.objects.create(access_token=result['access_token'], expires_in=result['expires_in'])
+
         return HttpResponse(result)
