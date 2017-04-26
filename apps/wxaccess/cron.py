@@ -24,7 +24,7 @@ def get_access_token_job():
         # 将%Y-%m-%d %H:%M:%S 转换成时间戳
         add_time = time.mktime(time.strptime(str(add_time), "%Y-%m-%d %H:%M:%S"))
 
-        if current_time - add_time >= 1800:
+        if current_time - add_time >= 5400:
             component = WeChatClient(appid, appsecret)
             result = component.fetch_access_token()
 
