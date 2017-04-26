@@ -30,7 +30,7 @@ def get_access_token_job():
 
             obj.access_token = result['access_token']
             obj.expires_in = result['expires_in']
-            obj.add_time = datetime.now()
+            obj.add_time = current_time
             obj.save()
     except ObjectDoesNotExist:
         component = WeChatClient(appid, appsecret)
