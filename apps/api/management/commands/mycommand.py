@@ -1,9 +1,10 @@
 # -*-  coding:utf-8 -*-
-__author__ = ''
-__date__ = '2017/4/19 14:39'
+# __author__ = ''
+# __date__ = '2017/4/19 14:39'
 from django.core.management.base import BaseCommand
 from api.models import AccessToken
-import datetime,logging
+import datetime, logging
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):

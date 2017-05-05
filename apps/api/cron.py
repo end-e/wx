@@ -5,6 +5,7 @@ import datetime
 
 from django.db import connection as conn
 from django.http import HttpResponse
+from django.core.cache import caches
 from wechatpy import WeChatClient
 
 from .models import AccessToken, Log
@@ -30,11 +31,11 @@ def cron_send_temp():
                 openid = wechat_user['openid']
                 data = {}
                 # 模版数据字典
-                data['first'] = {
+                data['message'] = {
                     "value": float(order['PayMoney']),
                     "color": "#173177"
                 }
-                data['key1'] = {
+                data['message2'] = {
                     "value": wechat_user['username'],
                     "color": "#173177"
                 }
@@ -46,13 +47,23 @@ def get_user_order():
     conn = db.getMsSqlConn()
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
-    sql = "SELECT a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
-          " WHERE PurchDateTime> '{start}' AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
-        .format(start=start)
+    last_purchserial = caches['default'].get('last_purchserial', '')
+    if last_purchserial:
+        sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point " \
+              "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
+              "WHERE a.PurchSerial> '{last_purchserial}' AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
+            .format(last_purchserial=last_purchserial)
+    else:
+        sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point " \
+              "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
+              " WHERE PurchDateTime> '{start}' AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
+            .format(start=start)
 
     cur = conn.cursor()
     cur.execute(sql)
     orders = cur.fetchall()
+    last_one = orders[-1]['PurchSerial']
+    caches['default'].set('last_purchserial', last_one)
     cur.close()
     conn.close()
 
@@ -82,9 +93,11 @@ def send_temp(openid, data):
 
     message = client.message
     # 用户openid
-    user_id = openid
+    # oE9Pts9_cBLTWccP682FgWuvQ7js
+    # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
+    user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
     # 模版id
-    template_id = 'LgOhnBWTPdJ2sjjTuCjePq2tdqp2YYWqQlwdIyyh0zE'
+    template_id = '0twv952J80MHBUm_WUQfgNPG9w7_FyALpYxSpAvgVjc'
     url = ''
     top_color = '#efefef'
     miniprogram = {}

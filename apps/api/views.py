@@ -72,7 +72,7 @@ def get_template_id(request):
     client = WeChatClient(app_id, secret)
 
     message = client.message
-    user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
+    user_id = 'oE9Pts_Hk63sj3dlmCtfkXGWMV-8'
     template_id = '0twv952J80MHBUm_WUQfgNPG9w7_FyALpYxSpAvgVjc'
     url = ''
     top_color = '#efefef'

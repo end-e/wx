@@ -144,10 +144,11 @@ CACHES = {
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
     # ('* */1 * * *', 'api.cron.crontab_get_token'),
-    # ('* * * * *', 'api.cron.cron_send_temp'),
-    ('20 * * * *', 'wxaccess.cron.get_access_token_job'),
+    ('* * * * *', 'api.cron.cron_send_temp'),
+    ('20,40,59 * * * *', 'wxaccess.cron.get_access_token_job'),
 
     # format 1
+
     # ('*/1 * * * *', 'api.cron.my_scheduled_job', '>> /home/xiul/djangoapps/wx/log/scheduled_job.log'),
 
     # format 2
