@@ -12,34 +12,38 @@ from .models import AccessToken, Log
 from utils import db, consts
 
 
-def crontab_get_token():
-    AccessToken.objects.create(
-        add_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        access_token='my_scheduled_job',
-        expires_in='7200',
-    )
-    return HttpResponse('my_scheduled_job')
+def cron_get_token():
+    app_id = 'wxd892ee844883f6a8'
+    secret = '8888eb81688a37912e05ba0520ac4b70'
+    client = WeChatClient(app_id, secret)
+    response = client.fetch_access_token()
+    token = response['access_token']
+    caches['default'].set('wx_access_token',token,7200)
+    return token
 
 
 def cron_send_temp():
-    orders = get_user_order()
-    wechat_users = get_wechat_users(orders)
-    for wechat_user in wechat_users:
-        userId = wechat_user['membernumber']
-        for order in orders:
-            if order['CardNo'].strip() == userId:
-                openid = wechat_user['openid']
-                data = {}
-                # 模版数据字典
-                data['message'] = {
-                    "value": float(order['PayMoney']),
-                    "color": "#173177"
-                }
-                data['message2'] = {
-                    "value": wechat_user['username'],
-                    "color": "#173177"
-                }
-                send_temp(openid, data)
+    try:
+        orders = get_user_order()
+        wechat_users = get_wechat_users(orders)
+        for wechat_user in wechat_users:
+            userId = wechat_user['membernumber']
+            for order in orders:
+                if order['CardNo'].strip() == userId:
+                    openid = wechat_user['openid']
+                    data = {}
+                    # 模版数据字典
+                    data['message'] = {
+                        "value": str(float('%.2f' %order['PayMoney'])),
+                        "color": "#173177"
+                    }
+                    data['message2'] = {
+                        "value": wechat_user['username'],
+                        "color": "#173177"
+                    }
+                    send_temp(openid, data)
+    except Exception as e:
+        pass
 
 
 def get_user_order():
@@ -49,21 +53,21 @@ def get_user_order():
     start = start.strftime('%Y-%m-%d %H:%M:%S')
     last_purchserial = caches['default'].get('last_purchserial', '')
     if last_purchserial:
-        sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point " \
-              "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
-              "WHERE a.PurchSerial> '{last_purchserial}' AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
-            .format(last_purchserial=last_purchserial)
+        whereStr = "a.PurchSerial> '{last_purchserial}'".format(last_purchserial=last_purchserial)
     else:
-        sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point " \
-              "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
-              " WHERE PurchDateTime> '{start}' AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
-            .format(start=start)
+        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
+
+    sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point " \
+          "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
+          "WHERE "+whereStr+" AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0 " \
+          "ORDER BY a.PurchSerial"
 
     cur = conn.cursor()
     cur.execute(sql)
     orders = cur.fetchall()
-    last_one = orders[-1]['PurchSerial']
-    caches['default'].set('last_purchserial', last_one)
+    if len(orders)>0:
+        last_one = orders[-1]['PurchSerial']
+        caches['default'].set('last_purchserial', last_one,2*60)
     cur.close()
     conn.close()
 
@@ -89,15 +93,25 @@ def get_wechat_users(orders):
 def send_temp(openid, data):
     app_id = consts.APPID
     secret = consts.APPSECRET
-    client = WeChatClient(app_id, secret)
 
+    # # 用户openid
+    # # oE9Pts9_cBLTWccP682FgWuvQ7js
+    # # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
+    # user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
+
+    app_id = 'wxd892ee844883f6a8'
+    secret = '8888eb81688a37912e05ba0520ac4b70'
+    user_id = 'ouCqqv7gRJtLb6oUwCvG0QdeJ6Ec'
+
+
+    access_token = caches['default'].get('wx_access_token','')
+    if not access_token:
+        access_token = cron_get_token()
+
+    client = WeChatClient(app_id,secret,access_token)
     message = client.message
-    # 用户openid
-    # oE9Pts9_cBLTWccP682FgWuvQ7js
-    # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
-    user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
     # 模版id
-    template_id = '0twv952J80MHBUm_WUQfgNPG9w7_FyALpYxSpAvgVjc'
+    template_id = '_QquwRB2gnGxZpR8DSW-MivTgh6mSb9zeuYA7RiOpOU'
     url = ''
     top_color = '#efefef'
     miniprogram = {}
@@ -106,8 +120,11 @@ def send_temp(openid, data):
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
     Log.objects.create(
+        access_token=access_token,
+        open_id = data['message2']['value'],
         errmsg=res_send['errmsg'],
         errcode=res_send['errcode'],
+        last_purchserial=caches['default'].get('last_purchserial', ''),
         type='02',
     )
     if res_send['errmsg'] != 'ok':

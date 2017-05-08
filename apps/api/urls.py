@@ -7,6 +7,6 @@ from . import views, cron
 urlpatterns = [
     url(r'^conn/', views.conn, name='conn'),
     url(r'^hx/(?P<sn>.*)/(?P<stamp>\d+)', views.hx, name='hx'),
-    url(r'msgTemplate/get/', views.get_template_id, name='get_template_id'),
+    url(r'cron/token/', cron.cron_get_token(), name='cron_get_token'),
     url(r'cron/temp/', cron.cron_send_temp, name='cron_send_temp'),
 ]

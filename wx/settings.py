@@ -87,8 +87,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        # 'HOST': '192.168.250.12',
-        'HOST': '127.0.0.1'
+        'HOST': '192.168.250.12',
+        # 'HOST': '127.0.0.1'
     }
 }
 
@@ -134,7 +134,7 @@ CACHES = {
             "PASSWORD": "kgredis",
             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
         },
-        "KEY_PREFIX": 'scm',
+        "KEY_PREFIX": 'wx',
         "TIMEOUT": 480,
 
     },
@@ -146,12 +146,4 @@ CRONJOBS = [
     # ('* */1 * * *', 'api.cron.crontab_get_token'),
     ('* * * * *', 'api.cron.cron_send_temp'),
     ('20,40,59 * * * *', 'wxaccess.cron.get_access_token_job'),
-
-    # format 1
-
-    # ('*/1 * * * *', 'api.cron.my_scheduled_job', '>> /home/xiul/djangoapps/wx/log/scheduled_job.log'),
-
-    # format 2
-    # ('0   0 1 * *', 'myapp.cron.other_scheduled_job', ['myapp']),
-    # ('0   0 * * 0', 'django.core.management.call_command', ['dumpdata', 'auth'], {'indent': 4}, '> /home/xiul/djangoapps/wx/last_sunday_auth_backup.json'),
 ]
