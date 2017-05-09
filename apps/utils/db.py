@@ -31,3 +31,16 @@ def getMysqlConn():
         cursorclass=pymysql.cursors.DictCursor
     )
     return conn
+
+
+def getMysqlConn2():
+    conn = pymysql.connect(
+        host=consts.DB_SERVER_187,
+        port=consts.DB_PORT_187,
+        user=consts.DB_USER_187,
+        password=consts.DB_PASSWORD_187,
+        db=consts.DB_DATABASE_187,
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    return conn

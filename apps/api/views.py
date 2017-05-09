@@ -1,5 +1,6 @@
 import json
 import datetime
+from urllib import parse
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -8,7 +9,7 @@ from django.views.generic.base import View
 
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
-from wechatpy import WeChatClient
+from wechatpy import WeChatClient, WeChatOAuth
 from utils import consts
 
 
@@ -90,3 +91,34 @@ def get_template_id(request):
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
     return HttpResponse(json.dumps(res_send))
+
+
+def create_nav(request):
+    access_token = caches['default'].get('wx_access_token', '')
+    if not access_token:
+        access_token = get_token()
+
+    # 配置自定义菜单
+    client = WeChatClient(consts.APPID, consts.APPSECRET, access_token)
+
+    # 会员绑定页面
+    redirect_uri = 'http://wx.huigo.com/user/membersbound/'
+
+    # OAuth2.0网页认证授权
+    oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
+    # 获取授权跳转地址
+    url = oauth.authorize_url
+    # urlEncode，除0~9，a~Z外，全部转换成ascii形式
+    url = parse.quote(url)
+
+    # 获取授权后重定向到会员绑定页面
+    client.menu.create({
+        "button": [
+            {
+                "type": "view",
+                "name": "会员绑定",
+                "url": url,
+            }
+        ]
+    })
+    return HttpResponse(request)
