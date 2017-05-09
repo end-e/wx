@@ -2,10 +2,8 @@ import json
 import datetime
 from urllib import parse
 
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.cache import caches
-from django.views.generic.base import View
 
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
@@ -49,7 +47,7 @@ def hx(request, sn, stamp):
 
 
 def get_token():
-    token = caches['default'].get('token', '')
+    token = caches['default'].get('wx_access_token', '')
     # 如果不存在，请向微信请求获取
     if not token:
         app_id = 'wxd892ee844883f6a8'
@@ -58,7 +56,7 @@ def get_token():
         response = client.fetch_access_token()
         token = response['access_token']
         time = datetime.datetime.now()
-        caches['default'].set('token', token)
+        caches['default'].set('wx_access_token', token)
 
     return token
 
