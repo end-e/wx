@@ -19,6 +19,10 @@ def cron_get_token():
     response = client.fetch_access_token()
     token = response['access_token']
     caches['default'].set('wx_access_token', token, 7200)
+    # 测试access_token为什么会超出上限
+    AccessToken.access_token = token
+    AccessToken.expires_in = response['expires_in']
+    AccessToken.objects.save()
     return token
 
 

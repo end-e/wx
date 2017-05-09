@@ -57,7 +57,7 @@ class MembersBoundView(View):
                 WechatMembers.openid = openid
                 WechatMembers.username = username
                 WechatMembers.telphone = telphone
-                WechatMembers.save()
+                WechatMembers.objects.save()
                 return render(request, 'msg_success.html', {})
             else:
                 return render(request, 'msg_warn.html', {})
