@@ -3,10 +3,7 @@ import datetime
 import json
 
 from django.shortcuts import render
-from django.http import HttpResponse
 from django.views.generic import View
-from django.core.exceptions import ObjectDoesNotExist
-from wechatpy.exceptions import InvalidSignatureException
 from wechatpy import WeChatOAuth
 
 from utils import db
@@ -48,17 +45,20 @@ class MembersBoundView(View):
             conn = db.getMysqlConn2()
             sql = "SELECT mem_number " \
                   "FROM uc_memcontent " \
-                  "WHERE idc_name={0} AND idc_id={1} AND phonenumber={2}".format(username, telphone, idnumber)
+                  "WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(username, idnumber, telphone)
             cur = conn.cursor()
             cur.execute(sql)
             member = cur.fetchall()
             if len(member) > 0:
-                member_card = member['mem_number']
-                WechatMembers.openid = openid
-                WechatMembers.username = username
-                WechatMembers.telphone = telphone
-                WechatMembers.objects.save()
-                return render(request, 'msg_success.html', {})
+                try:
+                    WechatMembers.membernumber = member[0][0]
+                    WechatMembers.openid = openid
+                    WechatMembers.username = username
+                    WechatMembers.telphone = telphone
+                    WechatMembers.objects.save()
+                except Exception as e:
+                    return render(request, 'msg_warn.html', {'error': e})
+                else:
+                    return render(request, 'msg_success.html', {})
             else:
-                return render(request, 'msg_warn.html', {})
-
+                return render(request, 'msg_warn.html', {'error': '请确认信息填写正确'})

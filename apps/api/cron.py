@@ -4,7 +4,6 @@
 import datetime
 
 from django.db import connection as conn
-from django.http import HttpResponse
 from django.core.cache import caches
 from wechatpy import WeChatClient
 
@@ -102,7 +101,6 @@ def send_temp(openid, data):
     # oE9Pts9_cBLTWccP682FgWuvQ7js
     # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
     user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
-
     access_token = caches['default'].get('wx_access_token', '')
     if not access_token:
         access_token = cron_get_token()
