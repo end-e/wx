@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import datetime
 import json
+from urllib import parse
 
 from django.shortcuts import render
 from django.views.generic import View
@@ -9,6 +10,7 @@ from wechatpy import WeChatOAuth
 from utils import db
 from .models import WechatMembers
 from .form import BoundForm
+from utils import consts
 
 
 class MembersBoundView(View):
@@ -16,13 +18,15 @@ class MembersBoundView(View):
         # 微信通过网页授权后返回的code
         code = request.GET.get('code', '')
 
+        # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
+        redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
         # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
-        res = WeChatOAuth.fetch_access_token(code)
+        oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
+        res = oauth.fetch_access_token(code)
         # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
         # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
-        data = json.loads(res)
-        openid = data['openid']
-        access_token = data['access_token']
+        openid = res['openid']
+        access_token = res['access_token']
 
         return render(request, 'members_bound.html', {
             'openid': openid,
@@ -51,11 +55,12 @@ class MembersBoundView(View):
             member = cur.fetchall()
             if len(member) > 0:
                 try:
-                    WechatMembers.membernumber = member[0][0]
-                    WechatMembers.openid = openid
-                    WechatMembers.username = username
-                    WechatMembers.telphone = telphone
-                    WechatMembers.objects.save()
+                    wechat_member = WechatMembers()
+                    wechat_member.membernumber = member[0][0]
+                    wechat_member.openid = openid
+                    wechat_member.username = username
+                    wechat_member.telphone = telphone
+                    wechat_member.save()
                 except Exception as e:
                     return render(request, 'msg_warn.html', {'error': e})
                 else:
