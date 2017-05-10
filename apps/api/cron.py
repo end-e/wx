@@ -103,7 +103,7 @@ def create_temp_data(order):
         "color": "#173177"
     }
     data['remark'] = {
-        "value": "消费日期：" + order['PurchDateTime'].strftime("%Y-%m-%d %H:%M:%S") + ' \n详询40011110314',
+        "value": "消费日期：" + order['PurchDateTime'].strftime("%Y-%m-%d %H:%M:%S") + ' \n详询4001110314',
         "color": "#173177"
     }
 
