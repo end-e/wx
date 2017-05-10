@@ -3,6 +3,7 @@ import datetime
 from urllib import parse
 
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.core.cache import caches
 
 from wechatpy.utils import check_signature
@@ -22,6 +23,11 @@ def conn(request):
         return HttpResponse(echostr)
     except InvalidSignatureException:
         return HttpResponse(u'验证失败')
+
+
+# 微信回调域名校验文件
+def verify(request):
+    return render(request, 'MP_verify_QthEcNlYA73MNXgH.txt')
 
 
 def hx(request, sn, stamp):
@@ -73,19 +79,16 @@ def create_nav(request):
     # 配置自定义菜单
     client = WeChatClient(consts.APPID, consts.APPSECRET, access_token)
 
-    # 会员绑定页面
-    redirect_uri = 'http://wx.huigo.com/user/membersbound/'
+    # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
+    redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
 
     # OAuth2.0网页认证授权
     oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
     # 获取授权跳转地址
     url = oauth.authorize_url
-    # urlEncode，除0~9，a~Z外，全部转换成ascii形式
-    url = parse.quote(url)
-    print(url)
 
-    # 获取授权后重定向到会员绑定页面
-    client.menu.create({
+    # 配置自定义菜单
+    menu_create = client.menu.create({
         "button": [
             {
                 "type": "view",
@@ -99,10 +102,12 @@ def create_nav(request):
             }
         ]
     })
-    return HttpResponse(request)
+    return HttpResponse(json.dumps(menu_create))
 
 
 from utils import method
+
+
 def test(re):
     shop = method.getShopName('C024')
-    return  HttpResponse(shop)
+    return HttpResponse(shop)
