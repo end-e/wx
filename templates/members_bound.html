@@ -9,8 +9,11 @@
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.css">
 </head>
 <body>
+<div class="page__hd" style="padding: 40px;">
+    <h3 class="page__title">hi, 您好</h3>
+    <p class="page__desc">小宽祝您每日愉快。</p>
+</div>
 <form id="subform" action="{% url 'user:members_bound' %}" method="post">
-    <div class="weui-cells__title">请填写会员实名制信息</div>
     <div class="weui-cells weui-cells_form">
         <div class="weui-cell">
             <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
@@ -40,8 +43,9 @@
     <input name="access_token" type="hidden" value="{{ access_token }}">
     {% csrf_token %}
 </form>
-<div class="weui-footer">
+<div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
     <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
+    <p class="weui-footer__text">based on zisai System</p>
 </div>
 </body>
 </html>
