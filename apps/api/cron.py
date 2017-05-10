@@ -23,27 +23,24 @@ def cron_get_token():
 
 
 def cron_send_temp():
-    try:
-        orders = get_user_order()
-        wechat_users = get_wechat_users(orders)
-        for wechat_user in wechat_users:
-            userId = wechat_user['membernumber']
-            for order in orders:
-                if order['CardNo'].strip() == userId:
-                    openid = wechat_user['openid']
-                    data = {}
-                    # 模版数据字典
-                    data['message'] = {
-                        "value": str(float('%.2f' %order['PayMoney'])),
-                        "color": "#173177"
-                    }
-                    data['message2'] = {
-                        "value": wechat_user['username'],
-                        "color": "#173177"
-                    }
-                    send_temp(openid, data)
-    except Exception as e:
-        pass
+    orders = get_user_order()
+    wechat_users = get_wechat_users(orders)
+    for wechat_user in wechat_users:
+        userId = wechat_user['membernumber']
+        for order in orders:
+            if order['CardNo'].strip() == userId:
+                openid = wechat_user['openid']
+                data = {}
+                # 模版数据字典
+                data['message'] = {
+                    "value": str(float('%.2f' %order['PayMoney'])),
+                    "color": "#173177"
+                }
+                data['message2'] = {
+                    "value": wechat_user['username'],
+                    "color": "#173177"
+                }
+                send_temp(openid, data)
 
 
 def get_user_order():

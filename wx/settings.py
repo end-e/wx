@@ -143,7 +143,7 @@ CACHES = {
 # django-crontab任务加载
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
-    # ('* */1 * * *', 'api.cron.crontab_get_token'),
+    ('0 * * * *', 'api.cron.cron_get_token'),
     ('* * * * *', 'api.cron.cron_send_temp'),
     ('20,40,59 * * * *', 'wxaccess.cron.get_access_token_job'),
 ]
