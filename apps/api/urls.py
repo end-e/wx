@@ -6,7 +6,12 @@ from . import views, cron
 
 urlpatterns = [
     url(r'^hx/(?P<sn>.*)/(?P<stamp>\d+)', views.hx, name='hx'),
-    url(r'cron/token/', cron.cron_get_token(), name='cron_get_token'),
+    url(r'conn/', views.conn, name='conn'),
+    url(r'cron/token/', cron.cron_get_token, name='cron_get_token'),
     url(r'cron/temp/', cron.cron_send_temp, name='cron_send_temp'),
-    url(r'^menu/create/$', views.create_nav, name='menu_create')
+    url(r'^menu/create/$', views.create_nav, name='menu_create'),
+
+    url(r'^test/$', views.test)
+
+
 ]

@@ -22,3 +22,5 @@ class Log(models.Model):
                             verbose_name=u'错误类型')
     last_purchserial = models.CharField(max_length=8, verbose_name='上一次最后一个单号', blank=True, null=True)
     add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
+
+
