@@ -27,7 +27,7 @@ SECRET_KEY = 'al_5odchumw51dflcr_wdne*8=hs-=derz*$e3=*^^n)y$qa&q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.250.12', '127.0.0.1', 'wx.huigo.com']
+ALLOWED_HOSTS = ['192.168.250.12', '127.0.0.1', 'zisai.net']
 
 # Application definition
 
@@ -131,7 +131,7 @@ CACHES = {
 
         "OPTIONS": {
             'DB': 1,
-            "PASSWORD": "kgredis",
+            #"PASSWORD": "kgredis",
             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
         },
         "KEY_PREFIX": 'wx',
@@ -144,6 +144,6 @@ CACHES = {
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
     ('0 * * * *', 'api.cron.cron_get_token'),
-    ('* * * * *', 'api.cron.cron_send_temp'),
+    # ('* * * * *', 'api.cron.cron_send_temp'),
     # ('20,40,59 * * * *', 'wxaccess.cron.get_access_token_job'),
 ]
