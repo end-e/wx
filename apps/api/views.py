@@ -82,6 +82,7 @@ def create_nav(request):
     url = oauth.authorize_url
     # urlEncode，除0~9，a~Z外，全部转换成ascii形式
     url = parse.quote(url)
+    print(url)
 
     # 获取授权后重定向到会员绑定页面
     client.menu.create({
@@ -90,6 +91,11 @@ def create_nav(request):
                 "type": "view",
                 "name": "会员绑定",
                 "url": url,
+            },
+            {
+                "type": "view",
+                "name": "慧购",
+                "url": "http://www.huigo.com/mobile"
             }
         ]
     })
