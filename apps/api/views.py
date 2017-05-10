@@ -65,32 +65,6 @@ def check_consume(code, token):
     pass
 
 
-def get_template_id(request):
-    app_id = consts.APPID
-    secret = consts.APPSECRET
-    client = WeChatClient(app_id, secret)
-
-    message = client.message
-    user_id = 'oE9Pts_Hk63sj3dlmCtfkXGWMV-8'
-    template_id = '0twv952J80MHBUm_WUQfgNPG9w7_FyALpYxSpAvgVjc'
-    url = ''
-    top_color = '#efefef'
-    miniprogram = {}
-    data = {
-        "message": {
-            "value": "恭喜你购买成功！",
-            "color": "#173177"
-        },
-        "message2": {
-            "value": "巧克力",
-            "color": "#173177"
-        }
-    }
-
-    res_send = message.send_template(user_id, template_id, url, top_color, data)
-    return HttpResponse(json.dumps(res_send))
-
-
 def create_nav(request):
     access_token = caches['default'].get('wx_access_token', '')
     if not access_token:
@@ -108,6 +82,7 @@ def create_nav(request):
     url = oauth.authorize_url
     # urlEncode，除0~9，a~Z外，全部转换成ascii形式
     url = parse.quote(url)
+    print(url)
 
     # 获取授权后重定向到会员绑定页面
     client.menu.create({
@@ -116,6 +91,11 @@ def create_nav(request):
                 "type": "view",
                 "name": "会员绑定",
                 "url": url,
+            },
+            {
+                "type": "view",
+                "name": "慧购",
+                "url": "http://www.huigo.com/mobile"
             }
         ]
     })
