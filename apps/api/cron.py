@@ -4,7 +4,6 @@
 import datetime
 
 from django.db import connection as conn
-from django.http import HttpResponse
 from django.core.cache import caches
 from wechatpy import WeChatClient
 
@@ -13,12 +12,17 @@ from utils import db, consts
 
 
 def cron_get_token():
-    app_id = 'wxd892ee844883f6a8'
-    secret = '8888eb81688a37912e05ba0520ac4b70'
+    app_id = consts.APPID
+    secret = consts.APPSECRET
     client = WeChatClient(app_id, secret)
     response = client.fetch_access_token()
     token = response['access_token']
-    caches['default'].set('wx_access_token',token,7200)
+    caches['default'].set('wx_access_token', token, 7200)
+    # 测试access_token为什么会超出上限
+    access_token = AccessToken()
+    access_token.access_token = token
+    access_token.expires_in = response['expires_in']
+    access_token.save()
     return token
 
 
@@ -91,24 +95,18 @@ def send_temp(openid, data):
     app_id = consts.APPID
     secret = consts.APPSECRET
 
-    # # 用户openid
-    # # oE9Pts9_cBLTWccP682FgWuvQ7js
-    # # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
-    # user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
-
-    app_id = 'wxd892ee844883f6a8'
-    secret = '8888eb81688a37912e05ba0520ac4b70'
-    user_id = 'ouCqqv7gRJtLb6oUwCvG0QdeJ6Ec'
-
-
-    access_token = caches['default'].get('wx_access_token','')
+    # 用户openid
+    # oE9Pts9_cBLTWccP682FgWuvQ7js
+    # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
+    user_id = 'oE9Pts9_cBLTWccP682FgWuvQ7js'
+    access_token = caches['default'].get('wx_access_token', '')
     if not access_token:
         access_token = cron_get_token()
 
-    client = WeChatClient(app_id,secret,access_token)
+    client = WeChatClient(app_id, secret, access_token)
     message = client.message
     # 模版id
-    template_id = '_QquwRB2gnGxZpR8DSW-MivTgh6mSb9zeuYA7RiOpOU'
+    template_id = '0twv952J80MHBUm_WUQfgNPG9w7_FyALpYxSpAvgVjc'
     url = ''
     top_color = '#efefef'
     miniprogram = {}
@@ -118,7 +116,7 @@ def send_temp(openid, data):
 
     Log.objects.create(
         access_token=access_token,
-        open_id = data['message2']['value'],
+        open_id=data['message2']['value'],
         errmsg=res_send['errmsg'],
         errcode=res_send['errcode'],
         last_purchserial=caches['default'].get('last_purchserial', ''),
