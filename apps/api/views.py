@@ -79,21 +79,13 @@ def create_nav(request):
     # 配置自定义菜单
     client = WeChatClient(consts.APPID, consts.APPSECRET, access_token)
 
-    # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
-    redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
-
-    # OAuth2.0网页认证授权
-    oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
-    # 获取授权跳转地址
-    url = oauth.authorize_url
-
     # 配置自定义菜单
     menu_create = client.menu.create({
         "button": [
             {
                 "type": "view",
                 "name": "会员绑定",
-                "url": url,
+                "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
             },
             {
                 "type": "view",
