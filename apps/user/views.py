@@ -1,8 +1,10 @@
 # -*- coding:utf-8 -*-
 from urllib import parse
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View
+from django.db import IntegrityError
+from django.http import HttpResponse
 from wechatpy import WeChatOAuth
 
 from utils import db
@@ -15,6 +17,9 @@ class MembersBoundView(View):
     def get(self, request):
         # 微信通过网页授权后返回的code
         code = request.GET.get('code', '')
+        if not code:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
 
         # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
         redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
@@ -45,23 +50,28 @@ class MembersBoundView(View):
 
             # 验证是否是实名制会员
             conn = db.getMysqlConn2()
-            sql = "SELECT mem_number " \
-                  "FROM uc_memcontent " \
-                  "WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(username, idnumber, telphone)
             cur = conn.cursor()
+            # 将身份证最后一位的x转换为大写
+            if str(idnumber)[-1] == 'x':
+                idnumber = str(idnumber).upper()
+            sql = "SELECT mem_number FROM uc_memcontent WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(
+                username, idnumber, telphone)
             cur.execute(sql)
             member = cur.fetchall()
-            if len(member) > 0:
+            if member:
+                membership = member[0]['mem_number']
                 try:
                     wechat_member = WechatMembers()
-                    wechat_member.membernumber = member[0][0]
+                    wechat_member.membernumber = membership
                     wechat_member.openid = openid
                     wechat_member.username = username
                     wechat_member.telphone = telphone
                     wechat_member.save()
+                except IntegrityError:
+                    return render(request, 'msg_warn.html', {'error': u'此微信已绑定会员'})
                 except Exception as e:
                     return render(request, 'msg_warn.html', {'error': e})
                 else:
                     return render(request, 'msg_success.html', {})
             else:
-                return render(request, 'msg_warn.html', {'error': '请确认信息填写正确'})
+                return render(request, 'msg_warn.html', {'error': u'请确认信息填写正确'})
