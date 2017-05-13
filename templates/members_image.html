@@ -10,7 +10,9 @@
 <style type="text/css">
 .demo{width:400px; margin:40px auto 0 auto; min-height:250px;}
 .demo p{line-height:30px}
-.weui_div{margin-top: 5%;text-align: center;}
+.weui_div{margin-top: 5%;text-align: center;
+  margin-left: auto;
+  margin-right: auto;}
 #code{margin-top:10px}
 </style>
 <script type="text/javascript" src="/static/wx/js/jquery.min.js"></script>
@@ -22,8 +24,6 @@ $("#code").empty();
 
 		$("#code").qrcode({
 			render: "table",
-			width: 200,
-			height:200,
 			text: str
 		});
 });
@@ -56,13 +56,22 @@ function showtime(){
 </script>
 </head>
 <body>
-<div id="main">
-   <h2 class="weui_div">会员编号：{{ member_num }}</h2>
-   <div class="demo">
+   <h2 class="weui_div">会员卡号：{{ member_num }}</h2>
         <input type="hidden" class="input" id="mytxt" value="{{ member_num }}">
-   		<div id="code" class="weui_div"></div>
+   		<div  class="page__bd page__bd_spacing" style="padding-top: 20px;padding-bottom: 20px;">
+            <div  class="weui-flex">
+                <div  class="weui-flex__item">
+                <div  class="placeholder">
+                    <div id="code" align="center">
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
        <div id="time" class="weui_div"></div>
-   </div>
+<div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
+    <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
+    <p class="weui-footer__text">based on zisai System</p>
 </div>
 </body>
 </html>

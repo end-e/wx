@@ -99,8 +99,8 @@ class MembersImageView(View):
         member_info = WechatMembers.objects.values('membernumber').filter(openid=openid)
         # return HttpResponse(member_info)
 
-        if member_info is None:
-            pass
+        if not member_info:
+            return render(request, 'msg_warn.html', {'error': u'此会员未实名制'})
         else:
             member_num = member_info[0]['membernumber']
 
