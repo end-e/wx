@@ -83,7 +83,7 @@ class MembersImageView(View):
         code = request.GET.get('code', '')
         if not code:
             return redirect(
-                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersimage&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
 
         # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
         redirect_uri = parse.quote('http://www.zisai.net/user/membersimage/')
@@ -96,12 +96,12 @@ class MembersImageView(View):
         access_token = res['access_token']
 
         member_num=''
-        member_info = WechatMembers.objects.filter(openid=openid)
+        member_info = WechatMembers.objects.values('membernumber').filter(openid=openid)
 
         if member_info is None:
             pass
         else:
-            member_num = member_info[0]['membernumber']
+            member_num = member_info[0][0]
 
         return render(request, 'members_image.html', {
             'openid': openid,
