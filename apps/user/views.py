@@ -75,3 +75,36 @@ class MembersBoundView(View):
                     return render(request, 'msg_success.html', {})
             else:
                 return render(request, 'msg_warn.html', {'error': u'请确认信息填写正确'})
+
+
+class MembersImageView(View):
+    def get(self, request):
+        # 微信通过网页授权后返回的code
+        code = request.GET.get('code', '')
+        if not code:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
+
+        # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
+        redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
+        # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
+        oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
+        res = oauth.fetch_access_token(code)
+        # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
+        # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
+        openid = res['openid']
+        access_token = res['access_token']
+
+        member_num=''
+        member_info = WechatMembers.objects.filter(openid=openid)
+
+        if member_info is None:
+            pass
+        else:
+            member_num = member_info[0]['membernumber']
+
+        return render(request, 'members_image.html', {
+            'openid': openid,
+            'access_token': access_token,
+            'member_num': member_num,
+        })
