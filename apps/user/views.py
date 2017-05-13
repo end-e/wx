@@ -86,7 +86,7 @@ class MembersImageView(View):
                 u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
 
         # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
-        redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
+        redirect_uri = parse.quote('http://www.zisai.net/user/membersimage/')
         # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
         oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
         res = oauth.fetch_access_token(code)
