@@ -95,13 +95,14 @@ class MembersImageView(View):
         openid = res['openid']
         access_token = res['access_token']
 
-        member_num=''
+        member_num = ''
         member_info = WechatMembers.objects.values('membernumber').filter(openid=openid)
+        # return HttpResponse(member_info)
 
         if member_info is None:
             pass
         else:
-            member_num = member_info[0][0]
+            member_num = member_info[0]['membernumber']
 
         return render(request, 'members_image.html', {
             'openid': openid,
