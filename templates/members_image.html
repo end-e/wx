@@ -10,6 +10,7 @@
 <style type="text/css">
 .demo{width:400px; margin:40px auto 0 auto; min-height:250px;}
 .demo p{line-height:30px}
+.weui_div{margin-top: 5%;text-align: center;}
 #code{margin-top:10px}
 </style>
 <script type="text/javascript" src="/static/wx/js/jquery.min.js"></script>
@@ -45,24 +46,23 @@ function toUtf8(str) {
     }
     return out;
 }
+function showtime(){
+        var str,time;
+        time=new Date();
+        str=time.getFullYear()+"年"+(time.getMonth()+1)+"月"+time.getDate()+"日  "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+        document.getElementById("time").innerHTML=str;
+    }
+    setInterval("showtime()",1000);
 </script>
 </head>
 <body>
-<div class="page__hd" style="padding: 40px;">
-    <h3 class="page__title">hi, 您好</h3>
-    <p class="page__desc">小宽祝您每日愉快。</p>
-</div>
 <div id="main">
-   <h2 class="top_title">{{ member_num }}</h2>
+   <h2 class="top_title">会员编号：{{ member_num }}</h2>
    <div class="demo">
         <input type="hidden" class="input" id="mytxt" value="{{ member_num }}">
-   		<div id="code"></div>
+   		<div id="code" class="weui_div"></div>
+       <div id="time" class="weui_div"></div>
    </div>
-</div>
-
-<div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
-    <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
-    <p class="weui-footer__text">based on zisai System</p>
 </div>
 </body>
 </html>
