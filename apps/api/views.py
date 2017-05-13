@@ -84,14 +84,19 @@ def create_nav(request):
         "button": [
             {
                 "type": "view",
+                "name": "慧购",
+                "url": "http://www.huigo.com/mobile"
+            },
+            {
+                "type": "view",
                 "name": "会员绑定",
                 "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
             },
             {
                 "type": "view",
-                "name": "慧购",
-                "url": "http://www.huigo.com/mobile"
-            }
+                "name": "会员卡",
+                "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersimage&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
+            },
         ]
     })
     return HttpResponse(json.dumps(menu_create))
