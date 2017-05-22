@@ -88,8 +88,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        # 'HOST': '192.168.250.12',
-        'HOST': '127.0.0.1'
+        'HOST': '192.168.250.12',
+        # 'HOST': '127.0.0.1'
     }
 }
 
@@ -148,8 +148,8 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 # django-crontab任务加载
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
-    ('0 * * * *', 'api.cron.cron_get_token'),
-    ('* * * * *', 'api.cron.cron_send_temp'),
+    ('1 */1 * * *', 'api.views.cron.cron_get_token'),
+    ('* * * * *', 'api.views.cron.cron_send_temp'),
 ]
 
 

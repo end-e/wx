@@ -101,10 +101,3 @@ def create_nav(request):
     })
     return HttpResponse(json.dumps(menu_create))
 
-
-from utils import method
-
-
-def test(re):
-    shop = method.getShopName('C024')
-    return HttpResponse(shop)
