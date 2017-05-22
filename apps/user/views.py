@@ -1,28 +1,35 @@
 # -*- coding:utf-8 -*-
-import datetime
-import json
+from urllib import parse
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View
+from django.db import IntegrityError
+from django.http import HttpResponse
 from wechatpy import WeChatOAuth
 
 from utils import db
 from .models import WechatMembers
 from .form import BoundForm
+from utils import consts
 
 
 class MembersBoundView(View):
     def get(self, request):
         # 微信通过网页授权后返回的code
         code = request.GET.get('code', '')
+        if not code:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
 
+        # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
+        redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
         # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
-        res = WeChatOAuth.fetch_access_token(code)
+        oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
+        res = oauth.fetch_access_token(code)
         # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
         # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
-        data = json.loads(res)
-        openid = data['openid']
-        access_token = data['access_token']
+        openid = res['openid']
+        access_token = res['access_token']
 
         return render(request, 'members_bound.html', {
             'openid': openid,
@@ -43,22 +50,62 @@ class MembersBoundView(View):
 
             # 验证是否是实名制会员
             conn = db.getMysqlConn2()
-            sql = "SELECT mem_number " \
-                  "FROM uc_memcontent " \
-                  "WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(username, idnumber, telphone)
             cur = conn.cursor()
+            # 将身份证最后一位的x转换为大写
+            if str(idnumber)[-1] == 'x':
+                idnumber = str(idnumber).upper()
+            sql = "SELECT mem_number FROM uc_memcontent WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(
+                username, idnumber, telphone)
             cur.execute(sql)
             member = cur.fetchall()
-            if len(member) > 0:
+            if member:
+                membership = member[0]['mem_number']
                 try:
-                    WechatMembers.membernumber = member[0][0]
-                    WechatMembers.openid = openid
-                    WechatMembers.username = username
-                    WechatMembers.telphone = telphone
-                    WechatMembers.objects.save()
+                    wechat_member = WechatMembers()
+                    wechat_member.membernumber = membership
+                    wechat_member.openid = openid
+                    wechat_member.username = username
+                    wechat_member.telphone = telphone
+                    wechat_member.save()
+                except IntegrityError:
+                    return render(request, 'msg_warn.html', {'error': u'此微信已绑定会员'})
                 except Exception as e:
                     return render(request, 'msg_warn.html', {'error': e})
                 else:
                     return render(request, 'msg_success.html', {})
             else:
-                return render(request, 'msg_warn.html', {'error': '请确认信息填写正确'})
+                return render(request, 'msg_warn.html', {'error': u'请确认信息填写正确'})
+
+
+class MembersImageView(View):
+    def get(self, request):
+        # 微信通过网页授权后返回的code
+        code = request.GET.get('code', '')
+        if not code:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersimage&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
+
+        # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
+        redirect_uri = parse.quote('http://www.zisai.net/user/membersimage/')
+        # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
+        oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
+        res = oauth.fetch_access_token(code)
+        # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
+        # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
+        openid = res['openid']
+        access_token = res['access_token']
+
+        member_num = ''
+        member_info = WechatMembers.objects.values('membernumber').filter(openid=openid)
+        # return HttpResponse(member_info)
+
+        if not member_info:
+            return render(request, 'msg_warn.html', {'error': u'此会员未实名制'})
+        else:
+            member_num = member_info[0]['membernumber']
+
+        return render(request, 'members_image.html', {
+            'openid': openid,
+            'access_token': access_token,
+            'member_num': member_num,
+        })

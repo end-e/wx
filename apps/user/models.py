@@ -10,7 +10,7 @@ class WechatMembers(models.Model):
     city = models.CharField(max_length=45, verbose_name=u'城市', null=True)
     country = models.CharField(max_length=45, verbose_name=u'省份', null=True)
     province = models.CharField(max_length=45, verbose_name=u'国家', null=True)
-    openid = models.CharField(max_length=100, verbose_name=u'openid')
+    openid = models.CharField(max_length=100, verbose_name=u'openid', unique=True)
     telphone = models.CharField(max_length=20, verbose_name=u'手机号')
     attentiontime = models.DateTimeField(default=datetime.now, verbose_name=u'绑定时间')
     username = models.CharField(max_length=45, verbose_name=u'会员姓名')

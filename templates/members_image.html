@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>微信会员二维码</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>WeUI</title>
+    <!-- 引入 WeUI -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.css">
+    <style type="text/css">
+        .demo {
+            width: 400px;
+            margin: 40px auto 0 auto;
+            min-height: 250px;
+        }
+
+        .demo p {
+            line-height: 30px
+        }
+
+        .weui_div {
+            margin-top: 10%;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #code {
+            margin-top: 10px
+        }
+    </style>
+    <script type="text/javascript" src="/static/wx/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/wx/js/jquery.qrcode.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#code").empty();
+            var str = toUtf8($("#mytxt").val());
+
+            $("#code").qrcode({
+                render: "table",
+                text: str
+            });
+        });
+        function toUtf8(str) {
+            var out, i, len, c;
+            out = "";
+            len = str.length;
+            for (i = 0; i < len; i++) {
+                c = str.charCodeAt(i);
+                if ((c >= 0x0001) && (c <= 0x007F)) {
+                    out += str.charAt(i);
+                } else if (c > 0x07FF) {
+                    out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                    out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                    out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                } else {
+                    out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                    out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                }
+            }
+            return out;
+        }
+        function showtime() {
+            var str, time;
+            time = new Date();
+            str = time.getFullYear() + "年" + (time.getMonth() + 1) + "月" + time.getDate() + "日  " + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
+            document.getElementById("time").innerHTML = str;
+        }
+        setInterval("showtime()", 1000);
+    </script>
+</head>
+<body>
+<h2 class="weui_div">会员卡号：{{ member_num }}</h2>
+<input type="hidden" class="input" id="mytxt" value="{{ member_num }}">
+<div class="page__bd page__bd_spacing" style="padding-top: 30px;padding-bottom: 20px;">
+    <div class="weui-flex">
+        <div class="weui-flex__item">
+            <div class="placeholder">
+                <div id="code" align="center">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="time" class="weui_div"></div>
+<div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
+    <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
+    <p class="weui-footer__text">based on zisai System</p>
+</div>
+</body>
+</html>

@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>微信会员绑定</title>
-    <link rel="stylesheet" href="//res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>WeUI</title>
+    <!-- 引入 WeUI -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.css">
 </head>
 <body>
-<form action="{% url 'user:members_bound' %}" method="post">
-    <div class="weui-cells__title">请填写会员实名制信息</div>
+<div class="page__hd" style="padding: 40px;">
+    <h3 class="page__title">hi, 您好</h3>
+    <p class="page__desc">小宽祝您每日愉快。</p>
+</div>
+<form id="subform" action="{% url 'user:members_bound' %}" method="post">
     <div class="weui-cells weui-cells_form">
         <div class="weui-cell">
             <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
             <div class="weui-cell__bd">
-                <input class="weui-input" type="text" placeholder="姓名" name="username" id="username">
+                <input class="weui-input" type="text" placeholder="请填写姓名" name="username" id="username">
             </div>
         </div>
-        <div class="weui-cell weui-cell_vcode">
+        <div class="weui-cell weui-cell__bd">
             <div class="weui-cell__hd">
                 <label class="weui-label">手机号</label>
             </div>
@@ -26,19 +32,20 @@
         <div class="weui-cell">
             <div class="weui-cell__hd"><label class="weui-label">身份证号</label></div>
             <div class="weui-cell__bd">
-                <input class="weui-input" type="tel" placeholder="身份证号" name="idnumber" id="idnumber">
+                <input class="weui-input" type="tel" placeholder="请填写身份证号" name="idnumber" id="idnumber">
             </div>
         </div>
     </div>
-    <div class="weui-footer">
-        <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
-    </div>
     <div class="weui-btn-area">
-        <a class="weui-btn weui-btn_primary" href="javascript:" id="showTooltips">确定</a>
+        <input type="submit" class="weui-btn weui-btn_primary" href="javascript:" id="showTooltips" value="确定">
     </div>
     <input name="openid" type="hidden" value="{{ openid }}">
     <input name="access_token" type="hidden" value="{{ access_token }}">
     {% csrf_token %}
 </form>
+<div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
+    <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
+    <p class="weui-footer__text">based on zisai System</p>
+</div>
 </body>
 </html>

@@ -5,6 +5,8 @@ from django.conf.urls import url
 from . import views, cron
 
 urlpatterns = [
+    # 微信后台配置的url
+    url(r'^checksignature/$', views.conn, name='checksignature'),
     url(r'^hx/(?P<sn>.*)/(?P<stamp>\d+)', views.hx, name='hx'),
     url(r'conn/', views.conn, name='conn'),
     url(r'cron/token/', cron.cron_get_token, name='cron_get_token'),

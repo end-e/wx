@@ -8,6 +8,9 @@ xversion.register_models()
 
 urlpatterns = [
     url(r'xadmin/', include(xadmin.site.urls)),
+    # 微信文件校验地址
+    url(r'MP_verify_QthEcNlYA73MNXgH.txt', views.verify, name='MP_verify_QthEcNlYA73MNXgH.txt'),
+
     # 微信接入url (www.zisai.net)
     url(r'^$', 'api.views.conn', name='check_signature'),
     # api

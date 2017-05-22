@@ -45,7 +45,8 @@ def getMysqlConn2():
     )
     return conn
 
-def getMysqlConnection(host,port,user,password,db):
+
+def getMysqlConnection(host, port, user, password, db):
     conn = pymysql.connect(
         host=host,
         port=port,
