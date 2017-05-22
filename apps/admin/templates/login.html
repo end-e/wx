@@ -1,0 +1,56 @@
+{% extends 'base/base.html' %}
+{% block content %}
+    <div class="container-fluid-full">
+        <div class="row-fluid">
+            <div class="row-fluid">
+                <div class="login-box">
+                    <h2 id="err"></h2>
+                    <form class="form-horizontal" id="loginForm" style="overflow: hidden;"/>
+                        <input class="input-large span12" name="username" type="text" placeholder="type username"/>
+                        <input class="input-large span12" name="password" type="password" placeholder="type password"/>
+                        <div class="clearfix"></div>
+                        <div class="control-group">
+                            <input class="input-large span8 fl" name="vcode" type="text"/>
+                            <img class="span4 fl"  id="validateImg" src="{% url 'admin:vcode' %}" alt="点击刷新验证码" onclick="changeValidateCode('validateImg')" style="height: 40px;margin-top: 5px;">
+                        </div>
+                        <div class="clearfix"></div>
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-primary span12" onclick="login()">立即登陆</button>
+                    </form>
+                </div>
+            </div><!--/row-->
+
+        </div>
+
+{% endblock %}
+{% block js %}
+    <script>
+        function changeValidateCode(id) {
+            var timenow = new Date().getTime();
+            $('#' + id).attr("src", '{% url 'admin:vcode' %}?nocache=' + timenow);
+        }
+
+        function login() {
+            $.post("{% url 'admin:login' %}",$('#loginForm').serialize(),function(result){
+                if(result.status==0){
+                    window.location.href = "{% url 'admin:index' %}"
+                }else if(result.status==1){
+                    $('#err').text('用户名和密码不能为空');
+                }else if(result.status==2){
+                    $('#err').text('验证码输入错误');
+                }else if(result.status==3){
+                    $('#err').text('用户账号不存在');
+                }else if(result.status==2){
+                    $('#err').text('用户密码输入错误');
+                }
+            })
+        }
+        $("#loginForm").keydown(function (e) {
+            var e = e || event;
+            var keycode = e.which || e.keyCode;
+            if (keycode == 13) {
+                login();
+            }
+        });
+    </script>
+{% endblock %}

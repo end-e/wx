@@ -10,10 +10,10 @@ urlpatterns = [
     url(r'xadmin/', include(xadmin.site.urls)),
     # 微信接入url (www.zisai.net)
     url(r'^$', 'api.views.conn', name='check_signature'),
-
     # api
     url(r'^api/', include('api.urls', namespace='api')),
-
+    #admin
+    url(r'^admin/', include('admin.urls', namespace='admin')),
     # 会员微信绑定模块
     url(r'^user/', include('user.urls', namespace='user')),
 ]

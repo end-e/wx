@@ -1,0 +1,51 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid">
+        <form class="form-horizontal" id="Form">
+            <fieldset>
+                <div class="control-group">
+                    <label class="control-label" for="input2">新密码</label>
+                    <div class="controls">
+                        <input id="pwd_new" type="text" >
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="input3">确认密码</label>
+                    <div class="controls">
+                        <input id="pwd_confirm" type="text">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="btn-enter" class="btn btn-primary">确认修改</button>
+                    <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                </div>
+            </fieldset>
+        </form>
+
+    </div>
+{% endblock %}
+{% block js %}
+<script>
+    $('#Form #btn-enter').click,onKeyDown.enter(function(){
+        var pwd_new = $("#pwd_new").val();
+        var pwd_confirm = $("#pwd_confirm").val();
+        if(!pwd_new || !pwd_confirm){
+            alert('新密码和确认密码不能为空，请重试');
+            return false;
+        }
+        if(pwd_new!=pwd_confirm){
+            alert('两次密码不一致，请重试');
+            return false;
+        }
+
+        $('#Form').submit();
+    });
+
+    var data = {{ data | safe }};
+    if(data.result=='0'){
+        alert('密码重置成功，将跳转到登录页面');
+        window.location.href = "{% url 'admin:logout' %}";
+    }
+</script>
+{% endblock %}

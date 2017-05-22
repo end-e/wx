@@ -32,14 +32,14 @@ ALLOWED_HOSTS = ['192.168.250.12', '127.0.0.1', 'zisai.net']
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_crontab',
-    'xadmin',
+    'admin',
     'crispy_forms',
     'reversion',
     'user',
@@ -50,8 +50,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'apps.admin.middleware.LoginMiddleware.LoginMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -140,10 +141,16 @@ CACHES = {
     },
 }
 
+#session
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+
 # django-crontab任务加载
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
     ('0 * * * *', 'api.cron.cron_get_token'),
-    # ('* * * * *', 'api.cron.cron_send_temp'),
-    # ('20,40,59 * * * *', 'wxaccess.cron.get_access_token_job'),
+    ('* * * * *', 'api.cron.cron_send_temp'),
 ]
+
+
+

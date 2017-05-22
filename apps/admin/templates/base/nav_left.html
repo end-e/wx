@@ -1,0 +1,40 @@
+<!-- start: Header -->
+<div id="sidebar-left" class="span2">
+    <!--
+    <div class="row-fluid actions">
+        <input class="search span12" placeholder="..." type="text">
+    </div>
+    -->
+
+    <div class="nav-collapse sidebar-nav">
+        <ul class="nav nav-tabs nav-stacked main-menu">
+            {% for nav in request.session.user.user_nav %}
+            <li>
+                {% if nav.sub %}
+                    <a class="dropmenu" href="#">
+                        <i class="{{ nav.icon }}"></i>
+                        <span class="hidden-tablet"> {{ nav.nav_name }}</span>
+                        <span class="label">{{ nav.sub | length }}</span>
+                    </a>
+                    <ul>
+                        {% for sub in nav.sub %}
+                        <li>
+                            <a class="submenu" href="{{ sub.url | default:'/admin/index' }}">
+                                <i class="{{ nav.icon }}"></i>
+                                <span class="hidden-tablet"> {{ nav.nav_name }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <a href="{{ nav.icon }}">
+                        <i class="{{ nav.icon }}"></i>
+                        <span class="hidden-tablet"> {{ nav.nav_name }}</span>
+                    </a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<!-- start: Header -->
