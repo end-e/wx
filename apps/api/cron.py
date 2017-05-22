@@ -8,6 +8,7 @@ from django.core.cache import caches
 from wechatpy import WeChatClient
 
 from .models import AccessToken, Log
+from user.models import WechatMembers
 from utils import db, consts, method
 
 
@@ -69,16 +70,7 @@ def get_user_order():
 
 def get_wechat_users(orders):
     users = [order['CardNo'].strip() for order in orders]
-    users = "'" + "','".join(users) + "'"
-    sql_sel_wechat = "SELECT openid,username,membernumber FROM wechat_user WHERE membernumber IN ({users})" \
-        .format(users=users)
-
-    conn2 = db.getMysqlConn()
-    cur = conn2.cursor()
-    cur.execute(sql_sel_wechat)
-    wechat_users = cur.fetchall()
-    cur.close()
-    conn.close()
+    wechat_users = WechatMembers.objects.values('openid','username','membernumber').filter(membernumber__in=users)
 
     return wechat_users
 
@@ -103,7 +95,7 @@ def create_temp_data(order):
         "color": "#173177"
     }
     data['remark'] = {
-        "value": "消费日期：" + order['PurchDateTime'].strftime("%Y-%m-%d %H:%M:%S") + ' \n详询40011110314',
+        "value": "消费日期：" + order['PurchDateTime'].strftime("%Y-%m-%d %H:%M:%S") + ' \n详询4001110314',
         "color": "#173177"
     }
 
