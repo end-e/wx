@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 class LoginMiddleware(object):
     def process_request(self, request):
         path = request.path
-        if path != '/admin/login/' and path != '/admin/vcode/' and path.find('admin'):
+        if path != '/admin/login/' and path != '/admin/vcode/' and path.find('admin')!=-1:
             if request.session.get('user', None):
                 pass
             else:

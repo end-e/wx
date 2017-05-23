@@ -1,0 +1,70 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>
+                    {% if user_id %}编辑用户{% else %}新建用户{% endif %}
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:user_edit' user_id %}">
+                        {% csrf_token %}
+                        {% if user_id %} <input type="hidden" value="{{ user_id }}" name="id"> {% endif %}
+                        <div class="control-group {% if form.errors.nick %}error{% endif %}">
+                            <label class="control-label" for="input3">用户姓名</label>
+                            <div class="controls">
+                                <input name="nick" type="text">
+                                {% if form.errors.nick %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group {% if form.errors.name %}error{% endif %}">
+                            <label class="control-label" for="input2">用户账号</label>
+                            <div class="controls">
+                                <input name="name" type="text">
+                                {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group {% if form.errors.pwd %}error{% endif %}">
+                            <label class="control-label" for="input3">用户密码</label>
+                            <div class="controls">
+                                <input name="pwd" type="text">
+                                {% if form.errors.pwd %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input3">用户角色</label>
+                            <div class="controls">
+                                <input name="role" type="text">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="input3">启用状态</label>
+                            <div class="controls">
+                                <select name="status">
+                                    <option value="0">启用</option>
+                                    <option value="1">停用</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <a class="btn btn-primary" onclick="submitForm()">
+                                {% if user_id %}编辑{% else %}新建{% endif %}
+                            </a>
+                            <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+<script>
+    function submitForm() {
+        $('#Form').submit();
+    }
+</script>
+{% endblock %}

@@ -12,3 +12,16 @@
         </div>
     </div>
 {% endblock %}
+{% block js %}
+    {% block common_js %}{% endblock %}
+    <script>
+        $("#Form").keydown(function (e) {
+            var e = e || event;
+            var keycode = e.which || e.keyCode;
+            if (keycode == 13) {
+                $("#Form #submit").click();
+            }
+        });
+    </script>
+{% endblock %}
+

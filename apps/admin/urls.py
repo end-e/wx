@@ -2,6 +2,7 @@
 from django.conf.urls import url
 
 from admin.views.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
+from admin.views.user.view import UserEditView
 
 urlpatterns = [
     # 会员绑定页面
@@ -11,4 +12,5 @@ urlpatterns = [
     url(r'^vcode/$', CodeView.as_view(), name='vcode'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
     url(r'^reset/$', ResetPwdView.as_view(), name='reset'),
+    url(r'^user/edit/(?P<user_id>\d+|\s*)', UserEditView.as_view(), name='user_edit'),
 ]

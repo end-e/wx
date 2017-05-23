@@ -2,32 +2,41 @@
 
 {% block content_r %}
     <div class="row-fluid">
-        <form class="form-horizontal" id="Form">
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="input2">新密码</label>
-                    <div class="controls">
-                        <input id="pwd_new" type="text" >
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="input3">确认密码</label>
-                    <div class="controls">
-                        <input id="pwd_confirm" type="text">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" id="btn-enter" class="btn btn-primary">确认修改</button>
-                    <button type="reset" class="btn" onclick="window.history.back()">取消</button>
-                </div>
-            </fieldset>
-        </form>
-
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>
+                    重置密码
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post">
+                    <fieldset>
+                        <div class="control-group">
+                            <label class="control-label" for="input2">新密码</label>
+                            <div class="controls">
+                                <input id="pwd_new" type="text" >
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input3">确认密码</label>
+                            <div class="controls">
+                                <input id="pwd_confirm" type="text">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="submit" class="btn btn-primary">确认修改</button>
+                            <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}
 {% block js %}
 <script>
-    $('#Form #btn-enter').click,onKeyDown.enter(function(){
+    $('#Form #submit').click(function(){
         var pwd_new = $("#pwd_new").val();
         var pwd_confirm = $("#pwd_confirm").val();
         if(!pwd_new || !pwd_confirm){
