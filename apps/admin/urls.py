@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+from admin.views.base.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
 from django.conf.urls import url
 
-from admin.views.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
-from admin.views.user import UserEditView
+from admin.views.base.user import UserEditView
 
 urlpatterns = [
     # 会员绑定页面
-    url(r'^index/$', IndexView.as_view(), name='index'),
+    url(r'^$', IndexView.as_view(), name='index'),
     #登陆相关
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^vcode/$', CodeView.as_view(), name='vcode'),

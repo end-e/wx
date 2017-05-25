@@ -12,12 +12,12 @@ from admin.models import User
 # Create your views here.
 class IndexView(View):
     def get(self,request):
-        return render(request, 'index.html')
+        return render(request, 'base/index.html')
 
 
 class LoginView(View):
     def get(self,request):
-        return render(request, 'login.html')
+        return render(request, 'base/login.html')
     def post(self,request):
         u_name = request.POST.get('username').strip()
         u_pwd = request.POST.get('password').strip()
@@ -67,7 +67,7 @@ class LogoutView(View):
 #密码重置
 class ResetPwdView(View):
     def get(self,request):
-        return render(request, 'reset.html')
+        return render(request, 'base/reset.html')
     def post(self,request):
         msg = {}
         user = request.session["user"]
@@ -82,6 +82,6 @@ class ResetPwdView(View):
                 msg["status"] = 1
         except Exception as e:
             print(e)
-        return render(request, 'reset.html', locals())
+        return render(request, 'base/reset.html', locals())
 
 
