@@ -2,7 +2,7 @@
 from django.conf.urls import url
 
 from admin.views.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
-from admin.views.user.view import UserEditView
+from admin.views.user import UserEditView
 
 urlpatterns = [
     # 会员绑定页面
