@@ -175,11 +175,11 @@ class WidgetDataError(Exception):
 
 class BaseWidget(forms.Form):
 
-    template = 'xadmin/widgets/base.html'
+    template = 'xadmin/widgets/sys.html'
     description = 'Base Widget, don\'t use it.'
     widget_title = None
     widget_icon = 'fa fa-plus-square'
-    widget_type = 'base'
+    widget_type = 'sys'
     base_title = None
 
     id = forms.IntegerField(label=_('Widget ID'), widget=forms.HiddenInput)

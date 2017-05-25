@@ -1250,7 +1250,7 @@ msgstr "%(name)s \"%(obj)s\" alterado(a) com sucesso."
 
 #: views/list.py:198
 msgid "Database error"
-msgstr "Erro da base de dados"
+msgstr "Erro da sys de dados"
 
 #: views/list.py:372
 #, python-format

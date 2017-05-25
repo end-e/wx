@@ -224,7 +224,7 @@ class BaseAdminPlugin(BaseAdminObject):
 class BaseAdminView(BaseAdminObject, View):
     """ Base Admin view, support some comm attrs."""
 
-    base_template = 'xadmin/base.html'
+    base_template = 'xadmin/sys.html'
     need_site_permission = True
 
     def __init__(self, request, *args, **kwargs):
@@ -501,7 +501,7 @@ class ModelAdminView(CommAdminView):
         """
         Get model object instance by object_id, used for change admin view
         """
-        # first get base admin view property queryset, return default model queryset
+        # first get sys admin view property queryset, return default model queryset
         queryset = self.queryset()
         model = queryset.model
         try:

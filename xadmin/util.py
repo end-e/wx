@@ -15,7 +15,7 @@ from django.conf import settings
 from django.forms import Media
 from django.utils.translation import get_language
 from xadmin.vendors import vendors
-import json   # used by xadmin.views.base. I don't know why.
+import json   # used by xadmin.views.sys. I don't know why.
 
 import datetime
 import decimal
