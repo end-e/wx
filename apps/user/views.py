@@ -1,16 +1,19 @@
 # -*- coding:utf-8 -*-
 from urllib import parse
+import json,time
 
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.db import IntegrityError
 from django.http import HttpResponse
-from wechatpy import WeChatOAuth
+from django.core.cache import caches
+from wechatpy import WeChatOAuth,WeChatClient
 
 from utils import db
 from .models import WechatMembers
 from .form import BoundForm
 from utils import consts
+from user.utils import method
 
 
 class MembersBoundView(View):
@@ -19,7 +22,8 @@ class MembersBoundView(View):
         code = request.GET.get('code', '')
         if not code:
             return redirect(
-                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect')
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
+            )
 
         # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
         redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
@@ -31,19 +35,34 @@ class MembersBoundView(View):
         openid = res['openid']
         access_token = res['access_token']
 
-        return render(request, 'members_bound.html', {
-            'openid': openid,
-            'access_token': access_token,
-        })
+        wx_access_token = caches['default'].get('wx_access_token', '')
+        app_id = consts.APPID
+        secret = consts.APPSECRET
+        client = WeChatClient(app_id, secret, wx_access_token)
+        jsapi = client.jsapi
+        ticket = jsapi.get_jsapi_ticket()
+        noncestr = method.createNonceStr()
+        timestamp = int(time.time())
+        url = "http://www.zisai.net/user/membersbound?code="+code+"&state=STATE"
+        signature = jsapi.get_jsapi_signature(noncestr,ticket,timestamp,url)
+        return render(request, 'members_bound.html',locals())
 
     def post(self, request):
         bound_form = BoundForm(request.POST)
+        msg = {}
         if bound_form.is_valid():
-            # 会员姓名
-            username = request.POST.get('username', '')
-            # 手机号
-            telphone = request.POST.get('telphone', '')
-            # 身份证号
+            username = request.POST.get('username', '').strip()
+            telphone = request.POST.get('telphone', '').strip()
+            vcode = request.POST.get('vcode', '').strip()
+            sms_code = caches['default'].get('sms_'+str(telphone))
+            if not sms_code :
+                #验证码不存在或失效
+                msg['status'] = 4
+                return HttpResponse(json.dumps(msg))
+            if sms_code != int(vcode):
+                msg['status'] = 5
+                return HttpResponse(json.dumps(msg))
+
             idnumber = request.POST.get('idnumber', '')
             openid = request.POST.get('openid', '')
             access_token = request.POST.get('access_token', '')
@@ -54,12 +73,21 @@ class MembersBoundView(View):
             # 将身份证最后一位的x转换为大写
             if str(idnumber)[-1] == 'x':
                 idnumber = str(idnumber).upper()
-            sql = "SELECT mem_number FROM uc_memcontent WHERE idc_name='{0}' AND idc_id='{1}' AND phonenumber='{2}'".format(
-                username, idnumber, telphone)
+            sql = "SELECT mem_number,wx_tel FROM uc_memcontent " \
+                  "WHERE idc_name='{0}' AND RIGHT(idc_id,6)='{1}'"\
+                  .format(username, idnumber)
             cur.execute(sql)
-            member = cur.fetchall()
+            member = cur.fetchone()
             if member:
-                membership = member[0]['mem_number']
+                if (member['wx_tel']!= telphone) or (not member['wx_tel']):
+                    sql_update = "UPDATE uc_memcontent SET wx_tel='{tel}' " \
+                                 "WHERE idc_name='{name}' AND RIGHT(idc_id,6)='{idc}'"\
+                                 .format(name=username,tel= telphone,idc=idnumber)
+                    cur.execute(sql_update)
+                    conn.commit()
+                    conn.close()
+                    cur.close()
+                membership = member['mem_number']
                 try:
                     wechat_member = WechatMembers()
                     wechat_member.membernumber = membership
@@ -68,13 +96,23 @@ class MembersBoundView(View):
                     wechat_member.telphone = telphone
                     wechat_member.save()
                 except IntegrityError:
-                    return render(request, 'msg_warn.html', {'error': u'此微信已绑定会员'})
+                    #此微信已绑定会员
+                    msg['status'] = 2
+                    return HttpResponse(json.dumps(msg))
                 except Exception as e:
-                    return render(request, 'msg_warn.html', {'error': e})
+                    #程序异常
+                    msg['status'] = 3
+                    return HttpResponse(json.dumps(msg))
                 else:
-                    return render(request, 'msg_success.html', {})
+                    msg['status'] = 0
+                    return HttpResponse(json.dumps(msg))
             else:
-                return render(request, 'msg_warn.html', {'error': u'请确认信息填写正确'})
+                #用户不存在
+                msg['status'] =1
+                return HttpResponse(json.dumps(msg))
+        else:
+            msg['status'] = 1
+            return HttpResponse(json.dumps(msg))
 
 
 class MembersImageView(View):
@@ -109,3 +147,10 @@ class MembersImageView(View):
             'access_token': access_token,
             'member_num': member_num,
         })
+
+
+class SuccessView(View):
+    def get(self,request):
+        return render(request,'msg_success.html')
+
+

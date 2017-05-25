@@ -146,7 +146,7 @@ CACHES = {
 
         "OPTIONS": {
             'DB': 1,
-            #"PASSWORD": "kgredis",
+            "PASSWORD": "kgredis",
             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
         },
         "KEY_PREFIX": 'wx',

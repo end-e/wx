@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^collected_static/font/(?P<path>.*)$', 'django.views.static.serve', {'document_root':root_path+ '/collected_static/font'}),
     url(r'^collected_static/ico/(?P<path>.*)$', 'django.views.static.serve', {'document_root':root_path+ '/collected_static/ico'}),
     url(r'^collected_static/wx/js/(?P<path>.*)$', 'django.views.static.serve', {'document_root':root_path+ '/collected_static/wx/js'}),
+    url(r'^common_static/wx/js/(?P<path>.*)$', 'django.views.static.serve', {'document_root':root_path+ '/common_static/wx/js'}),
 ]

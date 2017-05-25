@@ -2,7 +2,7 @@
 # __author__ = ''
 # __date__ = '2017/4/18 15:02'
 from django.conf.urls import url
-from api.views import views, cron
+from api.views import views, cron,sms
 
 urlpatterns = [
     # 微信后台配置的url
@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'conn/', views.conn, name='conn'),
     url(r'cron/token/', cron.cron_get_token, name='cron_get_token'),
     url(r'cron/temp/', cron.cron_send_temp, name='cron_send_temp'),
+
     url(r'^menu/create/$', views.create_nav, name='menu_create'),
-
-
+    url(r'^sms/$', sms.main, name='sms'),
 ]

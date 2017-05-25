@@ -7,7 +7,7 @@ from django.db import connection as conn
 from django.core.cache import caches
 from wechatpy import WeChatClient
 
-from .models import AccessToken, Log
+from api.models import AccessToken, Log
 from user.models import WechatMembers
 from utils import db, consts, method
 
