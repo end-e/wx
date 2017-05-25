@@ -1,11 +1,11 @@
-{% extends 'base/base.html' %}
+{% extends 'blocks/base.html' %}
 {% block nav %}
-    {% include 'base/nav_header.html' %}
+    {% include 'blocks/nav_header.html' %}
 {% endblock %}
 {% block content %}
     <div class="container-fluid-full">
         <div class="row-fluid">
-            {% include 'base/nav_left.html' %}
+            {% include 'blocks/nav_left.html' %}
             <div id="content" class="span10" style="min-height: 558px">
                 {% block content_r %} {% endblock %}
             </div>
