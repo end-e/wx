@@ -11,6 +11,8 @@ from admin.utils import method
 class UserEditView(View):
     def get(self, request, user_id):
         user_id = user_id
+        if(user_id):
+            user = User.objects.values('nick','name','pwd','role','status').filter(id=user_id).first()
         return render(request, 'user_edit.html', locals())
 
     def post(self, request, user_id):
