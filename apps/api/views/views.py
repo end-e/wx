@@ -30,6 +30,10 @@ def verify(request):
     return render(request, 'MP_verify_QthEcNlYA73MNXgH.txt')
 
 
+# CA证书校验文件
+def ca(request):
+    return render(request, 'fileauth.txt')
+
 def hx(request, sn, stamp):
     """
     微信卡卷核销
@@ -100,4 +104,3 @@ def create_nav(request):
         ]
     })
     return HttpResponse(json.dumps(menu_create))
-
