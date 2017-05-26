@@ -43,7 +43,8 @@ INSTALLED_APPS = (
     'crispy_forms',
     'reversion',
     'user',
-    'api'
+    'api',
+    'wxapp',
 )
 
 MIDDLEWARE_CLASSES = (

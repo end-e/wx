@@ -122,7 +122,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			return false;
 		}
 
-		if(this.options.disabled || this.options.type === "static") {
+		if(this.options.disabled || this.options.type === "common_static") {
 			return false;
 		}
 
@@ -1170,7 +1170,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 		if(this.helper[0] === this.currentItem[0]) {
 			for(i in this._storedCSS) {
-				if(this._storedCSS[i] === "auto" || this._storedCSS[i] === "static") {
+				if(this._storedCSS[i] === "auto" || this._storedCSS[i] === "common_static") {
 					this._storedCSS[i] = "";
 				}
 			}

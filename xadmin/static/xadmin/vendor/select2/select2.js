@@ -997,9 +997,9 @@ the specific language governing permissions and limitations under the Apache Lic
             //console.log("below/ droptop:", dropTop, "dropHeight", dropHeight, "sum", (dropTop+dropHeight)+" viewport bottom", viewportBottom, "enough?", enoughRoomBelow);
             //console.log("above/ offset.top", offset.top, "dropHeight", dropHeight, "top", (offset.top-dropHeight), "scrollTop", this.body().scrollTop(), "enough?", enoughRoomAbove);
 
-            // fix positioning when body has an offset and is not position: static
+            // fix positioning when body has an offset and is not position: common_static
 
-            if (this.body().css('position') !== 'static') {
+            if (this.body().css('position') !== 'common_static') {
                 bodyOffset = this.body().offset();
                 dropTop -= bodyOffset.top;
                 dropLeft -= bodyOffset.left;
