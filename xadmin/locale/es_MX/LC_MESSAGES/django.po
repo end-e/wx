@@ -968,7 +968,7 @@ msgstr "Añadir Widget"
 
 #: templates/xadmin/views/invalid_setup.html:13
 msgid "Something's wrong with your database installation. Make sure the appropriate database tables have been created, and make sure the database is readable by the appropriate user."
-msgstr "Algo está mal con tu instalación de base de datos. Asegúrese de que las tablas de la bases de datos se han creado apropiadamente, y asegúrese de que la base de datos puede ser leído por el usuario apropiado"
+msgstr "Algo está mal con tu instalación de sys de datos. Asegúrese de que las tablas de la bases de datos se han creado apropiadamente, y asegúrese de que la sys de datos puede ser leído por el usuario apropiado"
 
 #: templates/xadmin/views/logged_out.html:16
 msgid "Logout Success"
@@ -1264,7 +1264,7 @@ msgstr "El %(name)s \"%(obj)s\" fue editado exitosa mente."
 
 #: views/list.py:198
 msgid "Database error"
-msgstr "Error de base de datos"
+msgstr "Error de sys de datos"
 
 #: views/list.py:372
 #, python-format

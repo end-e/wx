@@ -13,7 +13,7 @@ class UserEditView(View):
         user_id = user_id
         if(user_id):
             user = User.objects.values('nick','name','pwd','role','status').filter(id=user_id).first()
-        return render(request, 'base/user_edit.html', locals())
+        return render(request, 'sys/user_edit.html', locals())
 
     def post(self, request, user_id):
         form = UserForm(request.POST)
@@ -33,4 +33,4 @@ class UserEditView(View):
                 msg['status'] = 0
             else:
                 msg['status'] = 1
-        return render(request, 'base/user_edit.html', locals())
+        return render(request, 'sys/user_edit.html', locals())

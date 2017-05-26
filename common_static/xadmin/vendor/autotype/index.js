@@ -166,7 +166,7 @@
             return codes;        
         },    
         triggerCodeOnField = function(code, field) {
-            // build up base content that every event should contain
+            // build up sys content that every event should contain
             // with information about whether certain chord keys are 
             // simulated as being pressed
             var evnt = {

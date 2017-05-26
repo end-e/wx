@@ -213,7 +213,7 @@ class ListAdminView(ModelAdminView):
         """
         Get model queryset. The query has been filted and ordered.
         """
-        # First, get queryset from base class.
+        # First, get queryset from sys class.
         queryset = self.queryset()
 
         # Use select_related() if one of the list_display options is a field
@@ -313,7 +313,7 @@ class ListAdminView(ModelAdminView):
         """
 
         # We must cope with more than one column having the same underlying sort
-        # field, so we base things on column numbers.
+        # field, so we sys things on column numbers.
         ordering = self._get_default_ordering()
         ordering_fields = SortedDict()
         if ORDER_VAR not in self.params or not self.params[ORDER_VAR]:
