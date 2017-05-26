@@ -1,11 +1,9 @@
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from django.views.generic.base import View
-import datetime, pymssql, json
-from admin.utils import method
-from admin.forms import UserForm
-from wxapp.models import Voucher
+import json
 
+from django.shortcuts import render
+from django.http import HttpResponse
+
+from wxapp.models import Voucher
 
 def index(request):
     voucher_no = request.GET.get('voucher_no', '')
@@ -63,11 +61,11 @@ def voucherSave(request):
     return render(request, 'wxapp/voucher/index.html', locals())
 
 def getVoucherList(request):
-    voucher_no = request.POST.get('voucher_no', '')
-    voucher_name = request.POST.get('voucher_name', '')
-    voucher_price = request.POST.get('voucher_price', '')
-    begin_date = request.POST.get('begin_date', '')
-    end_date = request.POST.get('end_date', '')
+    voucher_no = request.GET.get('voucher_no', '')
+    voucher_name = request.GET.get('voucher_name', '')
+    voucher_price = request.GET.get('voucher_price', '')
+    begin_date = request.GET.get('begin_date', '')
+    end_date = request.GET.get('end_date', '')
 
     kwargs = {}
 
@@ -87,11 +85,32 @@ def getVoucherList(request):
         kwargs.setdefault('end_date', end_date)
 
     vouchers = Voucher.objects.filter(**kwargs).order_by('voucher_no')
-    return vouchers
+    msg ={}
+    vardict = {}
+    if vouchers:
+        for item in vouchers:
+            vardict['voucher_no'] = str(item.voucher_no)
+            vardict['voucher_name'] = str(item.voucher_name)
+            vardict['voucher_price'] = str(item.voucher_price)
+            vardict['begin_date'] = str(item.begin_date)
+            vardict['end_date'] = str(item.end_date)
+            vardict['voucher_image'] = str(item.voucher_image)
+            msg[str(item.id)]= vardict
+    return HttpResponse(json.dumps(msg), content_type="application/json")
 
 
 def getVoucherInfo(request):
-    voucher_id = request.POST.get('voucher_id', '')
+    voucher_id = request.GET.get('voucher_id', '')
 
     voucher = Voucher.objects.get(pk=voucher_id)
-    return voucher
+    msg={}
+    if voucher:
+        msg['id']= str(voucher.id)
+        msg['voucher_no']= str(voucher.voucher_no)
+        msg['voucher_name']= str(voucher.voucher_name)
+        msg['voucher_price']= str(voucher.voucher_price)
+        msg['begin_date']= str(voucher.begin_date)
+        msg['end_date']= str(voucher.end_date)
+        msg['voucher_image']= str(voucher.voucher_image)
+
+    return HttpResponse(json.dumps(msg), content_type="application/json")
