@@ -238,7 +238,7 @@
 					modal ? this.getIndexOfModal(modal) : this.stack.length ))
 				.appendTo(this.$element);
 
-			if (modal && modal.options.backdrop != 'static') {
+			if (modal && modal.options.backdrop != 'common_static') {
 				$container.on('click.modal', targetIsSelf(function (e) {
 					modal.hide();
 				}));

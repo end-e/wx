@@ -220,7 +220,7 @@ $(function () {
         };
     };
 
-    // Dial static func
+    // Dial common_static func
     Dial.getCgColor = function (h) {
         h = h.substring(1,7);
         var rgb = [parseInt(h.substring(0,2),16)

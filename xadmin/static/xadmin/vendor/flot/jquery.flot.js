@@ -1180,7 +1180,7 @@ Licensed under the MIT license.
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children(":not(.flot-sys,.flot-overlay)").remove();
 
-            if (placeholder.css("position") == 'static')
+            if (placeholder.css("position") == 'common_static')
                 placeholder.css("position", "relative"); // for positioning labels and overlay
 
             surface = new Canvas("flot-sys", placeholder);

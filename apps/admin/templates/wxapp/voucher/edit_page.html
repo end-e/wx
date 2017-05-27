@@ -1,0 +1,86 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑券信息
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'wxapp:voucher_save' %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ voucher.id }}" name="voucher_id">
+                    <div class="control-group">
+                        <label>券编号：
+                            <input name="voucher_no" type="text" value="{{ voucher.voucher_no }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>券名称：
+                            <input name="voucher_name" type="text" value="{{ voucher.voucher_name }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>券面值：
+                            <input name="voucher_price" type="text" value="{{ voucher.voucher_price }}">
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <div data-link-format="yyyy-mm-dd" data-link-field="dtp_input2"
+                             data-date-format="yyyy-mm-dd" data-date=""
+                             class="input-group date form_date">
+                            <label>开始日期：
+                                <input readonly="" value="{{ voucher.begin_date | date:'Y-m-d' }}" size="16" name="begin_date"
+                                       id="begin_date" class="form-control" required>
+                                <span class="input-group-addon"><span
+                                        class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span
+                                        class="glyphicon glyphicon-calendar"></span></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div data-link-format="yyyy-mm-dd" data-link-field="dtp_input2"
+                             data-date-format="yyyy-mm-dd" data-date=""
+                             class="input-group date form_date">
+                            <label>截止日期：
+                                <input readonly="" value="{{ voucher.end_date | date:'Y-m-d' }}" size="16" name="end_date"
+                                       id="end_date" class="form-control" required>
+                                <span class="input-group-addon"><span
+                                        class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span
+                                        class="glyphicon glyphicon-calendar"></span></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <a class="btn btn-primary" onclick="submitForm()">提交</a>
+                        <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+    </script>
+    <!--给日期绑定控件-->
+    <script type="text/javascript">
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            weekStart: 1,
+            todayBtn: 1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            minView: 2,
+            forceParse: 0
+        });
+    </script>
+{% endblock %}

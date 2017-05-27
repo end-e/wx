@@ -43,7 +43,8 @@ INSTALLED_APPS = (
     'reversion',
     'admin',
     'user',
-    'api'
+    'api',
+    'wxapp',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -88,8 +89,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        'HOST': '192.168.250.12',
-        # 'HOST': '127.0.0.1'
+        # 'HOST': '192.168.250.12',
+        'HOST': '127.0.0.1'
     }
 }
 
