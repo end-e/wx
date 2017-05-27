@@ -1,0 +1,140 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑用户
+                </h2>
+            </div>
+            <div class="box-content" style="overflow: hidden">
+                <div class="span4">
+                    <div class="control-group pull-right">
+                        <label class="control-label" for="input3">权限列表</label>
+                        <div class="controls">
+                            <select name="" id="nav_left" multiple style="min-height: 400px">
+                                {% for nav in navList %}
+                                    <option value="{{ nav.id }}">{{ nav.name }}</option>
+                                    {% if nav.sub %}
+                                        {% for sub in nav.sub %}
+                                            <option value="{{ sub.id }}" data-parent-id="{{ nav.id }}">----{{ sub.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="span1">
+                    <div class="controls" style="margin-top: 50px">
+                        <button class="btn btn-success btn-block" onclick="addMenu()">
+                            <i class="icon-double-angle-right"></i>
+                        </button>
+                        <button class="btn btn-danger btn-block" onclick="removeMenu()">
+                            <i class="icon-double-angle-left"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="span4">
+                    <div class="controls pull-left">
+                        <label class="control-label" for="input3">角色权限</label>
+                        <select name="" id="nav_right" multiple style="min-height: 400px">
+                            {% for nav in my_nav_list %}
+                                <option value="{{ nav.id }}">{{ nav.name }}</option>
+                                {% if nav.sub %}
+                                    {% for sub in nav.sub %}
+                                        <option value="{{ sub.id }}" data-parent-id="{{ nav.id }}">----{{ sub.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ msg.status | safe | default:-1 }};
+        if (res_status === 0) {
+            alert('数据提交成');
+            window.location.href = "{% url 'admin:role' %}"
+        } else if (res_status === 1) {
+            alert('数据提交失败');
+        }
+    </script>
+    <script>
+
+        function addMenu() {
+            var menu_list = $('#nav_left').val();
+            data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'menu_list': menu_list.join(','),
+                'action': 'put'
+            };
+
+            $.post("{% url 'admin:role_nav' role_id %}", data, function (res) {
+                if (res['status'] == 0) {
+                    $.each($('#nav_left option'),function () {
+                        if(menu_list.indexOf($(this).val())>-1){
+                            var option = $(this).clone();
+                            var parent_id = option.attr('data-parent-id');
+                            if($('#nav_right option').length==0 || !parent_id){
+                                $('#nav_right').append(option)
+                            }else{
+                                $.each($('#nav_right option'),function () {
+                                    var this_r = $(this);
+                                    if(parent_id=this_r.val()){
+                                        this_r.after(option)
+                                    }
+                                })
+                            }
+                        }
+                    })
+
+                } else if (res['status'] == 1) {
+                    noty({"text":"数据提交失败","layout":"bottom","type":"error"});
+                }
+            }, 'json')
+        }
+
+        function removeMenu() {
+            var menu_list = $('#nav_right').val();
+            data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'menu_list': menu_list.join(','),
+                'action': 'delete'
+            };
+
+            $.post("{% url 'admin:role_nav' role_id %}", data, function (res) {
+                if (res['status'] == 0) {
+                    $.each($('#nav_right option'),function () {
+                        if(menu_list.indexOf($(this).val())>-1){
+                            var this_r = $(this);
+                            this_r.remove();
+                        }
+                    })
+                } else if (res['status'] == 1) {
+                    noty({"text":"数据提交失败","layout":"bottom","type":"error"});
+                }
+            }, 'json')
+        }
+
+        function notice(text){
+            $.gritter.add({
+                title: "温馨提示",
+                text: text
+            });
+        }
+
+
+    </script>
+{% endblock %}

@@ -3,13 +3,13 @@
 # __date__ = '2017/4/19 14:04'
 import datetime
 
-from django.db import connection as conn
 from django.core.cache import caches
 from wechatpy import WeChatClient
 
 from api.models import AccessToken, Log
+from api.utils import method
 from user.models import WechatMembers
-from utils import db, consts, method
+from utils import db, consts
 
 
 def cron_get_token():
@@ -87,7 +87,7 @@ def create_temp_data(order):
         "color": "#173177"
     }
     data['keyword2'] = {
-        "value": method.getShopName(order['shopID'])+"("+order['Branchno']+"/"+str(order['ListNO'])+")",
+        "value": method.getShopName(order['shopID']) + "(" + order['Branchno'] + "/" + str(order['ListNO']) + ")",
         "color": "#173177"
     }
     data['keyword3'] = {
