@@ -13,7 +13,7 @@ from admin.utils import method
 class UserView(View):
     def get(self, request):
         users = User.objects.values('id', 'nick', 'role', 'status', 'add_time')
-        paginator = MyPaginator(users, 1)
+        paginator = MyPaginator(users, 15)
         page_num = request.GET.get('page', 1)
         try:
             users = paginator.page(page_num)
@@ -30,19 +30,19 @@ class UserEditView(View):
         return render(request, 'sys/user_edit.html', locals())
 
     def post(self, request, user_id):
-        form = UserForm(request.POST)
         msg = {}
-        if form.is_valid():
-            name = request.POST.get('name', '')
-            nick = request.POST.get('nick', '')
-            role = request.POST.get('role', '')
-            status = request.POST.get('status', '')
-            result = User.objects.filter(id=user_id).update(name=name, nick=nick, role=role, status=status)
-            if result:
-                msg['status'] = 0
+        try:
+            user =  User.objects.get(pk=user_id)
+            form = UserForm(request.POST,instance=user)
+            if form.is_valid():
+                try:
+                    form.save()
+                    msg['status'] = 0
+                except:
+                    msg['status'] = 1
             else:
                 msg['status'] = 1
-        else:
+        except:
             msg['status'] = 1
         return render(request, 'sys/user_edit.html', locals())
 
@@ -55,14 +55,12 @@ class UserAddView(View):
         form = UserForm(request.POST)
         msg = {}
         if form.is_valid():
-            name = request.POST.get('name', '')
-            nick = request.POST.get('nick', '')
-            role = request.POST.get('role', '')
-            status = request.POST.get('status', '')
-            result = User.objects.create(name=name, nick=nick, role=role, status=status)
-            if result:
+            try:
+                user = form.save()
+                user.pwd = method.md5('ikg' + 'ikg123')
+                user.save()
                 msg['status'] = 0
-            else:
+            except:
                 msg['status'] = 1
         else:
             msg['status'] = 1

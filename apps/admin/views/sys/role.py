@@ -31,18 +31,21 @@ class RoleEditView(View):
         role = Role.objects.values('id','name','status').filter(id=role_id).first()
         return render(request,'sys/role_edit.html',locals())
     def post(self,request,role_id):
-        form = RoleForm(request.POST)
         msg = {}
-        if form.is_valid():
-            name = request.POST.get('name', '')
-            status = request.POST.get('status', '')
-            result = Role.objects.filter(id=role_id).update(name=name, status=status)
-            if result:
-                msg['status'] = 0
+        try:
+            role = Role.objects.get(pk=role_id)
+            form = RoleForm(request.POST, instance=role)
+            if form.is_valid():
+                result = form.save()
+                if result:
+                    msg['status'] = 0
+                else:
+                    msg['status'] = 1
             else:
                 msg['status'] = 1
-        else:
+        except:
             msg['status'] = 1
+
         return render(request, 'sys/role_edit.html', locals())
 
 
@@ -53,9 +56,7 @@ class RoleAddView(View):
         form = RoleForm(request.POST)
         msg = {}
         if form.is_valid():
-            name = request.POST.get('name', '')
-            status = request.POST.get('status', '')
-            result = Role.objects.create(name=name, status=status)
+            result = form.save()
             if result:
                 msg['status'] = 0
             else:
