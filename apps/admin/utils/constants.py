@@ -1,0 +1,1 @@
+FONT_ARIAL = "/apps/admin/static/font/Arial.ttf"
