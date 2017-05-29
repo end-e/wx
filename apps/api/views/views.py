@@ -108,7 +108,7 @@ def create_nav(request):
     return HttpResponse(json.dumps(menu_create))
 
 
-def get_session_key(request, code):
+def get_session_key(request):
     """
     小程序获取用户openid，使用小程序获取的code换取openid，session_key
     接口地址:
@@ -116,6 +116,8 @@ def get_session_key(request, code):
     """
     appid = 'wxd5fbbceb077f7635'
     secret = '041e0f60a39e8b0ff699101142a6f849'
+
+    code = request.GET.get('code', '')
 
     url = 'https://api.weixin.qq.com/sns/jscode2session'
     param = {
@@ -127,4 +129,4 @@ def get_session_key(request, code):
 
     res = requests.get(url, params=param)
 
-    return HttpResponse(res)
+    return HttpResponse(res, code)

@@ -16,5 +16,5 @@ urlpatterns = [
     url(r'^sms/$', sms.main, name='sms'),
 
     # 微信小程序获取用户openid，session_key接口
-    url(r'xcx/getopenid/(?P<code>\S+)/$', views.get_session_key, name='getopenid'),
+    url(r'xcx/getopenid', views.get_session_key, name='getopenid'),
 ]
