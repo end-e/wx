@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
+import os
+
 from django.conf.urls import include, url
+from django.views.static import serve
 import xadmin
 from xadmin.plugins import xversion
+
+from wx.settings import MEDIA_ROOT
 
 xadmin.autodiscover()
 
 xversion.register_models()
-import os
 
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 urlpatterns = [
@@ -14,7 +18,8 @@ urlpatterns = [
     # 微信文件校验地址
     url(r'MP_verify_QthEcNlYA73MNXgH.txt', 'api.views.views.verify', name='MP_verify_QthEcNlYA73MNXgH.txt'),
     # CA证书校验地址
-    url(r'.well-known/pki-validation/fileauth.txt', 'api.views.views.ca', name='.well-known/pki-validation/fileauth.txt'),
+    url(r'.well-known/pki-validation/fileauth.txt', 'api.views.views.ca',
+        name='.well-known/pki-validation/fileauth.txt'),
 
     # 微信接入url (www.zisai.net)
     url(r'^$', 'api.views.views.conn', name='check_signature'),
@@ -41,4 +46,7 @@ urlpatterns = [
         {'document_root': root_path + '/collected_static/wx/js'}),
     url(r'^common_static/wx/js/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': root_path + '/common_static/wx/js'}),
+
+    # 微信小程序图片
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': MEDIA_ROOT})
 ]
