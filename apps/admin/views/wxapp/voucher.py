@@ -1,10 +1,11 @@
-import json,datetime
+import json, datetime,time
 
 from django.shortcuts import render
 from django.http import HttpResponse
 
 from admin.utils import method
 from wxapp.models import Voucher
+
 
 def index(request):
     voucher_no = request.GET.get('voucher_no', '')
@@ -25,9 +26,14 @@ def index(request):
 
 def voucherEdit(request, voucher_id):
     voucher = []
+    img_url = ''
     if voucher_id != '0':
         voucher = Voucher.objects.get(pk=voucher_id)
-    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher})
+        if voucher.voucher_image != '':
+            img_url =  voucher.voucher_image.url
+
+    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'img_url':img_url})
+
 
 def voucherSave(request):
     voucher_id = request.POST.get('voucher_id', '')
@@ -38,14 +44,24 @@ def voucherSave(request):
     voucher_price = request.POST.get('voucher_price', '')
     begin_date = request.POST.get('begin_date', '')
     end_date = request.POST.get('end_date', '')
-    voucher_image = request.POST.get('voucher_image', '')
+    voucher_image = request.FILES.get('voucher_image')
+    if voucher_image == None:
+        voucher_image = ''
+
     if voucher_id != '':
-        result = Voucher.objects.get(pk=id).update(voucher_no=voucher_no,
-                                                   voucher_name=voucher_name,
-                                                   voucher_price=voucher_price,
-                                                   begin_date=begin_date,
-                                                   end_date=end_date,
-                                                   voucher_image=voucher_image)
+        if voucher_image != '':
+            result = Voucher.objects.filter(pk=voucher_id).update(voucher_no=voucher_no,
+                                                       voucher_name=voucher_name,
+                                                       voucher_price=voucher_price,
+                                                       begin_date=begin_date,
+                                                       end_date=end_date,
+                                                       voucher_image=voucher_image)
+        else:
+            result = Voucher.objects.filter(pk=voucher_id).update(voucher_no=voucher_no,
+                                                       voucher_name=voucher_name,
+                                                       voucher_price=voucher_price,
+                                                       begin_date=begin_date,
+                                                       end_date=end_date)
     else:
         result = Voucher.objects.create(voucher_no=voucher_no,
                                         voucher_name=voucher_name,
@@ -61,6 +77,7 @@ def voucherSave(request):
     List = Voucher.objects.all().order_by('voucher_no')
     return render(request, 'wxapp/voucher/index.html', locals())
 
+
 def getVoucherList(request):
     voucher_no = request.GET.get('voucher_no', '')
     voucher_name = request.GET.get('voucher_name', '')
@@ -68,22 +85,25 @@ def getVoucherList(request):
     begin_date = request.GET.get('begin_date', '')
     end_date = request.GET.get('end_date', '')
 
+    result_dict = {'status':1,'msg':[]}
     request_time = request.GET.get('request_time', '')
     request_result = request.GET.get('request_result', '')
-
     if request_time == '':
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
     if request_result == '':
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
-    time = (datetime.datetime.now()-datetime.timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M")
-    if time>request_time.strftime("%Y-%m-%d %H:%M"):
-        return
+    time_now = (datetime.datetime.now() - datetime.timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+    timeArray = time.strptime(time_now, "%Y-%m-%d %H:%M:%S")
+    time_int = int(time.mktime(timeArray))*1000
 
-    current_result = method.md5(method.md5('ikg' + request_time)+'wxapp')
+    if time_int > request_time:
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
+
+    current_result = method.md5(method.md5('ikg' + request_time) + 'wxapp')
 
     if request_result != current_result:
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     kwargs = {}
 
@@ -103,7 +123,7 @@ def getVoucherList(request):
         kwargs.setdefault('end_date', end_date)
 
     vouchers = Voucher.objects.filter(**kwargs).order_by('voucher_no')
-    msg =[]
+    msg = []
     vardict = {}
     if vouchers:
         for item in vouchers:
@@ -115,37 +135,48 @@ def getVoucherList(request):
             vardict['end_date'] = str(item.end_date)
             vardict['voucher_image'] = str(item.voucher_image)
             msg.append(vardict)
-    return HttpResponse(msg, content_type="application/json")
+
+        result_dict['status'] = 0
+        result_dict['msg'] = msg
+
+    return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
 
 def getVoucherInfo(request):
     voucher_id = request.GET.get('voucher_id', '')
 
+    result_dict = {'status':1,'msg':[]}
     request_time = request.GET.get('request_time', '')
     request_result = request.GET.get('request_result', '')
     if request_time == '':
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
     if request_result == '':
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
-    time = (datetime.datetime.now() - datetime.timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M")
-    if time > request_time.strftime("%Y-%m-%d %H:%M"):
-        return
+    time_now = (datetime.datetime.now() - datetime.timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+    timeArray = time.strptime(time_now, "%Y-%m-%d %H:%M:%S")
+    time_int = int(time.mktime(timeArray))*1000
+
+    if time_int > request_time:
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     current_result = method.md5(method.md5('ikg' + request_time) + 'wxapp')
 
     if request_result != current_result:
-        return
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     voucher = Voucher.objects.get(pk=voucher_id)
-    msg={}
+    msg = {}
     if voucher:
-        msg['id']= str(voucher.id)
-        msg['voucher_no']= str(voucher.voucher_no)
-        msg['voucher_name']= str(voucher.voucher_name)
-        msg['voucher_price']= str(voucher.voucher_price)
-        msg['begin_date']= str(voucher.begin_date)
-        msg['end_date']= str(voucher.end_date)
-        msg['voucher_image']= str(voucher.voucher_image)
+        msg['id'] = str(voucher.id)
+        msg['voucher_no'] = str(voucher.voucher_no)
+        msg['voucher_name'] = str(voucher.voucher_name)
+        msg['voucher_price'] = str(voucher.voucher_price)
+        msg['begin_date'] = str(voucher.begin_date)
+        msg['end_date'] = str(voucher.end_date)
+        msg['voucher_image'] = str(voucher.voucher_image)
 
-    return HttpResponse(json.dumps(msg), content_type="application/json")
+        result_dict['status'] = 0
+        result_dict['msg'] = msg
+
+    return HttpResponse(json.dumps(result_dict), content_type="application/json")

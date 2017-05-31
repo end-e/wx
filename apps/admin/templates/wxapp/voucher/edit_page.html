@@ -9,7 +9,7 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" action="{% url 'wxapp:voucher_save' %}">
+                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data" action="{% url 'wxapp:voucher_save' %}">
                     {% csrf_token %}
                     <input type="hidden" value="{{ voucher.id }}" name="voucher_id">
                     <div class="control-group">
@@ -32,7 +32,8 @@
                              data-date-format="yyyy-mm-dd" data-date=""
                              class="input-group date form_date">
                             <label>开始日期：
-                                <input readonly="" value="{{ voucher.begin_date | date:'Y-m-d' }}" size="16" name="begin_date"
+                                <input readonly="" value="{{ voucher.begin_date | date:'Y-m-d' }}" size="16"
+                                       name="begin_date"
                                        id="begin_date" class="form-control" required>
                                 <span class="input-group-addon"><span
                                         class="glyphicon glyphicon-remove"></span></span>
@@ -46,7 +47,8 @@
                              data-date-format="yyyy-mm-dd" data-date=""
                              class="input-group date form_date">
                             <label>截止日期：
-                                <input readonly="" value="{{ voucher.end_date | date:'Y-m-d' }}" size="16" name="end_date"
+                                <input readonly="" value="{{ voucher.end_date | date:'Y-m-d' }}" size="16"
+                                       name="end_date"
                                        id="end_date" class="form-control" required>
                                 <span class="input-group-addon"><span
                                         class="glyphicon glyphicon-remove"></span></span>
@@ -54,6 +56,12 @@
                                         class="glyphicon glyphicon-calendar"></span></span>
                             </label>
                         </div>
+                    </div>
+                    <div class="control-group ">
+                        <label>上传图片：
+                            <input type="file" name="voucher_image">
+                        </label>
+                        <img src='{{ img_url }}'/>
                     </div>
                     <div class="form-actions">
                         <a class="btn btn-primary" onclick="submitForm()">提交</a>
