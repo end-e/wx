@@ -40,11 +40,11 @@
         var pwd_new = $("#pwd_new").val();
         var pwd_confirm = $("#pwd_confirm").val();
         if(!pwd_new || !pwd_confirm){
-            alert('新密码和确认密码不能为空，请重试');
+            noty({"text":"新密码和确认密码不能为空，请重试","layout":"bottom","type":"error"});
             return false;
         }
         if(pwd_new!=pwd_confirm){
-            alert('两次密码不一致，请重试');
+            noty({"text":"两次密码不一致，请重试","layout":"bottom","type":"error"});
             return false;
         }
 
@@ -53,7 +53,7 @@
 
     var data = {{ data | safe }};
     if(data.result=='0'){
-        alert('密码重置成功，将跳转到登录页面');
+        noty({"text":"密码重置成功，将跳转到登录页面","layout":"bottom","type":"information"});
         window.location.href = "{% url 'admin:logout' %}";
     }
 </script>

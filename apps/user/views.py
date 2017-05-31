@@ -54,7 +54,7 @@ class MembersBoundView(View):
             username = request.POST.get('username', '').strip()
             telphone = request.POST.get('telphone', '').strip()
             vcode = request.POST.get('vcode', '').strip()
-            sms_code = caches['default'].get('sms_'+str(telphone))
+            sms_code = caches['default'].get('sms_'+str(telphone),'')
             if not sms_code :
                 #验证码不存在或失效
                 msg['status'] = 4
@@ -105,6 +105,7 @@ class MembersBoundView(View):
                     return HttpResponse(json.dumps(msg))
                 else:
                     msg['status'] = 0
+                    caches['default'].delete('sms_'+str(telphone))
                     return HttpResponse(json.dumps(msg))
             else:
                 #用户不存在

@@ -2,7 +2,7 @@
 # __author__ = ''
 # __date__ = '2017/4/18 15:02'
 from django.conf.urls import url
-from api.views import views, cron,sms
+from api.views import views, cron, sms
 
 urlpatterns = [
     # 微信后台配置的url
@@ -14,4 +14,7 @@ urlpatterns = [
 
     url(r'^menu/create/$', views.create_nav, name='menu_create'),
     url(r'^sms/$', sms.main, name='sms'),
+
+    # 微信小程序获取用户openid，session_key接口
+    url(r'xcx/getopenid', views.get_session_key, name='getopenid'),
 ]

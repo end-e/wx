@@ -6,8 +6,9 @@ from django.http import HttpResponse
 from io import BytesIO
 import json
 
-from admin.utils import login,method
+from admin.utils import method
 from admin.models import User
+from admin.forms import LoginForm
 
 # Create your views here.
 class IndexView(View):
@@ -17,7 +18,8 @@ class IndexView(View):
 
 class LoginView(View):
     def get(self,request):
-        return render(request, 'sys/login.html')
+        login_form = LoginForm()
+        return render(request, 'sys/login.html',locals())
     def post(self,request):
         u_name = request.POST.get('username').strip()
         u_pwd = request.POST.get('password').strip()
@@ -38,8 +40,8 @@ class LoginView(View):
                 else:
                     msg['status'] = 0
                     request.session['user'] = user
-                    navData = login.getUserNav(user.id)
-                    navList = login.createNavList(navData)
+                    navData = method.getUserNav(user.role)
+                    navList = method.createNavList(navData)
                     request.session['user'].user_nav = navList
         return HttpResponse(json.dumps(msg), content_type="application/json")
 
@@ -48,7 +50,7 @@ class CodeView(View):
     def get(self,request):
         # 将image信息保存到BytesIO流中
         buff = BytesIO()
-        image = login.verifycode(request, 'vcode')
+        image = method.verifycode(request, 'vcode')
         image.save(buff, "png")
         return HttpResponse(buff.getvalue(), 'image/png')
 

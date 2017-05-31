@@ -1,0 +1,60 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid" >
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-user"></i>
+                    用户信息
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal">
+
+                    <div class="control-group">
+                        <label class="control-label" for="input3">用户姓名</label>
+                        <div class="controls">
+                            <input name="role" type="text" value="{{ user.nick }}" readonly>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="input2">用户账号</label>
+                        <div class="controls">
+                            <input name="role" type="text" value="{{ user.name }}" readonly>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="input3">用户角色</label>
+                        <div class="controls">
+                            <input name="role" type="text" value="{{ user.role }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="input3">启用状态</label>
+                        <div class="controls">
+                            <input name="role" type="text" value="{{ user.status }}" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ msg.status | safe | default:-1 }};
+        if (res_status === 0) {
+            alert('数据提交成');
+            window.location.href = "{% url 'admin:user' %}"
+        } else if (res_status === 1) {
+            alert('数据提交失败');
+        }
+    </script>
+{% endblock %}

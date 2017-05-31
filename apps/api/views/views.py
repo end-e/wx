@@ -1,5 +1,6 @@
 import json
 import datetime
+import requests
 from urllib import parse
 
 from django.http import HttpResponse
@@ -28,6 +29,11 @@ def conn(request):
 # 微信回调域名校验文件
 def verify(request):
     return render(request, 'MP_verify_QthEcNlYA73MNXgH.txt')
+
+
+# CA证书校验文件
+def ca(request):
+    return render(request, 'fileauth.txt')
 
 
 def hx(request, sn, stamp):
@@ -101,3 +107,26 @@ def create_nav(request):
     })
     return HttpResponse(json.dumps(menu_create))
 
+
+def get_session_key(request):
+    """
+    小程序获取用户openid，使用小程序获取的code换取openid，session_key
+    接口地址:
+    https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+    """
+    appid = 'wxd5fbbceb077f7635'
+    secret = '041e0f60a39e8b0ff699101142a6f849'
+
+    code = request.GET.get('code', '')
+
+    url = 'https://api.weixin.qq.com/sns/jscode2session'
+    param = {
+        'appid': appid,
+        'secret': secret,
+        'js_code': code,
+        'grant_type': 'authorization_code'
+    }
+
+    res = requests.get(url, params=param)
+
+    return HttpResponse(res, code)

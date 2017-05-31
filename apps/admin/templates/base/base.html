@@ -37,7 +37,13 @@
 
     {% block content %} {% endblock %}
 
-    {% block footer %} {% endblock %}
+    <footer>
+        <p>
+            <span style="text-align:left;float:left">
+                Copyright © 宽广集团信息中心
+            </span>
+        </p>
+    </footer>
 
     <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
     <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>
@@ -48,7 +54,7 @@
     <script src="{% static 'js/jquery.chosen.min.js' %}"></script>
     <script src="{% static 'js/jquery.uniform.min.js' %}"></script>
     <script src="{% static 'js/jquery.cleditor.min.js' %}"></script>
-    <script src="{% static 'js/jquery.elfinder.min.js' %}"></script>
+    <script src="{% static 'js/jquery.noty.js' %}"></script>
     <script src="{% static 'js/jquery.raty.min.js' %}"></script>
     <script src="{% static 'js/jquery.iphone.toggle.js' %}"></script>
     <script src="{% static 'js/jquery.uploadify-3.1.min.js' %}"></script>
@@ -61,9 +67,9 @@
     <script src="{% static 'js/jquery.placeholder.min.js' %}"></script>
     <script src="{% static 'js/wizard.min.js' %}"></script>
     <script src="{% static 'js/core.min.js' %}"></script>
-    <script src="{% static 'js/custom.min.js' %}"></script>
     <script src="{% static 'js/bootstrap-datetimepicker.js' %}"></script>
     <script src="{% static 'js/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+    <script src="{% static 'js/custom.min.js' %}"></script>
     {% block js %}{% endblock %}
 </body>
 </html>

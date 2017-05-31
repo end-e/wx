@@ -1,0 +1,80 @@
+{% extends 'base/commont.html' %}
+
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑用户
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:nav_edit' nav_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ user_id }}" name="id">
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label" for="input3">名称</label>
+                        <div class="controls">
+                            <input name="name" type="text" value="{{ nav.name }}">
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.url %}error{% endif %}">
+                        <label class="control-label" for="input2">URL</label>
+                        <div class="controls">
+                            <input name="url" type="text" value="{{ nav.url }}">
+                            {% if form.errors.url %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="input3">父级节点</label>
+                        <div class="controls">
+                            <input name="parent" type="text" value="{{ nav.parent }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="input3">排列次序</label>
+                        <div class="controls">
+                            <input name="sort" type="text" value="{{ nav.sort }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="input3">标识</label>
+                        <div class="controls">
+                            <input name="icon" type="text" value="{{ nav.icon | default:' ' }}">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="input3">启用状态</label>
+                        <div class="controls">
+                            <select name="status">
+                                <option value="0" {% if nav.status == '0' %}selected{% endif %}>启用</option>
+                                <option value="1" {% if nav.status == '1' %}selected{% endif %}>停用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm()">编辑</button>
+                        <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ msg.status | safe | default:-1 }};
+        if (res_status === 0) {
+            noty({"text":"数据提交成","layout":"bottom","type":"information"});
+            window.location.href = "{% url 'admin:nav' %}"
+        }else if (res_status === 1){
+            noty({"text":"数据提交失败","layout":"bottom","type":"error"});
+        }
+    </script>
+{% endblock %}

@@ -9,36 +9,22 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:user_edit' user_id %}">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:role_edit' role_id %}">
                     {% csrf_token %}
-                    <input type="hidden" value="{{ user_id }}" name="id">
-                    <div class="control-group {% if form.errors.nick %}error{% endif %}">
-                        <label class="control-label" for="input3">用户姓名</label>
-                        <div class="controls">
-                            <input name="nick" type="text" value="{{ user.nick }}">
-                            {% if form.errors.nick %}<span class="help-inline">此字段必填</span>{% endif %}
-                        </div>
-                    </div>
+                    <input type="hidden" value="{{ role_id }}" name="id">
                     <div class="control-group {% if form.errors.name %}error{% endif %}">
-                        <label class="control-label" for="input2">用户账号</label>
+                        <label class="control-label" for="input3">角色名称</label>
                         <div class="controls">
-                            <input name="name" type="text" value="{{ user.name }}">
+                            <input name="name" type="text" value="{{ role.name }}">
                             {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="input3">用户角色</label>
-                        <div class="controls">
-                            <input name="role" type="text" value="{{ user.role }}">
-                        </div>
-                    </div>
-
-                    <div class="control-group">
                         <label class="control-label" for="input3">启用状态</label>
                         <div class="controls">
                             <select name="status">
-                                <option value="0" {% if user.status == '0' %}selected{% endif %}>启用</option>
-                                <option value="1" {% if user.status == '1' %}selected{% endif %}>停用</option>
+                                <option value="0" {% if role.status == '0' %}selected="selected"{% endif %}>启用</option>
+                                <option value="1" {% if role.status == '1' %}selected="selected"{% endif %}>停用</option>
                             </select>
                         </div>
                     </div>
@@ -60,7 +46,7 @@
         var res_status = {{ msg.status | safe | default:-1 }};
         if (res_status === 0) {
             noty({"text":"数据提交成","layout":"bottom","type":"information"});
-            window.location.href = "{% url 'admin:user' %}"
+            window.location.href = "{% url 'admin:role' %}"
         }else if (res_status === 1){
             noty({"text":"数据提交失败","layout":"bottom","type":"error"});
         }
