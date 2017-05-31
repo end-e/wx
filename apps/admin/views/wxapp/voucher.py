@@ -82,8 +82,6 @@ def getVoucherList(request):
     voucher_no = request.GET.get('voucher_no', '')
     voucher_name = request.GET.get('voucher_name', '')
     voucher_price = request.GET.get('voucher_price', '')
-    begin_date = request.GET.get('begin_date', '')
-    end_date = request.GET.get('end_date', '')
 
     result_dict = {'status':1,'msg':[]}
     request_time = request.GET.get('request_time', '')
@@ -97,7 +95,7 @@ def getVoucherList(request):
     timeArray = time.strptime(time_now, "%Y-%m-%d %H:%M:%S")
     time_int = int(time.mktime(timeArray))*1000
 
-    if time_int > request_time:
+    if time_int > int(request_time):
         return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     current_result = method.md5(method.md5('ikg' + request_time) + 'wxapp')
@@ -106,6 +104,9 @@ def getVoucherList(request):
         return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     kwargs = {}
+
+    kwargs.setdefault('begin_date__lte', datetime.datetime.now())
+    kwargs.setdefault('end_date__gte', datetime.datetime.now())
 
     if voucher_no != '':
         kwargs.setdefault('voucher_no__contains', voucher_no)
@@ -116,24 +117,18 @@ def getVoucherList(request):
     if voucher_price != '':
         kwargs.setdefault('voucher_price', voucher_price)
 
-    if begin_date != '':
-        kwargs.setdefault('begin_date', begin_date)
-
-    if end_date != '':
-        kwargs.setdefault('end_date', end_date)
-
     vouchers = Voucher.objects.filter(**kwargs).order_by('voucher_no')
     msg = []
-    vardict = {}
     if vouchers:
         for item in vouchers:
+            vardict = {}
             vardict['voucher_id'] = str(item.id)
             vardict['voucher_no'] = str(item.voucher_no)
             vardict['voucher_name'] = str(item.voucher_name)
             vardict['voucher_price'] = str(item.voucher_price)
-            vardict['begin_date'] = str(item.begin_date)
-            vardict['end_date'] = str(item.end_date)
-            vardict['voucher_image'] = str(item.voucher_image)
+            vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
+            vardict['end_date'] = str(item.end_date.strftime("%Y-%m-%d"))
+            vardict['voucher_image'] = 'https://www.zisai.net/media/' + str(item.voucher_image)
             msg.append(vardict)
 
         result_dict['status'] = 0
@@ -157,7 +152,7 @@ def getVoucherInfo(request):
     timeArray = time.strptime(time_now, "%Y-%m-%d %H:%M:%S")
     time_int = int(time.mktime(timeArray))*1000
 
-    if time_int > request_time:
+    if time_int > int(request_time):
         return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     current_result = method.md5(method.md5('ikg' + request_time) + 'wxapp')
@@ -172,9 +167,9 @@ def getVoucherInfo(request):
         msg['voucher_no'] = str(voucher.voucher_no)
         msg['voucher_name'] = str(voucher.voucher_name)
         msg['voucher_price'] = str(voucher.voucher_price)
-        msg['begin_date'] = str(voucher.begin_date)
-        msg['end_date'] = str(voucher.end_date)
-        msg['voucher_image'] = str(voucher.voucher_image)
+        msg['begin_date'] = str(voucher.begin_date.strftime("%Y-%m-%d"))
+        msg['end_date'] = str(voucher.end_date.strftime("%Y-%m-%d"))
+        msg['voucher_image'] = 'https://www.zisai.net/media/' + str(voucher.voucher_image)
 
         result_dict['status'] = 0
         result_dict['msg'] = msg

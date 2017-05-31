@@ -19,7 +19,7 @@ def getInfo(request):
     timeArray = time.strptime(time_now, "%Y-%m-%d %H:%M:%S")
     time_int = int(time.mktime(timeArray))*1000
 
-    if time_int > request_time:
+    if time_int > int(request_time):
         return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
     current_result = method.md5(method.md5('ikg' + request_time) + 'wxapp')
