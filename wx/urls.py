@@ -29,8 +29,10 @@ urlpatterns = [
     url(r'^admin/', include('admin.urls', namespace='admin')),
     # 会员微信绑定模块
     url(r'^user/', include('user.urls', namespace='user')),
-    # 微信券接口
+    # 微信后台
     url(r'^wxapp/', include('admin.views.wxapp.urls', namespace='wxapp')),
+    # 微信接口
+    url(r'^wxapp/', include('api.views.wxapp.urls', namespace='wxapp')),
 
     url(r'^collected_static/css/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': root_path + '/collected_static/css'}),
