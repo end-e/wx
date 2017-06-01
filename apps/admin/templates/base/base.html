@@ -37,13 +37,9 @@
 
     {% block content %} {% endblock %}
 
-    <footer>
-        <p>
-            <span style="text-align:left;float:left">
-                Copyright © 宽广集团信息中心
-            </span>
-        </p>
-    </footer>
+    {% block footer %} {% endblock %}
+
+
 
     <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
     <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>

@@ -16,7 +16,7 @@ from admin.utils.paginator import MyPaginator
 class RoleView(View):
     def get(self,request):
         roles = Role.objects.values('id', 'name', 'status')
-        paginator = MyPaginator(roles, 1)
+        paginator = MyPaginator(roles, 15)
         page_num = request.GET.get('page', 1)
         try:
             roles = paginator.page(page_num)
