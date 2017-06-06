@@ -130,3 +130,5 @@ def get_session_key(request):
     res = requests.get(url, params=param)
 
     return HttpResponse(res, code)
+
+
