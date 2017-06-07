@@ -41,6 +41,7 @@ def voucherSave(request):
         voucher_id = ''
     voucher_no = request.POST.get('voucher_no', '')
     voucher_name = request.POST.get('voucher_name', '')
+    unit_price = request.POST.get('unit_price', '')
     voucher_price = request.POST.get('voucher_price', '')
     begin_date = request.POST.get('begin_date', '')
     end_date = request.POST.get('end_date', '')
@@ -52,6 +53,7 @@ def voucherSave(request):
         result = Voucher.objects.get(pk=voucher_id)
         result.voucher_no = voucher_no
         result.voucher_name = voucher_name
+        result.unit_price = unit_price
         result.voucher_price = voucher_price
         result.begin_date = begin_date
         result.end_date = end_date
@@ -61,6 +63,7 @@ def voucherSave(request):
     else:
         result = Voucher.objects.create(voucher_no=voucher_no,
                                         voucher_name=voucher_name,
+                                        unit_price=unit_price,
                                         voucher_price=voucher_price,
                                         begin_date=begin_date,
                                         end_date=end_date,

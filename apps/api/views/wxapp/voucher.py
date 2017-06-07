@@ -7,6 +7,7 @@ from api.decorator import signature
 def getVoucherList(request):
     voucher_no = request.GET.get('voucher_no', '')
     voucher_name = request.GET.get('voucher_name', '')
+    unit_price = request.GET.get('unit_price', '')
     voucher_price = request.GET.get('voucher_price', '')
 
     result_dict = {'status':1,'msg':[]}
@@ -22,6 +23,9 @@ def getVoucherList(request):
     if voucher_name != '':
         kwargs.setdefault('voucher_name__contains', voucher_name)
 
+    if unit_price != '':
+        kwargs.setdefault('unit_price', unit_price)
+
     if voucher_price != '':
         kwargs.setdefault('voucher_price', voucher_price)
 
@@ -33,6 +37,7 @@ def getVoucherList(request):
             vardict['voucher_id'] = str(item.id)
             vardict['voucher_no'] = str(item.voucher_no)
             vardict['voucher_name'] = str(item.voucher_name)
+            vardict['unit_price'] = str(item.unit_price)
             vardict['voucher_price'] = str(item.voucher_price)
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
             vardict['end_date'] = str(item.end_date.strftime("%Y-%m-%d"))
@@ -55,6 +60,7 @@ def getVoucherInfo(request):
         msg['id'] = str(voucher.id)
         msg['voucher_no'] = str(voucher.voucher_no)
         msg['voucher_name'] = str(voucher.voucher_name)
+        msg['unit_price'] = str(voucher.unit_price)
         msg['voucher_price'] = str(voucher.voucher_price)
         msg['begin_date'] = str(voucher.begin_date.strftime("%Y-%m-%d"))
         msg['end_date'] = str(voucher.end_date.strftime("%Y-%m-%d"))

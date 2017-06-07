@@ -32,6 +32,7 @@
                             <tr>
                                 <th>券编号</th>
                                 <th>券名称</th>
+                                <th>单价</th>
                                 <th>券面值</th>
                                 <th>开始日期</th>
                                 <th>截止日期</th>
@@ -43,6 +44,7 @@
                                 <tr>
                                     <td>{{ row.voucher_no }}</td>
                                     <td>{{ row.voucher_name }}</td>
+                                    <td>{{ row.unit_price }}</td>
                                     <td>{{ row.voucher_price }}</td>
                                     <td>{{ row.begin_date | date:'Y-m-d' }}</td>
                                     <td>{{ row.end_date | date:'Y-m-d' }}</td>
