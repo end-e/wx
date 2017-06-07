@@ -8,6 +8,8 @@ class Voucher(models.Model):
     voucher_price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name=u'券面值')
     begin_date = models.DateTimeField(blank=True, null=True, verbose_name=u'开始日期')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=u'截至日期')
+    type_flag = models.CharField(max_length=2, default='0', verbose_name=u'类型 0通用 1微信专享')
+    code_flag = models.CharField(max_length=2, default='0', verbose_name=u'门店范围 0全部 1市区 2县区 3自由')
     shop_codes = models.CharField(max_length=500, blank=True, null=True, verbose_name=u'适用门店')
     voucher_image = models.ImageField(upload_to='upload', blank=True, null=True, verbose_name=u'券图片')
 
@@ -30,3 +32,9 @@ class Product(models.Model):
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=u'截至日期')
     product_weight = models.DecimalField(max_digits=12, decimal_places=5, verbose_name=u'商品重量 单位千克')
     product_image = models.ImageField(upload_to='upload/product', blank=True, null=True, verbose_name=u'商品图')
+
+
+class Shops(models.Model):
+    shop_code = models.CharField(max_length=16, default='', verbose_name=u'编号')
+    shop_name = models.CharField(max_length=32, default='', verbose_name=u'名称')
+    telphone = models.CharField(max_length=20, default='', verbose_name=u'电话')

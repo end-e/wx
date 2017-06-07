@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from admin.utils import method
-from wxapp.models import Voucher
+from wxapp.models import Voucher, Shops
 
 
 def index(request):
@@ -27,12 +27,14 @@ def index(request):
 def voucherEdit(request, voucher_id):
     voucher = []
     img_url = ''
+
+    shops = Shops.objects.all()
+
     if voucher_id != '0':
         voucher = Voucher.objects.get(pk=voucher_id)
         if voucher.voucher_image != '':
             img_url =  voucher.voucher_image.url
-
-    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'img_url':img_url})
+    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'shops': shops, 'img_url':img_url})
 
 
 def voucherSave(request):
@@ -43,8 +45,12 @@ def voucherSave(request):
     voucher_name = request.POST.get('voucher_name', '')
     unit_price = request.POST.get('unit_price', '')
     voucher_price = request.POST.get('voucher_price', '')
+    type_flag = request.POST.get('type_flag', '')
+    code_flag = request.POST.get('code_flag', '')
+    shop_codes = request.POST.get('shop_codes', '')
     begin_date = request.POST.get('begin_date', '')
     end_date = request.POST.get('end_date', '')
+    end_date += ' 23:59:59'
     voucher_image = request.FILES.get('voucher_image')
     if voucher_image == None:
         voucher_image = ''
@@ -55,6 +61,9 @@ def voucherSave(request):
         result.voucher_name = voucher_name
         result.unit_price = unit_price
         result.voucher_price = voucher_price
+        result.type_flag = type_flag
+        result.code_flag = code_flag
+        result.shop_codes = shop_codes
         result.begin_date = begin_date
         result.end_date = end_date
         if voucher_image != '':
@@ -65,6 +74,9 @@ def voucherSave(request):
                                         voucher_name=voucher_name,
                                         unit_price=unit_price,
                                         voucher_price=voucher_price,
+                                        type_flag=type_flag,
+                                        code_flag=code_flag,
+                                        shop_codes=shop_codes,
                                         begin_date=begin_date,
                                         end_date=end_date,
                                         voucher_image=voucher_image)
@@ -74,5 +86,5 @@ def voucherSave(request):
     else:
         msg['status'] = 1
     List = Voucher.objects.all().order_by('voucher_no')
-    return render(request, 'wxapp/voucher/index.html', locals())
+    return render(request, 'wxapp/voucher/index.html', {'List': List})
 

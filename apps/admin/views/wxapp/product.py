@@ -43,6 +43,7 @@ def productSave(request):
     enable_flag = request.POST.get('enable_flag', '')
     begin_date = request.POST.get('begin_date', '')
     end_date = request.POST.get('end_date', '')
+    end_date += ' 23:59:59'
     product_weight = request.POST.get('product_weight', '')
     product_image = request.FILES.get('product_image')
     if product_image == None:
