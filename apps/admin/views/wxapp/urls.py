@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from . import voucher, poster
+from . import voucher, poster, product
 
 urlpatterns = [
     #券操作页面
@@ -12,4 +12,8 @@ urlpatterns = [
     url(r'^poster/index/$', poster.index, name="poster_index"),
     url(r'^poster/edit/(?P<poster_id>[0-9]+)$', poster.posterEdit, name='poster_edit'),
     url(r'^poster/save/$', poster.posterSave, name="poster_save"),
+    #商品信息维护
+    url(r'^product/index/$', product.index, name="product_index"),
+    url(r'^product/edit/(?P<product_id>[0-9]+)$', product.productEdit, name='product_edit'),
+    url(r'^product/save/$', product.productSave, name="product_save"),
 ]

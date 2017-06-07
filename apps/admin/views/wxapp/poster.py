@@ -38,15 +38,13 @@ def posterSave(request):
         poster_image = ''
 
     if poster_id != '':
+        result = PosterImage.objects.get(pk=poster_id)
+        result.poster_name = poster_name
+        result.begin_date = begin_date
+        result.end_date = end_date
         if poster_image != '':
-            result = PosterImage.objects.filter(pk=poster_id).update(poster_name=poster_name,
-                                                                     begin_date=begin_date,
-                                                                     end_date=end_date,
-                                                                     poster_image=poster_image)
-        else:
-            result = PosterImage.objects.filter(pk=poster_id).update(poster_name=poster_name,
-                                                                     begin_date=begin_date,
-                                                                     end_date=end_date)
+            result.poster_image = poster_image
+        result.save()
     else:
         result = PosterImage.objects.create(poster_name=poster_name,
                                             begin_date=begin_date,
