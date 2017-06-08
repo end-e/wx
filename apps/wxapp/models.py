@@ -2,10 +2,11 @@ from django.db import models
 
 
 class Voucher(models.Model):
-    voucher_no = models.CharField(max_length=32, default='', verbose_name=u'券编号')
-    voucher_name = models.CharField(max_length=32, default='', verbose_name=u'券名称')
-    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name=u'单价')
-    voucher_price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name=u'券面值')
+    voucher_no = models.CharField(max_length=32, default='', verbose_name=u'优惠码')
+    voucher_name = models.CharField(max_length=32, default='', verbose_name=u'商品名称')
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name=u'原价')
+    voucher_price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name=u'优惠价')
+    goods_code = models.CharField(max_length=32, default='', verbose_name=u'商品码')
     begin_date = models.DateTimeField(blank=True, null=True, verbose_name=u'开始日期')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=u'截至日期')
     type_flag = models.CharField(max_length=2, default='0', verbose_name=u'类型 0通用 1微信专享')

@@ -45,6 +45,7 @@ def voucherSave(request):
     voucher_name = request.POST.get('voucher_name', '')
     unit_price = request.POST.get('unit_price', '')
     voucher_price = request.POST.get('voucher_price', '')
+    goods_code = request.POST.get('goods_code', '')
     type_flag = request.POST.get('type_flag', '')
     code_flag = request.POST.get('code_flag', '')
     shop_codes = request.POST.get('shop_codes', '')
@@ -61,6 +62,7 @@ def voucherSave(request):
         result.voucher_name = voucher_name
         result.unit_price = unit_price
         result.voucher_price = voucher_price
+        result.goods_code = goods_code
         result.type_flag = type_flag
         result.code_flag = code_flag
         result.shop_codes = shop_codes
@@ -74,6 +76,7 @@ def voucherSave(request):
                                         voucher_name=voucher_name,
                                         unit_price=unit_price,
                                         voucher_price=voucher_price,
+                                        goods_code=goods_code,
                                         type_flag=type_flag,
                                         code_flag=code_flag,
                                         shop_codes=shop_codes,

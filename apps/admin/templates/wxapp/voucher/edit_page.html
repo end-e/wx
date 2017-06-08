@@ -14,23 +14,28 @@
                     {% csrf_token %}
                     <input type="hidden" value="{{ voucher.id }}" name="voucher_id">
                     <div class="control-group">
-                        <label>券编号：
+                        <label>优惠码：
                             <input name="voucher_no" type="text" value="{{ voucher.voucher_no }}">
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>券名称：
+                        <label>商品名称：
                             <input name="voucher_name" type="text" value="{{ voucher.voucher_name }}">
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>单价：
+                        <label>原价：
                             <input name="unit_price" type="text" value="{{ voucher.unit_price }}">
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>券面值：
+                        <label>优惠价：
                             <input name="voucher_price" type="text" value="{{ voucher.voucher_price }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>商品码：
+                            <input name="goods_code" type="text" value="{{ voucher.goods_code }}">
                         </label>
                     </div>
                     <div class="control-group ">

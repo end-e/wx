@@ -11,12 +11,12 @@
             <div class="box-content">
                 <form class="form-horizontal" id="Form" action="{% url 'wxapp:voucher_index' %}">
                     <div class="control-group">
-                        <label class="control-label">券编号
+                        <label class="control-label">优惠码
                             <input name="voucher_no" type="text" value="{{ voucher_no }}">
                         </label>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">券名称
+                        <label class="control-label">商品名称
                             <input name="voucher_name" type="text" value="{{ voucher_name }}">
                         </label>
                     </div>
@@ -30,10 +30,10 @@
                         <table class="table table-striped table-hover table-form-my">
                             <thead>
                             <tr>
-                                <th>券编号</th>
-                                <th>券名称</th>
-                                <th>单价</th>
-                                <th>券面值</th>
+                                <th>优惠码</th>
+                                <th>商品名称</th>
+                                <th>原价</th>
+                                <th>优惠价</th>
                                 <th>开始日期</th>
                                 <th>截止日期</th>
                                 <th>操作</th>
