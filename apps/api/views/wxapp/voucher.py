@@ -1,7 +1,9 @@
 import json, datetime
 from django.http import HttpResponse
 from wxapp.models import Voucher
+from wxapp.constants import MEDIA_URL
 from api.decorator import signature
+
 
 @signature
 def getVoucherList(request):
@@ -10,7 +12,7 @@ def getVoucherList(request):
     unit_price = request.GET.get('unit_price', '')
     voucher_price = request.GET.get('voucher_price', '')
 
-    result_dict = {'status':1,'msg':[]}
+    result_dict = {'status': 1, 'msg': []}
 
     kwargs = {}
 
@@ -44,7 +46,7 @@ def getVoucherList(request):
             vardict['shop_codes'] = str(item.shop_codes)
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
             vardict['end_date'] = str(item.end_date.strftime("%Y-%m-%d"))
-            vardict['voucher_image'] = 'https://www.zisai.net/media/' + str(item.voucher_image)
+            vardict['voucher_image'] = MEDIA_URL + str(item.voucher_image)
             msg.append(vardict)
 
         result_dict['status'] = 0
@@ -52,11 +54,12 @@ def getVoucherList(request):
 
     return HttpResponse(json.dumps(result_dict), content_type="application/json")
 
+
 @signature
 def getVoucherInfo(request):
     voucher_id = request.GET.get('voucher_id', '')
 
-    result_dict = {'status':1,'msg':[]}
+    result_dict = {'status': 1, 'msg': []}
     voucher = Voucher.objects.get(pk=voucher_id)
     msg = {}
     if voucher:
@@ -70,7 +73,7 @@ def getVoucherInfo(request):
         msg['shop_codes'] = str(voucher.shop_codes)
         msg['begin_date'] = str(voucher.begin_date.strftime("%Y-%m-%d"))
         msg['end_date'] = str(voucher.end_date.strftime("%Y-%m-%d"))
-        msg['voucher_image'] = 'https://www.zisai.net/media/' + str(voucher.voucher_image)
+        msg['voucher_image'] = MEDIA_URL + str(voucher.voucher_image)
 
         result_dict['status'] = 0
         result_dict['msg'] = msg

@@ -1,7 +1,9 @@
 import json, datetime
 from django.http import HttpResponse
 from wxapp.models import PosterImage
+from wxapp.constants import MEDIA_URL
 from api.decorator import signature
+
 
 @signature
 def getPosterList(request):
@@ -21,13 +23,14 @@ def getPosterList(request):
             vardict['poster_name'] = str(item.poster_name)
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
             vardict['end_date'] = str(item.end_date.strftime("%Y-%m-%d"))
-            vardict['poster_image'] = 'https://www.zisai.net/media/' + str(item.poster_image)
+            vardict['poster_image'] = MEDIA_URL + str(item.poster_image)
             msg.append(vardict)
 
         result_dict['status'] = 0
         result_dict['msg'] = msg
 
     return HttpResponse(json.dumps(result_dict), content_type="application/json")
+
 
 @signature
 def getPosterInfo(request):
@@ -42,7 +45,7 @@ def getPosterInfo(request):
         msg['poster_name'] = str(poster.poster_name)
         msg['begin_date'] = str(poster.begin_date.strftime("%Y-%m-%d"))
         msg['end_date'] = str(poster.end_date.strftime("%Y-%m-%d"))
-        msg['poster_image'] = 'https://www.zisai.net/media/' + str(poster.poster_image)
+        msg['poster_image'] = MEDIA_URL + str(poster.poster_image)
 
         result_dict['status'] = 0
         result_dict['msg'] = msg
