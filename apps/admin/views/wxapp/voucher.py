@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from admin.utils import method
-from wxapp.models import Voucher, Shops
+from wxapp.models import Voucher, VoucherClass, Shops
 
 
 def index(request):
@@ -29,12 +29,12 @@ def voucherEdit(request, voucher_id):
     img_url = ''
 
     shops = Shops.objects.all()
-
+    classs = VoucherClass.objects.all()
     if voucher_id != '0':
         voucher = Voucher.objects.get(pk=voucher_id)
         if voucher.voucher_image != '':
             img_url =  voucher.voucher_image.url
-    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'shops': shops, 'img_url':img_url})
+    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'classs': classs, 'shops': shops, 'img_url':img_url})
 
 
 def voucherSave(request):
@@ -91,3 +91,37 @@ def voucherSave(request):
     List = Voucher.objects.all().order_by('voucher_no')
     return render(request, 'wxapp/voucher/index.html', {'List': List})
 
+
+def classList(request):
+    List = VoucherClass.objects.all()
+
+    return render(request, 'wxapp/voucher/class_list.html', locals())
+
+
+def classEdit(request, class_id):
+    v_class = []
+
+    if class_id != '0':
+        v_class = VoucherClass.objects.get(pk=class_id)
+    return render(request, 'wxapp/voucher/class_edit.html', {'v_class': v_class})
+
+
+def classSave(request):
+    class_id = request.POST.get('class_id', '')
+    if class_id is None:
+        class_id = ''
+    class_name = request.POST.get('class_name', '')
+
+    if class_id != '':
+        result = VoucherClass.objects.get(pk=class_id)
+        result.class_name = class_name
+        result.save()
+    else:
+        result = VoucherClass.objects.create(class_name=class_name)
+    msg = {}
+    if result:
+        msg['status'] = 0
+    else:
+        msg['status'] = 1
+    List = VoucherClass.objects.all()
+    return render(request, 'wxapp/voucher/class_list.html', {'List': List})

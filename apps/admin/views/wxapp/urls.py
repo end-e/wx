@@ -8,6 +8,9 @@ urlpatterns = [
     url(r'^voucher/index/$', voucher.index, name="voucher_index"),
     url(r'^voucher/edit/(?P<voucher_id>[0-9]+)$', voucher.voucherEdit, name='voucher_edit'),
     url(r'^voucher/save/$', voucher.voucherSave, name="voucher_save"),
+    url(r'^voucher/class_list/$', voucher.classList, name="class_list"),
+    url(r'^voucher/class_edit/(?P<class_id>[0-9]+)$', voucher.classEdit, name='class_edit'),
+    url(r'^voucher/class_save/$', voucher.classSave, name="class_save"),
     #海报操作
     url(r'^poster/index/$', poster.index, name="poster_index"),
     url(r'^poster/edit/(?P<poster_id>[0-9]+)$', poster.posterEdit, name='poster_edit'),

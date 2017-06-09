@@ -15,6 +15,10 @@ class Voucher(models.Model):
     voucher_image = models.ImageField(upload_to='upload', blank=True, null=True, verbose_name=u'券图片')
 
 
+class VoucherClass(models.Model):
+    class_name = models.CharField(max_length=32, default='', verbose_name=u'名称')
+
+
 class PosterImage(models.Model):
     poster_name = models.CharField(max_length=32, default='', verbose_name=u'海报名称')
     begin_date = models.DateTimeField(blank=True, null=True, verbose_name=u'开始日期')

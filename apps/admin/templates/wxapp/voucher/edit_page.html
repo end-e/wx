@@ -40,14 +40,16 @@
                     </div>
                     <div class="control-group ">
                         <label>类型：
-                            <select name="type_flag">
-                                <option value="0">通用</option>
-                                <option value="1">微信专享</option>
+                            <select name="type_flag" id="type_flag">
+                                {% for item in classs %}
+                                    <option value="{{ item.id }}">{{ item.class_name }}</option>
+                                {% endfor %}
                             </select>
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>选择范围：<input name="shop_codes" id="shop_codes" type="hidden" value="{{ voucher.shop_codes }}">
+                        <label>选择范围：<input name="shop_codes" id="shop_codes" type="hidden"
+                                           value="{{ voucher.shop_codes }}">
                             <select name="code_flag" class="code_radio">
                                 <option value="0">全部</option>
                                 <option value="1">市区</option>
@@ -118,6 +120,7 @@
                 $('#checkbox_div').hide();
             }
         });
+        $("#type_flag").val({{ voucher.type_flag }});
         $(".code_radio").val({{ voucher.code_flag }});
         if ($(".code_radio").val() == "3") {
             $('#checkbox_div').show();
