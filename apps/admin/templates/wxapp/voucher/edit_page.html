@@ -9,23 +9,61 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data" action="{% url 'wxapp:voucher_save' %}">
+                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data"
+                      action="{% url 'wxapp:voucher_save' %}">
                     {% csrf_token %}
                     <input type="hidden" value="{{ voucher.id }}" name="voucher_id">
                     <div class="control-group">
-                        <label>券编号：
+                        <label>优惠码：
                             <input name="voucher_no" type="text" value="{{ voucher.voucher_no }}">
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>券名称：
+                        <label>商品名称：
                             <input name="voucher_name" type="text" value="{{ voucher.voucher_name }}">
                         </label>
                     </div>
                     <div class="control-group ">
-                        <label>券面值：
+                        <label>原价：
+                            <input name="unit_price" type="text" value="{{ voucher.unit_price }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>优惠价：
                             <input name="voucher_price" type="text" value="{{ voucher.voucher_price }}">
                         </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>商品码：
+                            <input name="goods_code" type="text" value="{{ voucher.goods_code }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>类型：
+                            <select name="type_flag" id="type_flag">
+                                {% for item in classs %}
+                                    <option value="{{ item.id }}">{{ item.class_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>选择范围：<input name="shop_codes" id="shop_codes" type="hidden"
+                                           value="{{ voucher.shop_codes }}">
+                            <select name="code_flag" class="code_radio">
+                                <option value="0">全部</option>
+                                <option value="1">市区</option>
+                                <option value="2">县区</option>
+                                <option value="3">自由</option>
+                            </select></label>
+                        <div id="checkbox_div" style="display:none">
+                            {% for item in shops %}
+                                <label style="float: left">
+                                    <input value="{{ item.shop_code }}" class="code_checkbox"
+                                           type="checkbox">{{ item.shop_name }}
+                                </label>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div class="control-group">
                         <div data-link-format="yyyy-mm-dd" data-link-field="dtp_input2"
@@ -74,7 +112,40 @@
 {% endblock %}
 {% block common_js %}
     <script>
+        $(document).on('change', '.code_radio', function () {
+            if ($(this).val() == "3") {
+                $('#checkbox_div').show();
+            }
+            else {
+                $('#checkbox_div').hide();
+            }
+        });
+        $("#type_flag").val({{ voucher.type_flag }});
+        $(".code_radio").val({{ voucher.code_flag }});
+        if ($(".code_radio").val() == "3") {
+            $('#checkbox_div').show();
+        }
+        var code_list = {{ voucher.shop_codes |  safe }};
+
+        for (var shop_item in code_list) {
+            $("#checkbox_div input").each(function () {
+                if ($(this).val() == code_list[shop_item]['shop_code']) {
+                    $(this).attr("checked", true)
+                }
+            });
+        }
+    </script>
+    <script>
         function submitForm() {
+            var code = [];
+            $("#checkbox_div input").each(function () {
+                if ($(this).attr("checked")) {
+                    var item = {};
+                    item['shop_code'] = $(this).val();
+                    code.push(item);
+                }
+            });
+            $('#shop_codes').val(JSON.stringify(code));
             $('#Form').submit();
         }
     </script>

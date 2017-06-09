@@ -5,16 +5,37 @@
         <div class="box span12">
             <div class="box-header">
                 <h2>
-                    <i class="icon-edit"></i>编辑海报记录
+                    <i class="icon-edit"></i>编辑商品信息
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data" action="{% url 'wxapp:poster_save' %}">
+                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data"
+                      action="{% url 'wxapp:product_save' %}">
                     {% csrf_token %}
-                    <input type="hidden" value="{{ poster.id }}" name="poster_id">
+                    <input type="hidden" value="{{ product.id }}" name="product_id">
+                    <div class="control-group">
+                        <label>商品编号：
+                            <input name="product_code" type="text" value="{{ product.product_code }}">
+                        </label>
+                    </div>
                     <div class="control-group ">
-                        <label>海报名称：
-                            <input name="poster_name" type="text" value="{{ poster.poster_name }}">
+                        <label>商品名称：
+                            <input name="product_name" type="text" value="{{ product.product_name }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>单价：
+                            <input name="price" type="text" value="{{ product.price }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>库存：
+                            <input name="stock" type="text" value="{{ product.stock }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>商品自重(kg)：
+                            <input name="product_weight" type="text" value="{{ product.product_weight }}">
                         </label>
                     </div>
                     <div class="control-group">
@@ -22,7 +43,7 @@
                              data-date-format="yyyy-mm-dd" data-date=""
                              class="input-group date form_date">
                             <label>开始日期：
-                                <input readonly="" value="{{ poster.begin_date | date:'Y-m-d' }}" size="16"
+                                <input readonly="" value="{{ product.begin_date | date:'Y-m-d' }}" size="16"
                                        name="begin_date"
                                        id="begin_date" class="form-control" required>
                                 <span class="input-group-addon"><span
@@ -37,7 +58,7 @@
                              data-date-format="yyyy-mm-dd" data-date=""
                              class="input-group date form_date">
                             <label>截止日期：
-                                <input readonly="" value="{{ poster.end_date | date:'Y-m-d' }}" size="16"
+                                <input readonly="" value="{{ product.end_date | date:'Y-m-d' }}" size="16"
                                        name="end_date"
                                        id="end_date" class="form-control" required>
                                 <span class="input-group-addon"><span
@@ -48,8 +69,24 @@
                         </div>
                     </div>
                     <div class="control-group ">
+                        <label>类型：
+                            <select name="type_flag">
+                                <option value="0">换购商品</option>
+                                <option value="1">心愿商品</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>启用状态：
+                            <select name="enable_flag">
+                                <option value="0">启用</option>
+                                <option value="1">停用</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="control-group ">
                         <label>上传图片：
-                            <input type="file" name="poster_image">
+                            <input type="file" name="product_image">
                         </label>
                         <img src='{{ img_url }}'/>
                     </div>

@@ -5,19 +5,22 @@
         <div class="box span12">
             <div class="box-header">
                 <h2>
-                    <i class="icon-list"></i>海报记录列表
+                    <i class="icon-list"></i>商品列表
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" action="{% url 'wxapp:poster_index' %}">
+                <form class="form-horizontal" id="Form" action="{% url 'wxapp:product_index' %}">
                     <div class="control-group">
-                        <label class="control-label">名称
-                            <input name="poster_name" type="text" value="{{ poster_name }}">
+                        <label>商品编号：
+                            <input name="product_code" type="text" value="{{ product_code }}">
+                        </label>
+                        <label>商品名称：
+                            <input name="product_name" type="text" value="{{ product_name }}">
                         </label>
                     </div>
                     <div class="form-actions">
                         <a class="btn btn-primary" onclick="submitForm()">查询</a>
-                        <a class="btn btn-success" href="{% url 'wxapp:poster_edit' 0 %}">新建</a>
+                        <a class="btn btn-success" href="{% url 'wxapp:product_edit' 0 %}">新建</a>
                     </div>
                 </form>
                 <div class="widget-box">
@@ -25,19 +28,31 @@
                         <table class="table table-striped table-hover table-form-my">
                             <thead>
                             <tr>
-                                <th>名称</th>
+                                <th>商品编号</th>
+                                <th>商品名称</th>
+                                <th>单价</th>
+                                <th>重量</th>
                                 <th>开始日期</th>
                                 <th>截止日期</th>
+                                <th>库存</th>
+                                <th>类型</th>
+                                <th>是否可用</th>
                                 <th>操作</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for row in List %}
                                 <tr>
-                                    <td>{{ row.poster_name }}</td>
+                                    <td>{{ row.product_code }}</td>
+                                    <td>{{ row.product_name }}</td>
+                                    <td>{{ row.price }}</td>
+                                    <td>{{ row.product_weight }}</td>
                                     <td>{{ row.begin_date | date:'Y-m-d' }}</td>
                                     <td>{{ row.end_date | date:'Y-m-d' }}</td>
-                                    <td><a class="btn btn-success" href="{% url 'wxapp:poster_edit' row.id %}">修改</a>
+                                    <td>{{ row.stock }}</td>
+                                    <td>{{ row.type_flag }}</td>
+                                    <td>{{ row.enable_flag }}</td>
+                                    <td><a class="btn btn-success" href="{% url 'wxapp:product_edit' row.id %}">修改</a>
                                     </td>
                                 </tr>
                             {% endfor %}
