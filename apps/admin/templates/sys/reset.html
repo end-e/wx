@@ -10,22 +10,23 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:reset' %}">
                     <fieldset>
+                        {% csrf_token %}
                         <div class="control-group">
                             <label class="control-label" for="input2">新密码</label>
                             <div class="controls">
-                                <input id="pwd_new" type="text" >
+                                <input id="pwd_new" name="pwd_new" type="password" >
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="input3">确认密码</label>
                             <div class="controls">
-                                <input id="pwd_confirm" type="text">
+                                <input id="pwd_confirm" name="pwd_confirm" type="password">
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button type="button" id="submit" class="btn btn-primary">确认修改</button>
+                            <button type="button" class="btn btn-primary" onclick="submitForm()">确认修改</button>
                             <button type="reset" class="btn" onclick="window.history.back()">取消</button>
                         </div>
                     </fieldset>
@@ -36,23 +37,23 @@
 {% endblock %}
 {% block js %}
 <script>
-    $('#Form #submit').click(function(){
+    function submitForm() {
         var pwd_new = $("#pwd_new").val();
         var pwd_confirm = $("#pwd_confirm").val();
-        if(!pwd_new || !pwd_confirm){
-            noty({"text":"新密码和确认密码不能为空，请重试","layout":"bottom","type":"error"});
+        if (!pwd_new || !pwd_confirm) {
+            noty({"text": "新密码和确认密码不能为空，请重试", "layout": "bottom", "type": "error"});
             return false;
         }
-        if(pwd_new!=pwd_confirm){
-            noty({"text":"两次密码不一致，请重试","layout":"bottom","type":"error"});
+        if (pwd_new != pwd_confirm) {
+            noty({"text": "两次密码不一致，请重试", "layout": "bottom", "type": "error"});
             return false;
         }
-
         $('#Form').submit();
-    });
+    }
 
-    var data = {{ data | safe }};
-    if(data.result=='0'){
+
+    var res_status = {{ msg.status | safe | default:-1 }};
+    if(res_status===0){
         noty({"text":"密码重置成功，将跳转到登录页面","layout":"bottom","type":"information"});
         window.location.href = "{% url 'admin:logout' %}";
     }

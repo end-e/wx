@@ -12,4 +12,5 @@ urlpatterns = [
     #海报操作
     url(r'^poster/getList/$', poster.getPosterList, name="poster_getList"),
     url(r'^poster/getInfo/$', poster.getPosterInfo, name="poster_getInfo"),
+
 ]

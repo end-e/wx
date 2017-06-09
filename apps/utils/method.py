@@ -1,10 +1,17 @@
-# -*-  coding:utf-8 -*-
-__author__ = ''
-__date__ = '2017/5/10 17:03'
-from django.shortcuts import render
+import random
+
 from django.core.cache import caches
 
 from utils import db,consts
+
+def createNonceStr(length = 16):
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    str = ""
+    for i in range(0,length):
+        _index = random.randint(0, len(chars) - 1)
+        str += chars[_index:_index+1]
+    return str
+
 
 def getShopName(id):
     shopDict = caches['default'].get('base_shopDict','')
@@ -25,3 +32,12 @@ def getShopName(id):
 
     return shopDict[id]
 
+
+
+# 获取ip
+def get_ip(request):
+    if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+        ip =  request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        ip = request.META['REMOTE_ADDR']
+    return ip

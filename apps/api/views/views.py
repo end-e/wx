@@ -36,28 +36,6 @@ def ca(request):
     return render(request, 'fileauth.txt')
 
 
-def hx(request, sn, stamp):
-    """
-    微信卡卷核销
-    :param request:
-    :param sn: 卡卷编码
-    :param stamp: 发送核销请求时间
-    :return:
-    """
-    if sn:
-        # TODO 查询核销状态
-        state = caches['default'].get(sn, '')
-        if not state:
-            # TODO 向微信请求核销卡卷
-            token = get_token()
-        else:
-            pass
-
-    else:
-        # TODO
-        pass
-
-
 def get_token():
     token = caches['default'].get('wx_access_token', '')
     # 如果不存在，请向微信请求获取

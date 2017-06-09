@@ -7,9 +7,8 @@ from django.core.cache import caches
 from wechatpy import WeChatClient
 
 from api.models import AccessToken, Log
-from api.utils import method
 from user.models import WechatMembers
-from utils import db, consts
+from utils import db, consts,method
 
 
 def cron_get_token():
