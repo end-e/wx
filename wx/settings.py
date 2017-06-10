@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'user',
     'api',
     'wxapp',
+    'giftcard'
 )
 
 MIDDLEWARE_CLASSES = (
