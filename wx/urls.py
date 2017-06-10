@@ -52,4 +52,7 @@ urlpatterns = [
     # 微信小程序图片
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': MEDIA_ROOT}),
 
+    # 微信礼品卡
+    url(r'^giftcard$', include('giftcard.urls', namespace='giftcard')),
+
 ]
