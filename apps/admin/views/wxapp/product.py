@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 
 from wxapp.models import Product
 
@@ -80,7 +81,7 @@ def productSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/product/index/')
+    return redirect(reverse('wxapp:product_index'))
 
 
 def productDelete(request, product_id):
@@ -92,4 +93,4 @@ def productDelete(request, product_id):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/product/index/')
+    return redirect(reverse('wxapp:product_index'))

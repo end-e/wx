@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-
+from django.core.urlresolvers import reverse
 from wxapp.models import Voucher, VoucherClass, Shops
 
 
@@ -85,7 +85,7 @@ def voucherSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/voucher/index/')
+    return redirect(reverse('wxapp:voucher_index'))
 
 
 def voucherDelete(request, voucher_id):
@@ -97,7 +97,8 @@ def voucherDelete(request, voucher_id):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/voucher/index/')
+    return redirect(reverse('wxapp:voucher_index'))
+
 
 def classList(request):
     List = VoucherClass.objects.all()
@@ -130,7 +131,7 @@ def classSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/voucher/class_list/')
+    return redirect(reverse('wxapp:class_list'))
 
 
 def classDelete(request, class_id):
@@ -142,4 +143,4 @@ def classDelete(request, class_id):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/voucher/class_list/')
+    return redirect(reverse('wxapp:class_list'))

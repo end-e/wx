@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from wxapp.models import PosterImage
 
 
@@ -56,7 +57,7 @@ def posterSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/poster/index/')
+    return redirect(reverse('wxapp:poster_index'))
 
 
 def posterDelete(request, poster_id):
@@ -68,4 +69,4 @@ def posterDelete(request, poster_id):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    return redirect('/wxapp/poster/index/')
+    return redirect(reverse('wxapp:poster_index'))
