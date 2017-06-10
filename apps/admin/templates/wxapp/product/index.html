@@ -53,6 +53,7 @@
                                     <td>{{ row.type_flag }}</td>
                                     <td>{{ row.enable_flag }}</td>
                                     <td><a class="btn btn-success" href="{% url 'wxapp:product_edit' row.id %}">修改</a>
+                                        <a class="btn btn-danger" onclick="delete_info({{ row.id }})">删除</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -68,6 +69,15 @@
     <script>
         function submitForm() {
             $('#Form').submit();
+        }
+    </script>
+    <script>
+        function delete_info(id) {
+            if (window.confirm("确定要删除该记录吗？")) {
+                var v_url= "{% url 'wxapp:product_delete' 0%}"
+                v_url = v_url.replace('0',id);
+                window.location.href(v_url)
+            }
         }
     </script>
 {% endblock %}

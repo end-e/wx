@@ -11,9 +11,10 @@
             <div class="box-content">
                 <form class="form-horizontal" id="Form" method="post" action="{% url 'wxapp:class_save' %}">
                     {% csrf_token %}
+                    <input type="hidden" value="{{ v_class.id }}" name="class_id">
                     <div class="control-group">
                         <label class="control-label">分类名称
-                            <input name="class_name" type="text" value="{{ class_name }}">
+                            <input name="class_name" type="text" value="{{ v_class.class_name }}">
                         </label>
                     </div>
                     <div class="form-actions">

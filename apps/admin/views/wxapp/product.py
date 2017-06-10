@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from wxapp.models import Product
 
@@ -80,7 +80,16 @@ def productSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
+    return redirect('/wxapp/product/index/')
 
-    List = Product.objects.all().order_by('product_code')
 
-    return render(request, 'wxapp/product/index.html', locals())
+def productDelete(request, product_id):
+    result = None
+    if product_id != '0':
+        result = Product.objects.get(pk=product_id).delete()
+    msg = {}
+    if result:
+        msg['status'] = 0
+    else:
+        msg['status'] = 1
+    return redirect('/wxapp/product/index/')

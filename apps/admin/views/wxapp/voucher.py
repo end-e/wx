@@ -1,9 +1,5 @@
-import json, datetime,time
+from django.shortcuts import render, redirect
 
-from django.shortcuts import render
-from django.http import HttpResponse
-
-from admin.utils import method
 from wxapp.models import Voucher, VoucherClass, Shops
 
 
@@ -33,8 +29,9 @@ def voucherEdit(request, voucher_id):
     if voucher_id != '0':
         voucher = Voucher.objects.get(pk=voucher_id)
         if voucher.voucher_image != '':
-            img_url =  voucher.voucher_image.url
-    return render(request, 'wxapp/voucher/edit_page.html', {'voucher': voucher, 'classs': classs, 'shops': shops, 'img_url':img_url})
+            img_url = voucher.voucher_image.url
+    return render(request, 'wxapp/voucher/edit_page.html',
+                  {'voucher': voucher, 'classs': classs, 'shops': shops, 'img_url': img_url})
 
 
 def voucherSave(request):
@@ -88,9 +85,19 @@ def voucherSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    List = Voucher.objects.all().order_by('voucher_no')
-    return render(request, 'wxapp/voucher/index.html', {'List': List})
+    return redirect('/wxapp/voucher/index/')
 
+
+def voucherDelete(request, voucher_id):
+    result = None
+    if voucher_id != '0':
+        result = Voucher.objects.get(pk=voucher_id).delete()
+    msg = {}
+    if result:
+        msg['status'] = 0
+    else:
+        msg['status'] = 1
+    return redirect('/wxapp/voucher/index/')
 
 def classList(request):
     List = VoucherClass.objects.all()
@@ -123,5 +130,16 @@ def classSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    List = VoucherClass.objects.all()
-    return render(request, 'wxapp/voucher/class_list.html', {'List': List})
+    return redirect('/wxapp/voucher/class_list/')
+
+
+def classDelete(request, class_id):
+    result = None
+    if class_id != '0':
+        result = VoucherClass.objects.get(pk=class_id).delete()
+    msg = {}
+    if result:
+        msg['status'] = 0
+    else:
+        msg['status'] = 1
+    return redirect('/wxapp/voucher/class_list/')

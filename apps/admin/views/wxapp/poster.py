@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from wxapp.models import PosterImage
 
 
@@ -56,6 +56,16 @@ def posterSave(request):
         msg['status'] = 0
     else:
         msg['status'] = 1
-    List = PosterImage.objects.all()
-    return render(request, 'wxapp/poster/index.html', locals())
+    return redirect('/wxapp/poster/index/')
 
+
+def posterDelete(request, poster_id):
+    result = None
+    if poster_id != '0':
+        result = PosterImage.objects.get(pk=poster_id).delete()
+    msg = {}
+    if result:
+        msg['status'] = 0
+    else:
+        msg['status'] = 1
+    return redirect('/wxapp/poster/index/')
