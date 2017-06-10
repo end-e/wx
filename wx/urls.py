@@ -3,18 +3,18 @@ import os
 
 from django.conf.urls import include, url
 from django.views.static import serve
-import xadmin
-from xadmin.plugins import xversion
+# import xadmin
+# from xadmin.plugins import xversion
 
 from wx.settings import MEDIA_ROOT
 
-xadmin.autodiscover()
+# xadmin.autodiscover()
 
-xversion.register_models()
+# xversion.register_models()
 
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 urlpatterns = [
-    url(r'xadmin/', include(xadmin.site.urls)),
+    # url(r'xadmin/', include(xadmin.site.urls)),
     # 微信文件校验地址
     url(r'MP_verify_QthEcNlYA73MNXgH.txt', 'api.views.views.verify', name='MP_verify_QthEcNlYA73MNXgH.txt'),
     # CA证书校验地址

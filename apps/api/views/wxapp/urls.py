@@ -13,7 +13,7 @@ urlpatterns = [
     # 商品页面
     url(r'^product/getList/$', product.getProductList, name="product_getList"),
     url(r'^product/getInfo/$', product.getProductInfo, name="product_getInfo"),
-    # 海报操作
+    #海报操作
     url(r'^poster/getList/$', poster.getPosterList, name="poster_getList"),
     url(r'^poster/getInfo/$', poster.getPosterInfo, name="poster_getInfo"),
 ]

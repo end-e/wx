@@ -78,7 +78,7 @@ class ResetPwdView(View):
             pwd_confirm = request.POST.get("pwd_confirm","").strip()
             if pwd_new and pwd_confirm and pwd_new == pwd_confirm:
                 pwd = method.md5('ikg'+pwd_new)
-                User.objects.filter(id=user.id).update(password=pwd)
+                User.objects.filter(id=user.id).update(pwd=pwd)
                 msg["status"] = 0
             else:
                 msg["status"] = 1

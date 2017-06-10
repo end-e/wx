@@ -1,11 +1,13 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/5/23 15:59'
+import json
+import random
+
 from django.core.cache import caches
 from django.http import HttpResponse
 
-import json,random
-import api.utils.SmsSender as SmsSender
+import utils.SmsSender as SmsSender
 
 
 def main(request):

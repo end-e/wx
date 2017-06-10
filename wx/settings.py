@@ -33,14 +33,13 @@ ALLOWED_HOSTS = ['192.168.250.12', '127.0.0.1', 'zisai.net']
 
 INSTALLED_APPS = (
     # 'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    # 'django.contrib.auth',
+    # 'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
+    # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_crontab',
-    'crispy_forms',
-    'reversion',
+    # 'djcelery',
     'admin',
     'user',
     'api',
@@ -52,9 +51,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'apps.admin.middleware.LoginMiddleware.LoginMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
@@ -147,7 +146,6 @@ CACHES = {
 
         "OPTIONS": {
             'DB': 1,
-            "PASSWORD": "kgredis",
             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
         },
         "KEY_PREFIX": 'wx',
@@ -166,6 +164,12 @@ CRONJOBS = [
     ('1 */1 * * *', 'api.views.cron.cron_get_token'),
     ('* * * * *', 'api.views.cron.cron_send_temp'),
 ]
+
+
+# import djcelery
+# djcelery.setup_loader()
+# BROKER_URL = 'redis://127.0.0.1:6379/1'
+
 
 
 

@@ -12,8 +12,8 @@ from wechatpy import WeChatOAuth,WeChatClient
 from utils import db
 from .models import WechatMembers
 from .form import BoundForm
-from utils import consts
-from user.utils import method
+from utils import consts,method
+
 
 
 class MembersBoundView(View):

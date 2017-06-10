@@ -1,10 +1,20 @@
-# -*-  coding:utf-8 -*-
-# !/usr/bin/env python
-from celery import Celery
-
-app = Celery('tasks', broker='redis://localhost')
-
-
-@app.tasks
-def add(x, y):
-    return x + y
+# Create your tasks here
+# from __future__ import absolute_import, unicode_literals
+# from celery import shared_task
+# from wx.celery import app
+#
+#
+# # @shared_task
+# @app.task
+# def add(x, y):
+#     return x + y
+#
+#
+# @shared_task
+# def mul(x, y):
+#     return x * y
+#
+#
+# @shared_task
+# def xsum(numbers):
+#     return sum(numbers)
