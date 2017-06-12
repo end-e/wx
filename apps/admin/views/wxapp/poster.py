@@ -1,3 +1,4 @@
+import datetime,os
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from wxapp.models import PosterImage
@@ -36,8 +37,12 @@ def posterSave(request):
     end_date = request.POST.get('end_date', '')
     end_date += ' 23:59:59'
     poster_image = request.FILES.get('poster_image')
+
     if poster_image == None:
         poster_image = ''
+    else:
+        file_type = os.path.splitext(poster_image.name)[1]
+        poster_image.name = "poster_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + file_type
 
     if poster_id != '':
         result = PosterImage.objects.get(pk=poster_id)

@@ -1,3 +1,4 @@
+import datetime,os
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 
@@ -47,8 +48,12 @@ def productSave(request):
     end_date += ' 23:59:59'
     product_weight = request.POST.get('product_weight', '')
     product_image = request.FILES.get('product_image')
+
     if product_image == None:
         product_image = ''
+    else:
+        file_type = os.path.splitext(product_image.name)[1]
+        product_image.name = "product_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + file_type
 
     if product_id != '':
         result = Product.objects.get(pk=product_id)

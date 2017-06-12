@@ -1,3 +1,4 @@
+import datetime,os
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from wxapp.models import Voucher, VoucherClass, Shops
@@ -50,8 +51,12 @@ def voucherSave(request):
     end_date = request.POST.get('end_date', '')
     end_date += ' 23:59:59'
     voucher_image = request.FILES.get('voucher_image')
+
     if voucher_image == None:
         voucher_image = ''
+    else:
+        file_type = os.path.splitext(voucher_image.name)[1]
+        voucher_image.name = "voucher_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + file_type
 
     if voucher_id != '':
         result = Voucher.objects.get(pk=voucher_id)
