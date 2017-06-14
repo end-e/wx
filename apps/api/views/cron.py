@@ -58,7 +58,7 @@ def get_user_order():
     conn = db.getMsSqlConn()
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
-    last_purchserial = caches['default'].get('last_purchserial', '')
+    last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')
     if last_purchserial:
         whereStr = "a.PurchSerial> '{last_purchserial}'".format(last_purchserial=last_purchserial)
     else:
@@ -74,7 +74,7 @@ def get_user_order():
     orders = cur.fetchall()
     if len(orders) > 0:
         last_one = orders[-1]['PurchSerial']
-        caches['default'].set('last_purchserial', last_one, 2 * 60)
+        caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 2 * 60)
     cur.close()
     conn.close()
 
@@ -137,6 +137,15 @@ def send_temp(openid, data):
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
+    Log.objects.create(
+        access_token=access_token,
+        open_id=openid,
+        errmsg=res_send['errmsg'],
+        errcode=res_send['errcode'],
+        last_purchserial=caches['default'].get('wx_ikg_tempmsg_last_purchserial', ''),
+        type='02',
+    )
+
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志
         Log.objects.create(
@@ -144,6 +153,6 @@ def send_temp(openid, data):
             open_id=openid,
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode'],
-            last_purchserial=caches['default'].get('last_purchserial', ''),
+            last_purchserial=caches['default'].get('wx_ikg_tempmsg_last_purchserial', ''),
             type='02',
         )
