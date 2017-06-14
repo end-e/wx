@@ -1,8 +1,9 @@
-import random
+import random,hashlib
 
 from django.core.cache import caches
 
 from utils import db,consts
+
 
 def createNonceStr(length = 16):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -34,10 +35,24 @@ def getShopName(id):
 
 
 
-# 获取ip
+
 def get_ip(request):
+    """
+    获取ip
+    :param request:
+    :return:
+    """
     if request.META.has_key('HTTP_X_FORWARDED_FOR'):
         ip =  request.META['HTTP_X_FORWARDED_FOR']
     else:
         ip = request.META['REMOTE_ADDR']
     return ip
+
+
+
+
+def md5(data):
+    md5 = hashlib.md5()
+    if data:
+        md5.update(data.encode(encoding = 'utf-8'))
+    return md5.hexdigest()

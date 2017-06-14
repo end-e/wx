@@ -5,7 +5,7 @@ from django.http import HttpResponse
 
 import json, datetime, time
 
-from api.method import md5
+from utils.method import md5
 
 
 def signature(func):

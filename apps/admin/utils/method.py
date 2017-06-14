@@ -8,14 +8,13 @@ from admin.utils import constants
 from admin.models import RoleNav
 
 
-def md5(data):
-    md5 = hashlib.md5()
-    if str:
-        md5.update(data.encode(encoding='utf-8'))
-    return md5.hexdigest()
 
-#根据用户role，获取navList
 def getUserNav(role_id=None):
+    """
+    根据用户role，获取navList
+    :param role_id:
+    :return:
+    """
 
     # kwargs = {}
     # kwargs.setdefault('nav__status','0')

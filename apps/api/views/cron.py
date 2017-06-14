@@ -6,7 +6,7 @@ import datetime
 from django.core.cache import caches
 from wechatpy import WeChatClient
 
-from api.models import AccessToken, Log
+from api.models import Log
 from user.models import WechatMembers
 from utils import db, consts,method
 
@@ -137,22 +137,12 @@ def send_temp(openid, data):
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
-    Log.objects.create(
-        access_token=access_token,
-        open_id=openid,
-        errmsg=res_send['errmsg'],
-        errcode=res_send['errcode'],
-        last_purchserial=caches['default'].get('wx_ikg_tempmsg_last_purchserial', ''),
-        type='02',
-    )
 
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志
         Log.objects.create(
-            access_token=access_token,
             open_id=openid,
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode'],
-            last_purchserial=caches['default'].get('wx_ikg_tempmsg_last_purchserial', ''),
             type='02',
         )
