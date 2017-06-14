@@ -5,12 +5,11 @@ import json
 
 from django.views.generic.base import View
 from django.shortcuts import render
-from django.http import HttpResponse
+
 
 from admin.models import Nav
 from admin.forms import NavForm
-from admin.utils import method
-from admin.utils.paginator import MyPaginator
+
 
 
 class NavView(View):

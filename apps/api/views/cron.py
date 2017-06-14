@@ -18,12 +18,8 @@ def cron_get_ikg_token():
     '''
     app_id = consts.APPID
     secret = consts.APPSECRET
-    client = WeChatClient(app_id, secret)
-    response = client.fetch_access_token()
-    token = response['access_token']
-    caches['default'].set('wx_ikg_access_token', token, 7200)
+    method.get_access_token(app_id, secret, 'ikg')
 
-    return token
 
 def cron_get_kgcs_token():
     """
@@ -32,12 +28,9 @@ def cron_get_kgcs_token():
     """
     app_id = consts.KG_APPID
     secret = consts.KG_APPSECRET
-    client = WeChatClient(app_id, secret)
-    response = client.fetch_access_token()
-    token = response['access_token']
-    caches['default'].set('wx_kgcs_access_token', token, 7200)
+    method.get_access_token(app_id, secret,'kgcs')
 
-    return token
+
 
 
 def cron_send_temp():
@@ -125,8 +118,7 @@ def send_temp(openid, data):
     user_id = openid
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
-        access_token = cron_get_ikg_token()
-
+        access_token = method.get_access_token('ikg',app_id,secret)
     client = WeChatClient(app_id, secret, access_token)
     message = client.message
     # 模版id
@@ -137,6 +129,12 @@ def send_temp(openid, data):
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
+    Log.objects.create(
+        open_id=openid,
+        errmsg=res_send['errmsg'],
+        errcode=res_send['errcode'],
+        type='02',
+    )
 
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志

@@ -1,6 +1,8 @@
-import random,hashlib
+import random,hashlib,pycurl
+from io import StringIO
 
 from django.core.cache import caches
+from wechatpy import WeChatClient
 
 from utils import db,consts
 
@@ -15,6 +17,11 @@ def createNonceStr(length = 16):
 
 
 def getShopName(id):
+    """
+    门店code==》门店名称
+    :param id:
+    :return:
+    """
     shopDict = caches['default'].get('base_shopDict','')
     if not shopDict:
         conn = db.getMysqlConnection(
@@ -52,7 +59,34 @@ def get_ip(request):
 
 
 def md5(data):
+    """
+    md5加密
+    :param data:
+    :return:
+    """
     md5 = hashlib.md5()
     if data:
         md5.update(data.encode(encoding = 'utf-8'))
     return md5.hexdigest()
+
+
+def get_access_token(app_name,app_id,secret):
+    client = WeChatClient(app_id, secret)
+    response = client.fetch_access_token()
+    token = response['access_token']
+    key = 'wx_{app_name}_access_token'.format(app_name=app_name)
+    caches['default'].set(key, token, 7200)
+
+    return token
+
+def http_post(url,data,second=30):
+    curl = pycurl.Curl()
+    curl.setopt(pycurl.URL, url)
+    curl.setopt(pycurl.TIMEOUT, second)
+    curl.setopt(pycurl.POST, True)
+    curl.setopt(pycurl.POSTFIELDS, data)
+    buff = StringIO()
+    curl.setopt(pycurl.WRITEFUNCTION, buff.write)
+
+    curl.perform()
+    return buff.getvalue()

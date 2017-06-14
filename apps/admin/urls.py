@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import url
+from django.conf.urls import url,include
 
 from admin.views.sys.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
 from admin.views.sys.user import UserEditView,UserView,UserInfoView,UserAddView
@@ -28,5 +28,7 @@ urlpatterns = [
     url(r'^nav/$', NavView.as_view(), name='nav'),
     url(r'^nav/edit/(?P<nav_id>\d+$)', NavEditView.as_view(), name='nav_edit'),
     url(r'^nav/add/', NavAddView.as_view(), name='nav_add'),
+
+    url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard'))
 
 ]
