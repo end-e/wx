@@ -11,18 +11,32 @@ from user.models import WechatMembers
 from utils import db, consts,method
 
 
-def cron_get_token():
+def cron_get_ikg_token():
+    '''
+    获取并缓存 爱宽广access_token
+    :return: access_token
+    '''
     app_id = consts.APPID
     secret = consts.APPSECRET
     client = WeChatClient(app_id, secret)
     response = client.fetch_access_token()
     token = response['access_token']
-    caches['default'].set('wx_access_token', token, 7200)
-    # 测试access_token为什么会超出上限
-    access_token = AccessToken()
-    access_token.access_token = token
-    access_token.expires_in = response['expires_in']
-    access_token.save()
+    caches['default'].set('wx_ikg_access_token', token, 7200)
+
+    return token
+
+def cron_get_kgcs_token():
+    """
+    获取并缓存 宽广超市access_token
+    :return: access_token
+    """
+    app_id = consts.KG_APPID
+    secret = consts.KG_APPSECRET
+    client = WeChatClient(app_id, secret)
+    response = client.fetch_access_token()
+    token = response['access_token']
+    caches['default'].set('wx_kgcs_access_token', token, 7200)
+
     return token
 
 
@@ -109,9 +123,9 @@ def send_temp(openid, data):
     # oE9Pts9_cBLTWccP682FgWuvQ7js
     # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
     user_id = openid
-    access_token = caches['default'].get('wx_access_token', '')
+    access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
-        access_token = cron_get_token()
+        access_token = cron_get_ikg_token()
 
     client = WeChatClient(app_id, secret, access_token)
     message = client.message
@@ -123,14 +137,13 @@ def send_temp(openid, data):
 
     res_send = message.send_template(user_id, template_id, url, top_color, data)
 
-    Log.objects.create(
-        access_token=access_token,
-        open_id=openid,
-        errmsg=res_send['errmsg'],
-        errcode=res_send['errcode'],
-        last_purchserial=caches['default'].get('last_purchserial', ''),
-        type='02',
-    )
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志
-        pass
+        Log.objects.create(
+            access_token=access_token,
+            open_id=openid,
+            errmsg=res_send['errmsg'],
+            errcode=res_send['errcode'],
+            last_purchserial=caches['default'].get('last_purchserial', ''),
+            type='02',
+        )

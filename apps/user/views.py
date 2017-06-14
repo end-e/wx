@@ -35,10 +35,10 @@ class MembersBoundView(View):
         openid = res['openid']
         access_token = res['access_token']
 
-        wx_access_token = caches['default'].get('wx_access_token', '')
+        wx_ikg_access_token = caches['default'].get('wx_ikg_access_token', '')
         app_id = consts.APPID
         secret = consts.APPSECRET
-        client = WeChatClient(app_id, secret, wx_access_token)
+        client = WeChatClient(app_id, secret, wx_ikg_access_token)
         jsapi = client.jsapi
         ticket = jsapi.get_jsapi_ticket()
         noncestr = method.createNonceStr()

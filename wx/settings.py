@@ -162,7 +162,8 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 # django-crontab任务加载
 CRONJOBS = [
     # ('* * * * *', 'django.core.management.call_command', ['mycommand']),
-    ('1 */1 * * *', 'api.views.cron.cron_get_token'),
+    ('1 */1 * * *', 'api.views.cron.cron_get_ikg_token'),
+    ('1 */1 * * *', 'api.views.cron.cron_get_kgcs_token'),
     ('* * * * *', 'api.views.cron.cron_send_temp'),
 ]
 

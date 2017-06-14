@@ -37,7 +37,7 @@ def ca(request):
 
 
 def get_token():
-    token = caches['default'].get('wx_access_token', '')
+    token = caches['default'].get('wx_ikg_access_token', '')
     # 如果不存在，请向微信请求获取
     if not token:
         app_id = 'wxd892ee844883f6a8'
@@ -45,8 +45,7 @@ def get_token():
         client = WeChatClient(app_id, secret)
         response = client.fetch_access_token()
         token = response['access_token']
-        time = datetime.datetime.now()
-        caches['default'].set('wx_access_token', token)
+        caches['default'].set('wx_ikg_access_token', token, 7200)
 
     return token
 
@@ -56,7 +55,7 @@ def check_consume(code, token):
 
 
 def create_nav(request):
-    access_token = caches['default'].get('wx_access_token', '')
+    access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
         access_token = get_token()
 
