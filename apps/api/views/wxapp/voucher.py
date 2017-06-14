@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json, datetime
 from django.http import HttpResponse
 from wxapp.models import Voucher, VoucherClass, Shops
