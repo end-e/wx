@@ -70,9 +70,9 @@
     <script>
         function delete_info(id) {
             if (window.confirm("确定要删除该记录吗？")) {
-                var v_url= "{% url 'wxapp:voucher_delete' 0%}"
-                v_url = v_url.replace('0',id);
-                window.location.href(v_url)
+                var v_url = "{% url 'wxapp:voucher_delete' 0%}";
+                v_url = v_url.replace('0', id);
+                window.location.href = v_url;
             }
         }
     </script>
