@@ -47,10 +47,27 @@ def getVoucherList(request):
             vardict['code_flag'] = str(item.code_flag)
 
             code_list = []
-            if json.loads(item.shop_codes):
-                for itm in json.loads(item.shop_codes):
-                    var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
-                    code_list.append(var_shop)
+            if vardict['code_flag'] == '0':
+                var_shop={}
+                var_shop['shop_code']='0'
+                var_shop['shop_name']='全部门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '1':
+                var_shop={}
+                var_shop['shop_code']='1'
+                var_shop['shop_name']='市区门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '2':
+                var_shop={}
+                var_shop['shop_code']='2'
+                var_shop['shop_name']='县区门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '3':
+                if json.loads(item.shop_codes):
+                    for itm in json.loads(item.shop_codes):
+                        var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
+                        code_list.append(var_shop)
+
             vardict['shop_codes'] = code_list
 
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
@@ -83,10 +100,27 @@ def getVoucherInfo(request):
         msg['code_flag'] = str(voucher.code_flag)
 
         code_list = []
-        if json.loads(voucher.shop_codes):
-            for itm in json.loads(voucher.shop_codes):
-                var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
-                code_list.append(var_shop)
+        if msg['code_flag'] == '0':
+            var_shop = {}
+            var_shop['shop_code'] = '0'
+            var_shop['shop_name'] = '全部门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '1':
+            var_shop = {}
+            var_shop['shop_code'] = '1'
+            var_shop['shop_name'] = '市区门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '2':
+            var_shop = {}
+            var_shop['shop_code'] = '2'
+            var_shop['shop_name'] = '县区门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '3':
+            if json.loads(voucher.shop_codes):
+                for itm in json.loads(voucher.shop_codes):
+                    var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
+                    code_list.append(var_shop)
+
         msg['shop_codes'] = code_list
 
         msg['begin_date'] = str(voucher.begin_date.strftime("%Y-%m-%d"))
