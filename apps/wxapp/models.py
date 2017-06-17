@@ -51,7 +51,7 @@ class DisCode(models.Model):
     batch = models.CharField(max_length=2,  blank=False, verbose_name=u'批次')
     remark = models.CharField(max_length=200, blank=True, null=True, verbose_name=u'备注')
     has_usable = models.BooleanField(default=0, verbose_name=u'是否可用')
-    use_time = models.DateTimeField(verbose_name=u'使用时间')
+    use_time = models.DateTimeField(verbose_name=u'使用时间', null=True)
 
     class Meta:
         verbose_name = u'券验证码'
