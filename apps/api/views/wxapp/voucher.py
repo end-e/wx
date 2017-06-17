@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import json, datetime
+
 from django.http import HttpResponse
-from wxapp.models import Voucher, VoucherClass, Shops
+from django.core.exceptions import ObjectDoesNotExist
+
+from wxapp.models import Voucher, VoucherClass, Shops, DisCode
 from wxapp.constants import MEDIA_URL
 from api.decorator import signature
 
@@ -48,19 +51,19 @@ def getVoucherList(request):
 
             code_list = []
             if vardict['code_flag'] == '0':
-                var_shop={}
-                var_shop['shop_code']='0'
-                var_shop['shop_name']='全部门店'
+                var_shop = {}
+                var_shop['shop_code'] = '0'
+                var_shop['shop_name'] = '全部门店'
                 code_list.append(var_shop)
             if vardict['code_flag'] == '1':
-                var_shop={}
-                var_shop['shop_code']='1'
-                var_shop['shop_name']='市区门店'
+                var_shop = {}
+                var_shop['shop_code'] = '1'
+                var_shop['shop_name'] = '市区门店'
                 code_list.append(var_shop)
             if vardict['code_flag'] == '2':
-                var_shop={}
-                var_shop['shop_code']='2'
-                var_shop['shop_name']='县区门店'
+                var_shop = {}
+                var_shop['shop_code'] = '2'
+                var_shop['shop_name'] = '县区门店'
                 code_list.append(var_shop)
             if vardict['code_flag'] == '3':
                 if json.loads(item.shop_codes):
@@ -150,3 +153,20 @@ def getVoucherClass(request):
         result_dict['msg'] = msg
 
     return HttpResponse(json.dumps(result_dict), content_type="application/json")
+
+
+@signature
+def verification_discode(request):
+    discode = request.GET.get('discode', '')
+    # 对discode进行切片，获取batch，dis_code
+    batch = discode[:2]
+
+    one_code = DisCode.objects.filter(batch=batch, dis_code=discode)
+
+    if len(one_code) != 1:
+        result_dict = {'status': 0, 'msg': 'failed'}
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
+    else:
+        DisCode.objects.filter(batch=batch, dis_code=discode).update(has_usable=1, use_time=datetime.datetime.now())
+        result_dict = {'status': 1, 'msg': 'success'}
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")

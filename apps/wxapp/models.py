@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 
 
@@ -43,3 +44,15 @@ class Shops(models.Model):
     shop_code = models.CharField(max_length=16, default='', verbose_name=u'编号')
     shop_name = models.CharField(max_length=32, default='', verbose_name=u'名称')
     telphone = models.CharField(max_length=20, default='', verbose_name=u'电话')
+
+
+class DisCode(models.Model):
+    dis_code = models.CharField(max_length=6, verbose_name=u'验证码')
+    batch = models.CharField(max_length=2,  blank=False, verbose_name=u'批次')
+    remark = models.CharField(max_length=200, blank=True, null=True, verbose_name=u'备注')
+    has_usable = models.BooleanField(default=0, verbose_name=u'是否可用')
+    use_time = models.DateTimeField(verbose_name=u'使用时间')
+
+    class Meta:
+        verbose_name = u'券验证码'
+        verbose_name_plural = verbose_name

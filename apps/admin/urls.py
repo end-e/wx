@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import url,include
+from django.conf.urls import url, include
 
-from admin.views.sys.website import LoginView,LogoutView,ResetPwdView,IndexView,CodeView
-from admin.views.sys.user import UserEditView,UserView,UserInfoView,UserAddView
-from admin.views.sys.role import RoleEditView,RoleView,RoleAddView,RoleNavView
-from admin.views.sys.nav import NavEditView,NavView,NavAddView
+from admin.views.sys.website import LoginView, LogoutView, ResetPwdView, IndexView, CodeView
+from admin.views.sys.user import UserEditView, UserView, UserInfoView, UserAddView
+from admin.views.sys.role import RoleEditView, RoleView, RoleAddView, RoleNavView
+from admin.views.sys.nav import NavEditView, NavView, NavAddView
 
 urlpatterns = [
     # 会员绑定页面
     url(r'^$', IndexView.as_view(), name='index'),
-    #登陆相关
+    # 登陆相关
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^vcode/$', CodeView.as_view(), name='vcode'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
@@ -29,6 +29,6 @@ urlpatterns = [
     url(r'^nav/edit/(?P<nav_id>\d+$)', NavEditView.as_view(), name='nav_edit'),
     url(r'^nav/add/', NavAddView.as_view(), name='nav_add'),
 
-    url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard'))
+    url(r'^giftcard/', include('admin.views.giftcard.urls', namespace='giftcard'))
 
 ]

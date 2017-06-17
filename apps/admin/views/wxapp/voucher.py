@@ -1,7 +1,15 @@
-import datetime,os
+import datetime
+import os
+from random import sample
+
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
-from wxapp.models import Voucher, VoucherClass, Shops
+from django.views.generic.base import View
+from django.db.models import Q
+
+from admin.utils.paginator import MyPaginator
+from wxapp.models import Voucher, VoucherClass, Shops, DisCode
+from .forms import AddDiscodeForm, FindDiscodeForm
 
 
 def index(request):
@@ -149,3 +157,80 @@ def classDelete(request, class_id):
     else:
         msg['status'] = 1
     return redirect(reverse('wxapp:class_list'))
+
+
+class DiscodeListViews(View):
+    """
+    默认券验证码列表
+    """
+
+    def get(self, request):
+        # 默认页面展示所有优惠券
+        all_discode = DisCode.objects.all()
+        paginator = MyPaginator(all_discode, 10)
+        page_num = request.GET.get('page', 1)
+        try:
+            all_discode = paginator.page(page_num)
+        except Exception as e:
+            print(e)
+        return render(request, 'wxapp/voucher/discode_list.html', locals())
+
+
+class DiscodeQueryViews(View):
+    """
+    验证码查询
+    """
+
+    def get(self, request):
+        batch = request.GET.get('batch', '')
+        discode = request.GET.get('discode', '')
+        # 查询券授权码
+        if batch and discode:
+            all_discode = DisCode.objects.filter(dis_code=discode, batch=batch)
+        else:
+            all_discode = DisCode.objects.filter(Q(batch=batch) | Q(dis_code=discode))
+
+        paginator = MyPaginator(all_discode, 15)
+        page_num = request.GET.get('page', 1)
+        try:
+            all_discode = paginator.page(page_num)
+        except Exception as e:
+            print(e)
+        return render(request, 'wxapp/voucher/discode_list.html', locals())
+
+
+class AddDiscodeViews(View):
+    """
+    生成券验证码
+    """
+
+    def get(self, request):
+        return render(request, 'wxapp/voucher/discode_add.html')
+
+    def post(self, request):
+        form = AddDiscodeForm(request.POST)
+        # 验证表单
+        if form.is_valid():
+            nums = form.cleaned_data['nums']
+            batch = form.cleaned_data['batch']
+
+            for i in range(0, nums):
+                obj = DisCode(batch=batch)
+                dis_code = ''.join(sample('0123456789', 4))
+                dis_code = batch + dis_code
+                obj.dis_code = dis_code
+                obj.save()
+
+            all_discode = DisCode.objects.filter(batch=batch)
+
+            paginator = MyPaginator(all_discode, 15)
+            page_num = request.GET.get('page', 1)
+            try:
+                all_discode = paginator.page(page_num)
+            except Exception as e:
+                print(e)
+
+            return redirect(reverse('wxapp:discode_list'), {
+                'batch': batch,
+                'all_discode': all_discode
+            })
