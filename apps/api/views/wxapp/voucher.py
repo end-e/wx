@@ -81,8 +81,8 @@ def getVoucherList(request):
         result_dict['status'] = 0
         result_dict['msg'] = msg
 
-    # ensure_ascii=False 中文不序列化
-    return HttpResponse(json.dumps(result_dict, ensure_ascii=False), content_type="application/json")
+    # ensure_ascii=False 中文不序列化，utf-8编码
+    return HttpResponse(json.dumps(result_dict, ensure_ascii=False).encode('utf-8'), content_type="application/json")
 
 
 @signature
@@ -134,8 +134,7 @@ def getVoucherInfo(request):
         result_dict['status'] = 0
         result_dict['msg'] = msg
 
-    # ensure_ascii=False 中文不序列化
-    return HttpResponse(json.dumps(result_dict, ensure_ascii=False), content_type="application/json")
+    return HttpResponse(json.dumps(result_dict, ensure_ascii=False).encode('utf-8'), content_type="application/json")
 
 
 @signature
