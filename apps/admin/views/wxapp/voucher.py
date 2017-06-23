@@ -40,7 +40,7 @@ def voucherEdit(request, voucher_id):
         if voucher.voucher_image != '':
             img_url = voucher.voucher_image.url
     return render(request, 'wxapp/voucher/edit_page.html',
-                  {'voucher': voucher, 'classs': classs, 'shops': shops, 'img_url': img_url})
+                  {'voucher': voucher, 'classs': classs, 'shops': shops, 'img_url': img_url, 'voucher_id': voucher_id})
 
 
 def voucherSave(request):

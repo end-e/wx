@@ -125,15 +125,20 @@
         if ($(".code_radio").val() == "3") {
             $('#checkbox_div').show();
         }
-        var code_list = {{ voucher.shop_codes |  safe }};
+        var voucher_id = "{{ voucher_id | safe}}";
+        {% if voucher_id != '0' %}
+            if (voucher_id !== '0') {
+                var code_list = {{ voucher.shop_codes | safe | default:''}};
 
-        for (var shop_item in code_list) {
-            $("#checkbox_div input").each(function () {
-                if ($(this).val() == code_list[shop_item]['shop_code']) {
-                    $(this).attr("checked", true)
+                for (var shop_item in code_list) {
+                    $("#checkbox_div input").each(function () {
+                        if ($(this).val() == code_list[shop_item]['shop_code']) {
+                            $(this).attr("checked", true)
+                        }
+                    });
                 }
-            });
-        }
+            }
+        {% endif %}
     </script>
     <script>
         function submitForm() {
