@@ -2,10 +2,10 @@ from django.db import connection
 from django.conf import settings
 
 from PIL import Image, ImageDraw, ImageFont
-import random, hashlib, time
+import random,hashlib
 
 from admin.utils import constants
-from admin.models import RoleNav, GiftTheme, GiftThemeItem, GiftThemePicItem
+from admin.models import RoleNav
 
 
 def md5(data):
@@ -37,7 +37,7 @@ def getUserNav(role_id=None):
     #     .filter(**kwargs).order_by('nav__sort')
 
     sql = "select DISTINCT rn.role_id,rn.nav_id,n.name,n.parent,n.url,n.sort,n.icon " \
-          "from admin_rolenav as rn,admin_nav as n " \
+          "from admin_rolenav as rn,admin_nav as n "\
           "where rn.nav_id=n.id and n.status=0 "
     if role_id:
         role_id = str(role_id)
@@ -134,7 +134,7 @@ def verifycode(request, key):
 
 def getNextPageNum(data):
     num = ''
-    if data.number < data.paginator.num_pages:
+    if data.number < data.paginator.num_pages :
         num = data.paginator.next_page_num
     return num
 

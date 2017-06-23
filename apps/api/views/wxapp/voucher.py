@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import json, datetime
+
 from django.http import HttpResponse
-from wxapp.models import Voucher, VoucherClass, Shops
+from django.core.exceptions import ObjectDoesNotExist
+
+from wxapp.models import Voucher, VoucherClass, Shops, DisCode
 from wxapp.constants import MEDIA_URL
 from api.decorator import signature
 
@@ -47,10 +50,27 @@ def getVoucherList(request):
             vardict['code_flag'] = str(item.code_flag)
 
             code_list = []
-            if json.loads(item.shop_codes):
-                for itm in json.loads(item.shop_codes):
-                    var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
-                    code_list.append(var_shop)
+            if vardict['code_flag'] == '0':
+                var_shop = {}
+                var_shop['shop_code'] = '0'
+                var_shop['shop_name'] = '全部门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '1':
+                var_shop = {}
+                var_shop['shop_code'] = '1'
+                var_shop['shop_name'] = '市区门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '2':
+                var_shop = {}
+                var_shop['shop_code'] = '2'
+                var_shop['shop_name'] = '县区门店'
+                code_list.append(var_shop)
+            if vardict['code_flag'] == '3':
+                if json.loads(item.shop_codes):
+                    for itm in json.loads(item.shop_codes):
+                        var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
+                        code_list.append(var_shop)
+
             vardict['shop_codes'] = code_list
 
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
@@ -61,7 +81,8 @@ def getVoucherList(request):
         result_dict['status'] = 0
         result_dict['msg'] = msg
 
-    return HttpResponse(json.dumps(result_dict), content_type="application/json")
+    # ensure_ascii=False 中文不序列化，utf-8编码
+    return HttpResponse(json.dumps(result_dict, ensure_ascii=False).encode('utf-8'), content_type="application/json")
 
 
 @signature
@@ -83,10 +104,27 @@ def getVoucherInfo(request):
         msg['code_flag'] = str(voucher.code_flag)
 
         code_list = []
-        if json.loads(voucher.shop_codes):
-            for itm in json.loads(voucher.shop_codes):
-                var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
-                code_list.append(var_shop)
+        if msg['code_flag'] == '0':
+            var_shop = {}
+            var_shop['shop_code'] = '0'
+            var_shop['shop_name'] = '全部门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '1':
+            var_shop = {}
+            var_shop['shop_code'] = '1'
+            var_shop['shop_name'] = '市区门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '2':
+            var_shop = {}
+            var_shop['shop_code'] = '2'
+            var_shop['shop_name'] = '县区门店'
+            code_list.append(var_shop)
+        if msg['code_flag'] == '3':
+            if json.loads(voucher.shop_codes):
+                for itm in json.loads(voucher.shop_codes):
+                    var_shop = Shops.objects.values('shop_code', 'shop_name').get(shop_code=itm['shop_code'])
+                    code_list.append(var_shop)
+
         msg['shop_codes'] = code_list
 
         msg['begin_date'] = str(voucher.begin_date.strftime("%Y-%m-%d"))
@@ -96,7 +134,7 @@ def getVoucherInfo(request):
         result_dict['status'] = 0
         result_dict['msg'] = msg
 
-    return HttpResponse(json.dumps(result_dict), content_type="application/json")
+    return HttpResponse(json.dumps(result_dict, ensure_ascii=False).encode('utf-8'), content_type="application/json")
 
 
 @signature
@@ -116,3 +154,20 @@ def getVoucherClass(request):
         result_dict['msg'] = msg
 
     return HttpResponse(json.dumps(result_dict), content_type="application/json")
+
+
+@signature
+def verification_discode(request):
+    discode = request.GET.get('discode', '')
+    # 对discode进行切片，获取batch，dis_code
+    batch = discode[:2]
+
+    one_code = DisCode.objects.filter(batch=batch, dis_code=discode)
+
+    if len(one_code) != 1:
+        result_dict = {'status': 0, 'msg': 'failed'}
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
+    else:
+        DisCode.objects.filter(batch=batch, dis_code=discode).update(has_usable=1, use_time=datetime.datetime.now())
+        result_dict = {'status': 1, 'msg': 'success'}
+        return HttpResponse(json.dumps(result_dict), content_type="application/json")
