@@ -18,7 +18,7 @@ def cron_get_ikg_token():
     '''
     app_id = consts.APPID
     secret = consts.APPSECRET
-    method.get_access_token(app_id, secret, 'ikg')
+    method.get_access_token( 'ikg',app_id, secret,)
 
 
 def cron_get_kgcs_token():
@@ -28,9 +28,7 @@ def cron_get_kgcs_token():
     """
     app_id = consts.KG_APPID
     secret = consts.KG_APPSECRET
-    method.get_access_token(app_id, secret,'kgcs')
-
-
+    method.get_access_token('kgcs',app_id, secret)
 
 
 def cron_send_temp():
@@ -49,7 +47,7 @@ def cron_send_temp():
 def get_user_order():
     # TODO：查询ERP内的消费数据
     conn = db.getMsSqlConn()
-    start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
+    start = datetime.datetime.now() + datetime.timedelta(minutes=-100)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
     last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')
     if last_purchserial:

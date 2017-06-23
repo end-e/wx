@@ -2,6 +2,7 @@
 __author__ = ''
 __date__ = '2017/6/6 9:02'
 import hashlib
+import xml.etree.ElementTree as ET
 from urllib import parse
 
 from django.http import HttpResponse
@@ -158,7 +159,7 @@ def getSign(obj):
     result_ = String.upper()
     return result_
 
-import xml.etree.ElementTree as ET
+
 def xmlToArray(xml):
     """将xml转为array"""
     array_data = {}

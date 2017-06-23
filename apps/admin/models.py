@@ -46,3 +46,100 @@ class User(models.Model):
     class Meta:
         verbose_name = u'用户信息'
         verbose_name_plural = verbose_name
+
+
+class GiftCard(models.Model):
+    title = models.CharField(max_length=12,verbose_name=u'名称')
+    wx_card_id = models.CharField(max_length=32,verbose_name=u'微信返回ID',blank=True,null=True)
+    background_pic = models.CharField(max_length=128,verbose_name=u'背景图片')
+    logo = models.CharField(max_length=128,verbose_name='logo')
+    init_balance = models.DecimalField(max_digits=10, decimal_places=2,verbose_name=u'初始金额')
+    price = models.DecimalField(max_digits=10, decimal_places=2,verbose_name=u'售价')
+    brand_name = models.CharField(max_length=128, verbose_name='商户名称')
+    quantity = models.IntegerField(verbose_name='库存数量')
+    max_give = models.SmallIntegerField(verbose_name=u'最大赠送次数',default=9999)
+    notice = models.CharField(verbose_name=u'使用提醒',max_length=12,default='')
+    description = models.CharField(verbose_name=u'使用说明',max_length=1000,default='')
+    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
+    # supply_bonus = models.CharField(max_length=1, verbose_name=u'支持积分',default='1')
+    # supply_balance = models.CharField(max_length=1, verbose_name=u'支持余额',default='0')
+    # auto_activate = models.CharField(max_length=1, verbose_name=u'自动激活',default='1')
+
+    class Meta:
+        verbose_name = u'礼品卡信息'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_card'
+
+
+class GiftImg(models.Model):
+    title = models.CharField(max_length=12,verbose_name=u'名称')
+    url = models.CharField(max_length=128,verbose_name=u'背景图片')
+    create_time = models.DateField(max_length=128,verbose_name='创建日期',default=datetime.now)
+    status = models.CharField(max_length=1,verbose_name=u'状态',default='0')
+
+    class Meta:
+        verbose_name = u'图片素材'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_img'
+
+
+class GiftCategory(models.Model):
+    title = models.CharField(max_length=12,verbose_name=u'名称')
+    create_time = models.DateField(max_length=128,verbose_name='创建日期',default=datetime.now)
+    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
+
+    class Meta:
+        verbose_name = u'分类'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_category'
+
+
+class GiftTheme(models.Model):
+    title = models.CharField(max_length=12,verbose_name=u'主题名称')
+    theme_pic = models.CharField(max_length=128, verbose_name=u'封面图片')
+    title_color = models.CharField(max_length=7, verbose_name=u'主题字体颜色',default='#FB966E')
+    sku_title_first = models.CharField(max_length=1, verbose_name=u'突出商品名(1:是,0:否)', default='0')
+    create_time = models.DateField(max_length=128,verbose_name='创建日期',default=datetime.now)
+    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
+
+    class Meta:
+        verbose_name = u'主题'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_theme'
+
+
+class GiftThemeItem(models.Model):
+    theme_id = models.IntegerField(verbose_name=u'主题ID',default=1)
+    card_id = models.CharField(max_length=32, verbose_name=u'微信返回ID', blank=True, null=True)
+    title = models.CharField(max_length=12, verbose_name=u'名称')
+
+    class Meta:
+        verbose_name = u'主题-item'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_theme_item'
+
+
+class GiftThemePicItem(models.Model):
+    theme_id = models.IntegerField(verbose_name=u'主题ID',default=1)
+    background_pic = models.CharField(max_length=128, verbose_name=u'背景图片')
+    msg = models.CharField(max_length=32, verbose_name=u'默认祝福语')
+
+    class Meta:
+        verbose_name = u'主题-picItem'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_theme_pic_item'
+
+
+class GiftPage(models.Model):
+    wx_page_id = models.CharField(max_length=128,verbose_name=u'微信返回货架ID',blank=True,null=True)
+    title = models.CharField(max_length=12, verbose_name=u'货架名称')
+    banner_pic = models.CharField(max_length=128, verbose_name=u'banner图片')
+    categories = models.CharField(max_length=256, verbose_name=u'一级分类列表')
+    themes = models.CharField(max_length=128, verbose_name=u'主题列表',default='')
+    wx_page_url = models.CharField(max_length=128, verbose_name='货架首页地址',blank=True,null=True)
+
+    class Meta:
+        verbose_name = u'货架'
+        verbose_name_plural = verbose_name
+        db_table = 'gift_page'
+

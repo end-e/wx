@@ -30,7 +30,7 @@ class NavEditView(View):
         msg = {}
         try:
             nav = Nav.objects.get(pk=nav_id)
-            form = NavForm(request.POST.copy(),instance=nav)
+            form = NavForm(request.POST,instance=nav)
             if form.is_valid():
                 result = form.save()
                 if result:

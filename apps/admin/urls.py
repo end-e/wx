@@ -29,6 +29,6 @@ urlpatterns = [
     url(r'^nav/edit/(?P<nav_id>\d+$)', NavEditView.as_view(), name='nav_edit'),
     url(r'^nav/add/', NavAddView.as_view(), name='nav_add'),
 
-    url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard'))
+    url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard')),
 
 ]

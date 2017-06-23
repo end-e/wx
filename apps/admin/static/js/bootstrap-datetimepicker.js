@@ -168,10 +168,10 @@
 			this.picker.addClass('datetimepicker-rtl');
 			if (this.bootcssVer == 3) {
 				this.picker.find('.prev span, .next span')
-					.toggleClass('glyphicon-arrow-left glyphicon-arrow-right');
+					.toggleClass('icon-angle-left icon-angle-right');
 			} else {
 				this.picker.find('.prev i, .next i')
-					.toggleClass('icon-arrow-left icon-arrow-right');
+					.toggleClass('icon-angle icon-angle-right');
 			}
 			;
 
@@ -1639,9 +1639,9 @@
 			'</thead>',
 		headTemplateV3:   '<thead>' +
 							  '<tr>' +
-							  '<th class="prev"><span class="glyphicon glyphicon-arrow-left"></span> </th>' +
+							  '<th class="prev"><span class="glyphicon icon-angle-left"></span> </th>' +
 							  '<th colspan="5" class="switch"></th>' +
-							  '<th class="next"><span class="glyphicon glyphicon-arrow-right"></span> </th>' +
+							  '<th class="next"><span class="glyphicon icon-angle-right"></span> </th>' +
 							  '</tr>' +
 			'</thead>',
 		contTemplate:     '<tbody><tr><td colspan="7"></td></tr></tbody>',

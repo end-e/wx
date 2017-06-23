@@ -71,7 +71,7 @@
 
         var res_status = {{ msg.status | safe | default:-1 }};
         if (res_status === 0) {
-            noty({"text":"数据提交成","layout":"bottom","type":"information"});
+            noty({"text":"数据提交成功","layout":"bottom","type":"information"});
             window.location.href = "{% url 'admin:nav' %}"
         }else if (res_status === 1){
             noty({"text":"数据提交失败","layout":"bottom","type":"error"});

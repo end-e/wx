@@ -1,0 +1,97 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">礼品卡</a>
+    <a href="#" class="current">线上实例</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    礼品卡线上实例列表
+                </h2>
+            </div>
+            <div class="box-content">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>发行数量</th>
+                        <th>现有库存</th>
+                        <th>售价</th>
+                        <th>面值</th>
+                        <th>类型</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for card in card_list %}
+                        <tr>
+                            <td class="center">{{ card.general_card.base_info.title }}</td>
+                            <td class="center">{{ card.general_card.base_info.sku.total_quantity }}</td>
+                            <td class="center">{{ card.general_card.base_info.sku.quantity }}</td>
+                            <td class="center">{{ card.general_card.base_info.giftcard_info.price }}</td>
+                            <td class="center">{{ card.general_card.init_balance }}</td>
+                            <td class="center">{{ card.general_card.sub_card_type }}</td>
+                            <td class="center">
+                                {% comment %}<a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
+                                    <i class="icon-edit "></i>
+                                </a>{% endcomment %}
+                                <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.card_id }}')">
+                                    <i class=" icon-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">暂无数据</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="pagination pagination-centered">
+                    <ul>
+                        {% if prev_page != 0 %}
+                            <li><a title='上一页' href="{% url 'admin:giftcard:cards_wx' prev_page %}">上一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='上一页' href="#">上一页</a></li>
+                        {% endif %}
+                        {% for i in total_page|range %}
+                            {% if forloop.counter0 == offset|int %}
+                                <li class="active"><a>{{ i }}</a>
+                            </li>
+                             {% else %}
+                                <li><a href="{% url 'admin:giftcard:cards_wx' i %}">{{ i }}</a>
+                             {% endif %}
+                        {% endfor %}
+                        {% if page_num != total_page %}
+                            <li><a title='下一页' href="{% url 'admin:giftcard:cards_wx' next_page %}">下一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='下一页'>下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function delCard(wx_card_id) {
+            var url = "{% url 'admin:giftcard:card_del' 'card_id' %}";
+            url = url.replace('card_id',wx_card_id);
+            $.get(url,function (data) {
+                if(data.status==0){
+                    noty({"text":"数据删除成功","layout":"bottom","type":"information"});
+                    window.location.reload()
+                }else {
+                    noty({"text":"数据删除失败","layout":"bottom","type":"error"});
+                }
+            },'json')
+        }
+    </script>
+{% endblock %}

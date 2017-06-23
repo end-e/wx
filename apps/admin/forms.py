@@ -3,7 +3,7 @@ __author__ = ''
 __date__ = '2017/5/23 11:27'
 from django import forms
 
-from admin.models import User,Nav,Role
+from admin.models import User,Nav,Role,GiftCard
 
 class LoginForm(forms.Form):
     name = forms.CharField(required=True)
@@ -31,4 +31,13 @@ class NavForm(forms.ModelForm):
     class Meta:
         model = Nav
         fields = ['name','url','parent','sort','status','icon']
+
+
+class GiftCardForm(forms.ModelForm):
+    action = forms.CharField(required=True)
+    class Meta:
+        model = GiftCard
+        fields = ['title','background_pic','logo','init_balance',
+                  'price','brand_name','quantity','status','max_give',
+                  'notice','description','wx_card_id']
 

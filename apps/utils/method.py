@@ -1,5 +1,4 @@
-import random,hashlib,pycurl
-from io import StringIO
+import random,hashlib
 
 from django.core.cache import caches
 from wechatpy import WeChatClient
@@ -78,15 +77,3 @@ def get_access_token(app_name,app_id,secret):
     caches['default'].set(key, token, 7200)
 
     return token
-
-def http_post(url,data,second=30):
-    curl = pycurl.Curl()
-    curl.setopt(pycurl.URL, url)
-    curl.setopt(pycurl.TIMEOUT, second)
-    curl.setopt(pycurl.POST, True)
-    curl.setopt(pycurl.POSTFIELDS, data)
-    buff = StringIO()
-    curl.setopt(pycurl.WRITEFUNCTION, buff.write)
-
-    curl.perform()
-    return buff.getvalue()

@@ -1,0 +1,379 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">礼品卡</a>
+    <a href="#" class="current">主题</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑主题
+                </h2>
+            </div>
+            <div class="box-content">
+                <div id="MyWizard" class="wizard">
+                    <ul class="steps">
+                        <li data-target="#step1" class="active"><span class="badge badge-info">1</span></li>
+                        <li data-target="#step2"><span class="badge">2</span></li>
+                        <li data-target="#step3"><span class="badge">3</span></li>
+                    </ul>
+                    <div class="actions">
+                        <button type="button" class="btn btn-primary" onclick="window.history.back()" style="margin-right:50px">
+                            返&nbsp;&nbsp;回<i class="icon-reply" style="margin-left: 10px"></i>
+                        </button>
+                        <button type="button" class="btn btn-prev"><i class="icon-arrow-left"></i> 上一步</button>
+                        <button type="button" class="btn btn-success btn-next" data-last="完成">
+                            下一步 <i class="icon-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div id="step1" class="step-pane active">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="step" value="1">
+                            <div class="control-group">
+                                <label class="control-label">主题标题</label>
+                                <div class="controls">
+                                    <input type="text" name="title" value="{{ theme.title }}">
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">标题颜色</label>
+                                <div class="controls">
+                                    <input type="text" name="title_color" value="{{ theme.title_color }}">
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">封面图片</label>
+                                <div class="controls">
+                                    <select name="theme_pic" id="">
+                                        <option>请选择</option>
+                                        {% for pic in pic_list %}
+                                            <option value="{{ pic.url }}" {% if theme.theme_pic == pic.url %} selected{% endif %}>
+                                                {{ pic.title }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">突出商品</label>
+                                <div class="controls">
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" name="sku_title_first" value="1" {% if theme.sku_title_first == '1' %} checked{% endif %}/>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">状态</label>
+                                <div class="controls">
+                                    <select name="status">
+                                        <option>请选择</option>
+                                        <option value="0" {% if category.stauts == '0' %}selected{% endif %}>启用</option>
+                                        <option value="1" {% if category.stauts == '1' %}selected{% endif %}>禁用</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="submitForm()">保存修改</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="step2" class="step-pane ">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="th_id" value="{{ th_id }}">
+                            <input type="hidden" name="step" value="2">
+                            <div class="item_list list">
+                                {% for item in item_list %}
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡ID:</label>
+                                            <div class="controls">
+                                                <select name="theme_card_id">
+                                                    <option>请选择</option>
+                                                    {% for card in card_list %}
+                                                        {% if card.card_id == item.card_id %}
+                                                            <option value="{{ card.card_id }}" selected>
+                                                                {{ card.title }}
+                                                            </option>
+                                                        {% else %}
+                                                            <option value="{{ card.card_id }}">
+                                                                {{ card.title }}
+                                                            </option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡标题:</label>
+                                            <div class="controls">
+                                                <input type="text" name="theme_card_title" value="{{ item.title }}">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡ID:</label>
+                                            <div class="controls">
+                                                <select name="item_card_id[]">
+                                                    <option>请选择</option>
+                                                    {% for card in card_list %}
+                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡标题:</label>
+                                            <div class="controls">
+                                                <input type="text" name="item_card_title[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡ID:</label>
+                                            <div class="controls">
+                                                <select name="item_card_id[]">
+                                                    <option>请选择</option>
+                                                    {% for card in card_list %}
+                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡标题:</label>
+                                            <div class="controls">
+                                                <input type="text" name="item_card_title[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡ID:</label>
+                                            <div class="controls">
+                                                <select name="item_card_id[]">
+                                                    <option>请选择</option>
+                                                    {% for card in card_list %}
+                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">礼品卡标题:</label>
+                                            <div class="controls">
+                                                <input type="text" name="item_card_title[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="submitForm()">保存修改</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="step3" class="step-pane ">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="th_id" value="{{ th_id }}">
+                            <input type="hidden" name="step" value="3">
+                            <div class="pic_item_list list">
+                                {% for pic_item in pic_item_list %}
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">卡面背景:</label>
+                                            <div class="controls">
+                                                <select name="card_pic[]" >
+                                                    <option>请选择</option>
+                                                    {% for pic in pic_list %}
+                                                        <option value="{{ pic.url }}" {% if pic_item.background_pic == pic.url %} selected{% endif %}>
+                                                            {{ pic.title }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">祝福语:</label>
+                                            <div class="controls">
+                                                <input type="text" name="card_msg[]" value="{{ pic_item.msg }}">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success"
+                                                    onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger"
+                                                    onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">卡面背景:</label>
+                                            <div class="controls">
+                                                <select name="card_pic[]" >
+                                                    <option>请选择</option>
+                                                    {% for pic in pic_list %}
+                                                        <option value="{{ pic.url }}">
+                                                            {{ pic.title }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">祝福语:</label>
+                                            <div class="controls">
+                                                <input type="text" name="card_msg[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success"
+                                                    onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger"
+                                                    onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">卡面背景:</label>
+                                            <div class="controls">
+                                                <select name="card_pic[]" >
+                                                    <option>请选择</option>
+                                                    {% for pic in pic_list %}
+                                                        <option value="{{ pic.url }}">
+                                                            {{ pic.title }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">祝福语:</label>
+                                            <div class="controls">
+                                                <input type="text" name="card_msg[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success"
+                                                    onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger"
+                                                    onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="item list-item">
+                                        <div class="control-group span4">
+                                            <label class="control-label">卡面背景:</label>
+                                            <div class="controls">
+                                                <select name="card_pic[]" >
+                                                    <option>请选择</option>
+                                                    {% for pic in pic_list %}
+                                                        <option value="{{ pic.url }}">
+                                                            {{ pic.title }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="control-group span4">
+                                            <label class="control-label">祝福语:</label>
+                                            <div class="controls">
+                                                <input type="text" name="card_msg[]" value="">
+                                            </div>
+                                        </div>
+                                        <div class="control-group span2 list-item-btn">
+                                            <button type="button" class="btn btn-small btn-success"
+                                                    onclick="addFormRow(this)">
+                                                添加 <i class="icon-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-small btn-danger"
+                                                    onclick="delFormRow(this)">
+                                                删除 <i class="icon-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="submitForm()">保存修改</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        //表单提交
+        function submitForm() {
+           var step = $('.steps .active').attr('data-target');
+            $(step+' #Form').submit();
+        }
+        //控制步骤显示
+        var step_id = {{ step_id|safe }};
+        $('.steps li').removeClass('active').eq(step_id-1).addClass('active');
+        $('.step-content .step-pane').removeClass('active').eq(step_id-1).addClass('active');
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 0) {
+            $('.btn-next').click()
+        }
+        else if (res_status === 1) {
+            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+        }
+    </script>
+{% endblock %}

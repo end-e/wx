@@ -1,0 +1,231 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}修改货架信息{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2><i class="icon-edit"></i>货架信息</h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:edit_page' page_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="wx_page_id" value="{{ page.wx_page_id }}">
+                    <div class="control-group">
+                        <label class="control-label">标题名称:</label>
+                        <div class="controls">
+                            <input type="text" name="page_title" value="{{ page.title }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">主题图片:</label>
+                        <div class="controls">
+                            <select name="banner_pic_url" id="">
+                                {% for pic in pic_list %}
+                                    <option value="{{ pic.url }}" {% if theme.theme_pic == pic.url %}
+                                            selected{% endif %}>
+                                        {{ pic.title }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="category_list list">
+                        {% for category in page.category_list %}
+                            <div class="category list-item">
+                                <div class="control-group span4">
+                                    <label class="control-label" for="category_title">分类:</label>
+                                    <div class="controls">
+                                        <input class="category_title" type="text" name="category[]" value="{{ category.title }}">
+                                    </div>
+                                </div>
+                                <div class="control-group span2 list-item-btn">
+                                    <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                         <i class="icon-plus"></i>
+                                    </a>
+                                    <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                         <i class="icon-minus"></i>
+                                    </a>
+                                    <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                         <i class="icon-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="category list-item">
+                            <div class="control-group span4">
+                                <label class="control-label" for="category_title">分类:</label>
+                                <div class="controls">
+                                    <input class="category_title" type="text" name="category[]">
+                                </div>
+                            </div>
+                            <div class="control-group span2 list-item-btn">
+                                <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                     <i class="icon-plus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                     <i class="icon-minus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                     <i class="icon-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="category list-item">
+                            <div class="control-group span4">
+                                <label class="control-label" for="category_title">分类:</label>
+                                <div class="controls">
+                                    <input class="category_title" type="text" name="category[]">
+                                </div>
+                            </div>
+                            <div class="control-group span2 list-item-btn">
+                                <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                     <i class="icon-plus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                     <i class="icon-minus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                     <i class="icon-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="theme-list list">
+                        {% for theme in page.theme_list %}
+                            <div class="list-item">
+                                <div class="control-group span3">
+                                    <label class="control-label">主题:</label>
+                                    <div class="controls">
+                                        <select name="theme[]">
+                                            <option>请选择</option>
+                                            {% for base_theme in base_theme_list %}
+                                                {% if theme|slice:":1"|int == base_theme.id %}
+                                                    <option value="{{ base_theme.id }}" selected>{{ base_theme.title }}</option>
+                                                {% else %}
+                                                    <option value="{{ base_theme.id }}">{{ base_theme.title }}</option>
+                                                {% endif %}
+
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="control-group span3">
+                                    <label class="control-label">所属分类:</label>
+                                    <div class="controls">
+                                        <input type="text" name="theme_category[]" value="{{ theme|slice:"2:" }}">
+                                    </div>
+                                </div>
+                                <div class="control-group span2 list-item-btn">
+                                    <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                         <i class="icon-plus"></i>
+                                    </a>
+                                    <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                         <i class="icon-minus"></i>
+                                    </a>
+                                    <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                         <i class="icon-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="list-item">
+                            <div class="control-group span4">
+                                <label class="control-label">主题:</label>
+                                <div class="controls">
+                                    <select name="theme[]">
+                                        <option>请选择</option>
+                                        {% for base_theme in base_theme_list %}
+                                            <option value="{{ base_theme.id }}">{{ base_theme.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control-group span2 list-item-btn">
+                                <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                     <i class="icon-plus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                     <i class="icon-minus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                     <i class="icon-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="control-group span4">
+                                <label class="control-label">主题:</label>
+                                <div class="controls">
+                                    <select name="theme[]">
+                                        <option>请选择</option>
+                                        {% for base_theme in base_theme_list %}
+                                            <option value="{{ base_theme.id }}">{{ base_theme.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control-group span2 list-item-btn">
+                                <a class="btn btn-small btn-success" onclick="addFormRow(this)" title="添加">
+                                     <i class="icon-plus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="delFormRow(this)" title="删除">
+                                     <i class="icon-minus"></i>
+                                </a>
+                                <a class="btn btn-small btn-danger" onclick="editTheme(this)" title="编辑">
+                                     <i class="icon-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm()">保存修改</button>
+                    </div>
+                </form>
+            </div>
+
+        </div><!--/span-->
+
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        $(document).on("blur",".category_list input[name='category_title[]']",function(){
+            var category_list = $(".category_title");
+            $('.theme_category_index').empty();
+            category_list.each(function () {
+                var title = $(this).val();
+
+                if(title){
+                    var option = $("<option></option>").text(title).val(title);
+                    $('.theme_category_index').append(option);
+                    console.log($('.theme_category_index'))
+                }
+            })
+        });
+
+        function editTheme(obj) {
+            var row = $(obj).parents('.list-item');
+            var theme_id = row.find("select[name='theme[]']").val();
+            var url = "{% url 'admin:giftcard:theme_edit' 0 %}";
+            url = url.replace(0,theme_id);
+            window.location.href = url;
+        }
+
+        {% comment %}var res_status = {{ msg.status | safe | default:-1 }};
+        if (res_status === 0) {
+            noty({"text": "数据提交成", "layout": "bottom", "type": "information"});
+            window.location.href = "{% url 'admin:user' %}"
+        } else if (res_status === 1) {
+            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+        }{% endcomment %}
+
+
+    </script>
+{% endblock %}

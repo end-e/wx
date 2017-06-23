@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views.generic.base import View
 from django.http import HttpResponse
 
@@ -85,5 +85,4 @@ class ResetPwdView(View):
         except Exception as e:
             print(e)
         return render(request, 'sys/reset.html', locals())
-
 

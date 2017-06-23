@@ -7,6 +7,15 @@
         <div class="row-fluid">
             {% include 'base/nav_left.html' %}
             <div id="content" class="span10" style="min-height: 558px">
+                <div id="content-header">
+                    <div id="breadcrumb">
+                        <a data-original-title="Go to Home" href="#" title="" class="tip-bottom">
+                            <i class="icon-home"></i>首页
+                        </a>
+                        {% block current_page %}{% endblock %}
+
+                    </div>
+                </div>
                 {% block content_r %} {% endblock %}
             </div>
         </div>
@@ -32,6 +41,54 @@
                 $("#Form #submit").click();
             }
         });
+        function uploadImg(ID) {
+            var formData = new FormData();
+            var fileObj = document.getElementById(ID).files[0];
+            formData.append("img", fileObj);
+            formData.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+            $.ajax({
+                url: "{% url 'admin:giftcard:upload_img' %}",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.status == 0) {
+                        alert("上传成功！");
+                        $('#img_view_'+ID).attr('src',data.img_url).show();
+                        $('#'+ID+'_url').val(data.img_url)
+                    }
+                    if (data.status == 1) {
+                        alert(data.msg);
+                    }
+                    $("#imgWait").hide();
+                },
+                error: function () {
+                    alert("上传失败！");
+                    $("#imgWait").hide();
+                }
+            });
+        }
+
+        function addFormRow(obj) {
+            var formBox = $(obj).parent().parent().parent();
+            var formLine = $(obj).parent().parent().clone();
+            formBox.append(formLine);
+            formLine.find('input').val('');
+        }
+        function delFormRow(obj) {
+            $(obj).parents('.list-item').remove();
+        }
+
+        function addTheme(obj) {
+            var themeBox = $(obj).parents('.theme-list');
+            var theme = $(obj).parents('.theme').clone();
+            themeBox.append(theme);
+            theme.find('input[type=text]').val('');
+            theme.find('select').val('');
+            theme.find('img').attr('src','');
+        }
+
     </script>
 {% endblock %}
 

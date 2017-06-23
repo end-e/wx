@@ -13,7 +13,7 @@ class LoginMiddleware(object):
                 return HttpResponseRedirect('/admin/login/')
         elif path == '/admin/login/':
             if request.session.get('user', None):
-                return HttpResponseRedirect('/admin/index/')
+                return HttpResponseRedirect('/admin/')
             else:
                 pass
 
