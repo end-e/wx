@@ -3,7 +3,7 @@ __author__ = ''
 __date__ = '2017/6/14 10:26'
 from django.conf.urls import url
 
-from admin.views.giftcard.base import UploadImgView,UploadImgView2,ImgView,CategoryView,CategoryEditView,\
+from admin.views.giftcard.base import ImgUploadView,ImgView,CategoryView,CategoryEditView,\
     ThemeView,ThemeEditView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView
 from admin.views.giftcard.page import CreatePageView,UploadPageView,PageView
@@ -11,8 +11,7 @@ from admin.views.giftcard.order import OrderView
 
 urlpatterns = [
     #图片素材
-    url(r'^upload/img/$',UploadImgView.as_view(),name='upload_img'),
-    url(r'^upload/img2',UploadImgView2.as_view(),name='upload_img2'),
+    url(r'^upload/img',ImgUploadView.as_view(),name='img_upload'),
     url(r'^img/$',ImgView.as_view(),name='imgs'),
     #基础分类
     url(r'^category/$',CategoryView.as_view(),name='categorys'),
@@ -26,7 +25,7 @@ urlpatterns = [
     #card
     url(r'^card/$',CardView.as_view(),name='cards'),
     url(r'^card/edit/(?P<card_id>[0-9]+)/$',CardEditView.as_view(),name='card_edit'),
-    url(r'^card/del/(?P<card_id>.*)/$',CardDelView.as_view(),name='card_del'),
+    url(r'^card/del/(?P<action>.*)/(?P<card_id>.*)/$',CardDelView.as_view(),name='card_del'),
     url(r'^card/wx/(?P<page_num>[0-9]+)/$$',CardWxView.as_view(),name='cards_wx'),
     url(r'^card/wx/info/(?P<wx_card_id>.*)$',CardInfoWxView.as_view(),name='card_wx'),
     #订单

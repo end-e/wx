@@ -167,5 +167,5 @@ class CreatePageView(View):
 
 class PageView(View):
     def get(self,request):
-        page_list = GiftPage.objects.values('id','title','page_id')
+        page_list = GiftPage.objects.values('id','title','wx_page_id')
         return render(request,'giftcard/page_list.html',locals())

@@ -40,7 +40,7 @@
                             <td>{{ theme.category }}</td>
                             <td>{{ theme.create_time | date:'Y-m-d' }}</td>
                             <td class="center  sorting_1">
-                                <a class="btn btn-info" href="" title="编辑">
+                                <a class="btn btn-info" href="{% url 'admin:giftcard:theme_edit' theme.id %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>
                             </td>

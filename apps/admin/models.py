@@ -60,7 +60,7 @@ class GiftCard(models.Model):
     max_give = models.SmallIntegerField(verbose_name=u'最大赠送次数',default=9999)
     notice = models.CharField(verbose_name=u'使用提醒',max_length=12,default='')
     description = models.CharField(verbose_name=u'使用说明',max_length=1000,default='')
-    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
+    status = models.CharField(max_length=1, verbose_name=u'状态(0:线下失效,1:线下生效,2:已上线)', default='1')
     # supply_bonus = models.CharField(max_length=1, verbose_name=u'支持积分',default='1')
     # supply_balance = models.CharField(max_length=1, verbose_name=u'支持余额',default='0')
     # auto_activate = models.CharField(max_length=1, verbose_name=u'自动激活',default='1')

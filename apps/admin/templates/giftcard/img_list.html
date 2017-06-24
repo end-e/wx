@@ -15,7 +15,7 @@
             </div>
             <div class="box-content">
                 <div class="span12">
-                    <a class="btn btn-primary" href="{% url 'admin:giftcard:upload_img2' %}">
+                    <a class="btn btn-primary" href="{% url 'admin:giftcard:img_upload' %}">
                         <i class="icon-plus"></i>
                         添加素材
                     </a>
@@ -26,7 +26,6 @@
                         <th>ID</th>
                         <th>Title</th>
                         <th>图片预览</th>
-                        <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -35,11 +34,6 @@
                             <td>{{ img.id }}</td>
                             <td class="center">{{ img.title }}</td>
                             <td class="center"><img src="{{ img.url }}" width="125px" height="115px"></td>
-                            <td class="center  sorting_1">
-                                <a class="btn btn-info" href="" title="编辑">
-                                    <i class="icon-edit "></i>
-                                </a>
-                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

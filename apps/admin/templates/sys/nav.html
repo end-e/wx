@@ -1,4 +1,8 @@
 {% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">系统管理</a>
+    <a href="#" class="current">图片素材</a>
+{% endblock %}
 {% block content_r %}
     <div class="row-fluid">
         <div class="box span12">
@@ -20,6 +24,7 @@
                     <thead>
                     <tr>
                         <th>名称</th>
+                        <th>ID</th>
                         <th>URL</th>
                         <th>父级ID</th>
                         <th>排序</th>
@@ -30,8 +35,9 @@
                     </thead>
                     <tbody>
                     {% for nav in nav_list %}
-                        <tr>
+                        <tr class="error">
                             <td>{{ nav.name }}</td>
+                            <td>{{ nav.id }}</td>
                             <td class="center">{{ nav.url }}</td>
                             <td class="center">{{ nav.parent }}</td>
                             <td class="center">{{ nav.sort }}</td>
@@ -43,6 +49,24 @@
                                 </a>
                             </td>
                         </tr>
+                        {% if nav.sub %}
+                            {% for sub in nav.sub %}
+                                <tr>
+                                    <td>----{{ sub.name }}</td>
+                                    <td>{{ sub.id }}</td>
+                                    <td class="center">{{ sub.url }}</td>
+                                    <td class="center">{{ sub.parent }}</td>
+                                    <td class="center">{{ sub.sort }}</td>
+                                    <td class="center">{{ sub.status }}</td>
+                                    <td class="center">{{ sub.icon | default:'暂无' }}</td>
+                                    <td class="center  sorting_1">
+                                        <a class="btn btn-info" href="{% url 'admin:nav_edit' sub.id %}" title="编辑">
+                                            <i class="icon-edit "></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>

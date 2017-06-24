@@ -148,23 +148,30 @@ class CardInfoWxView(MyView):
 
 
 class CardDelView(MyView):
-    def get(self, request, card_id):
-        access_token = MyView().token
-        url = 'https://api.weixin.qq.com/card/delete?access_token={token}' \
-            .format(token=access_token)
-        data = {"card_id": card_id}
-        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-
-        rep = requests.post(url, data=data)
-        rep_data = json.loads(rep.text)
-
+    def get(self, request,action, card_id):
         res = {}
-        if rep_data['errmsg'] == 'ok':
-            GiftCard.objects.filter(wx_card_id=card_id).update(wx_card_id='')
-            res["status"] = 0
-        else:
-            res["status"] = 1
-            res["errcode"] = rep_data['errcode']
-            res["errmsg"] = rep_data['errmsg']
+        if action == 'wx':
+            access_token = MyView().token
+            url = 'https://api.weixin.qq.com/card/delete?access_token={token}' \
+                .format(token=access_token)
+            data = {"card_id": card_id}
+            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
 
+            rep = requests.post(url, data=data)
+            rep_data = json.loads(rep.text)
+
+            if rep_data['errmsg'] == 'ok':
+                GiftCard.objects.filter(wx_card_id=card_id).update(wx_card_id='',status='1')
+                res["status"] = 0
+            else:
+                res["status"] = 1
+                res["errcode"] = rep_data['errcode']
+                res["errmsg"] = rep_data['errmsg']
+        elif action == 'local':
+            try:
+                GiftCard.objects.filter(id=card_id).delete()
+                res["status"] = 0
+            except Exception as e:
+                print(e)
+                res["status"] = 1
         return HttpResponse(json.dumps(res))

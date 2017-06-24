@@ -95,7 +95,7 @@
                                                 <select name="theme_card_id">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        {% if card.card_id == item.card_id %}
+                                                        {% if card.wx_card_id == item.card_id %}
                                                             <option value="{{ card.card_id }}" selected>
                                                                 {{ card.title }}
                                                             </option>

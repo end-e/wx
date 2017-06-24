@@ -1,13 +1,16 @@
 #content-header {
+    padding-right: 53px;
     margin-left: -25px;
     margin-bottom: 20px;
     width: 100%;
     z-index: 20;
+    background-color: #fff;
+    border-bottom: 1px solid #e3ebed;
+
 }
 
 #breadcrumb {
-    background-color: #fff;
-    border-bottom: 1px solid #e3ebed;
+
 }
 
 #breadcrumb a {

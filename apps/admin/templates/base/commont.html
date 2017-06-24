@@ -47,7 +47,7 @@
             formData.append("img", fileObj);
             formData.append("csrfmiddlewaretoken", '{{ csrf_token }}');
             $.ajax({
-                url: "{% url 'admin:giftcard:upload_img' %}",
+                url: "{% url 'admin:giftcard:img_upload' %}",
                 type: "POST",
                 data: formData,
                 contentType: false,

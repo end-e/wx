@@ -14,7 +14,10 @@ from admin.models import GiftImg,GiftCategory,GiftTheme,GiftThemeItem,\
 from admin.utils.myClass import MyView
 
 
-class UploadImgView(MyView):
+class ImgUploadAjaxView(MyView):
+    """
+    ajax提交
+    """
     def post(self, request):
         access_token = MyView().token
         url = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token={access_token}' \
@@ -44,7 +47,10 @@ class ImgView(View):
         return render(request, 'giftcard/img_list.html', locals())
 
 
-class UploadImgView2(MyView):
+class ImgUploadView(MyView):
+    """
+    form表单提交
+    """
     def get(self, request):
         return render(request, 'giftcard/upload_img.html')
 
@@ -111,13 +117,13 @@ class ThemeView(View):
 class ThemeEditView(View):
     def get(self,request,theme_id):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='0')
+        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='2')
         if theme_id != '0':
             try:
                 theme = GiftTheme.objects\
                     .values('id','title','theme_pic','title_color','sku_title_first','status')\
                     .get(id=theme_id)
-                item_list = GiftThemeItem.objects.values('wx_card_id','title').filter(theme_id=theme['id'])
+                item_list = GiftThemeItem.objects.values('card_id','title').filter(theme_id=theme['id'])
                 pic_item_list = GiftThemePicItem.objects.values('background_pic','msg')\
                     .filter(theme_id=theme['id'])
             except Exception as e:
@@ -127,7 +133,7 @@ class ThemeEditView(View):
     def post(self,request,theme_id):
         res = {}
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='0')
+        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='1')
         step_id = request.POST.get('step')
         if step_id == '1':
             title = request.POST.get('title')

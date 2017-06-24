@@ -1,8 +1,8 @@
+from PIL import Image, ImageDraw, ImageFont
+import random,hashlib,time
+
 from django.db import connection
 from django.conf import settings
-
-from PIL import Image, ImageDraw, ImageFont
-import random,hashlib
 
 from admin.utils import constants
 from admin.models import RoleNav
@@ -43,7 +43,7 @@ def getUserNav(role_id=None):
         role_id = str(role_id)
         sql += "and rn.role_id in (" + role_id + ") "
 
-    sql += "order by n.sort "
+    # sql += "order by n.sort "
 
     cursor = connection.cursor()
     cursor.execute(sql)
@@ -70,7 +70,7 @@ def createNavList(data):
     :param data:
     :return:
     """
-    m1list = sorted(data, key=lambda pur: pur["id"])
+    m1list = sorted(data, key=lambda pur: pur["parent"])
     menu_dict = {}
     if m1list:
         for p in m1list:
