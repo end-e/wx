@@ -110,7 +110,7 @@ class GiftTheme(models.Model):
 
 class GiftThemeItem(models.Model):
     theme_id = models.IntegerField(verbose_name=u'主题ID',default=1)
-    card_id = models.CharField(max_length=32, verbose_name=u'微信返回ID', blank=True, null=True)
+    wx_card_id = models.CharField(max_length=32, verbose_name=u'微信返回ID', blank=True, null=True)
     title = models.CharField(max_length=12, verbose_name=u'名称')
 
     class Meta:

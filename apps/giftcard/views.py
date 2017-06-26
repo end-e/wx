@@ -10,6 +10,7 @@ from wechatpy.exceptions import InvalidSignatureException
 
 def conn(request):
     if request.method == 'GET':
+
         signature = request.GET.get('signature', '')
         timestamp = request.GET.get('timestamp', '')
         nonce = request.GET.get('nonce', '')
@@ -27,7 +28,7 @@ def conn(request):
         xml = ET.fromstring(xml)
 
         app_id = xml.find('ToUserName').text
-        event = xml.find('event').text
+        event = xml.find('Event').text
         if event == 'giftcard_pay_done':
             # 购买付款成功
             #TODO 更改ERP内的卡状态
@@ -38,4 +39,14 @@ def conn(request):
         elif event == 'card_pass_check':
             # 审核通过
             # TODO 更改gift_card卡状态
-            pass
+            cardid = xml.find('CardId').text
+            kwargs = {'wx_card_id':cardid}
+            return redirect(reverse('admin:giftcard:card_code_upload', kwargs=kwargs))
+        elif event == 'user_gifting_card':
+            cardid = xml.find('CardId').text
+            kwargs = {'wx_card_id': cardid}
+            return redirect(reverse('admin:giftcard:card_code_change', kwargs=kwargs))
+        elif event == 'user_del_card':
+            open_id = xml.find('FromUserName').text
+            card_id = xml.find('CardId').text
+

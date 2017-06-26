@@ -71,8 +71,8 @@
                                 <div class="controls">
                                     <select name="status">
                                         <option>请选择</option>
-                                        <option value="0" {% if category.stauts == '0' %}selected{% endif %}>启用</option>
-                                        <option value="1" {% if category.stauts == '1' %}selected{% endif %}>禁用</option>
+                                        <option value="0" {% if theme.stauts == '0' %}selected{% endif %}>启用</option>
+                                        <option value="1" {% if theme.stauts == '1' %}selected{% endif %}>禁用</option>
                                     </select>
                                 </div>
                             </div>
@@ -89,18 +89,19 @@
                             <div class="item_list list">
                                 {% for item in item_list %}
                                     <div class="item list-item">
+                                        <input type="hidden" name="theme_id[]" value="{{ item.id }}">
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
-                                                <select name="theme_card_id">
+                                                <select name="theme_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        {% if card.wx_card_id == item.card_id %}
-                                                            <option value="{{ card.card_id }}" selected>
+                                                        {% if card.wx_card_id == item.wx_card_id %}
+                                                            <option value="{{ card.wx_card_id }}" selected>
                                                                 {{ card.title }}
                                                             </option>
                                                         {% else %}
-                                                            <option value="{{ card.card_id }}">
+                                                            <option value="{{ card.wx_card_id }}">
                                                                 {{ card.title }}
                                                             </option>
                                                         {% endif %}
@@ -111,7 +112,7 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
-                                                <input type="text" name="theme_card_title" value="{{ item.title }}">
+                                                <input type="text" name="theme_card_title[]" value="{{ item.title }}">
                                             </div>
                                         </div>
                                         <div class="control-group span2 list-item-btn">
@@ -128,10 +129,10 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
-                                                <select name="item_card_id[]">
+                                                <select name="theme_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -139,7 +140,7 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
-                                                <input type="text" name="item_card_title[]" value="">
+                                                <input type="text" name="theme_card_title[]" value="">
                                             </div>
                                         </div>
                                         <div class="control-group span2 list-item-btn">
@@ -155,10 +156,10 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
-                                                <select name="item_card_id[]">
+                                                <select name="theme_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -166,7 +167,7 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
-                                                <input type="text" name="item_card_title[]" value="">
+                                                <input type="text" name="theme_card_title[]" value="">
                                             </div>
                                         </div>
                                         <div class="control-group span2 list-item-btn">
@@ -182,10 +183,10 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
-                                                <select name="item_card_id[]">
+                                                <select name="theme_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        <option value="{{ card.card_id }}">{{ card.title }}</option>
+                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -193,7 +194,7 @@
                                         <div class="control-group span4">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
-                                                <input type="text" name="item_card_title[]" value="">
+                                                <input type="text" name="theme_card_title[]" value="">
                                             </div>
                                         </div>
                                         <div class="control-group span2 list-item-btn">
@@ -219,7 +220,9 @@
                             <input type="hidden" name="step" value="3">
                             <div class="pic_item_list list">
                                 {% for pic_item in pic_item_list %}
+
                                     <div class="item list-item">
+                                        <input type="hidden" name="card_pic_id[]" value="{{ pic_item.id }}">
                                         <div class="control-group span4">
                                             <label class="control-label">卡面背景:</label>
                                             <div class="controls">
@@ -364,11 +367,13 @@
             $(step+' #Form').submit();
         }
         //控制步骤显示
-        var step_id = {{ step_id|safe }};
-        $('.steps li').removeClass('active').eq(step_id-1).addClass('active');
-        $('.step-content .step-pane').removeClass('active').eq(step_id-1).addClass('active');
+        {% comment %}var step_id = {{ step_id | safe | default:'1' }};
+        console.log(step_id);
+        $('.steps li').removeClass('active').eq(step_id).addClass('active');
+        $('.step-content .step-pane').removeClass('active').eq(step_id).addClass('active');{% endcomment %}
 
         var res_status = {{ res.status | safe | default:-1 }};
+
         if (res_status === 0) {
             $('.btn-next').click()
         }

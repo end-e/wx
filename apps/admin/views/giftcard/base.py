@@ -5,6 +5,7 @@ import json
 import os
 import requests
 import time
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import render,redirect
 from django.views.generic.base import View
@@ -80,6 +81,8 @@ class ImgUploadView(MyView):
             res['status'] = 1
             res['msg'] = rep_data['errmsg']
 
+        return render(request, 'giftcard/upload_img.html',locals())
+
 
 class CategoryView(View):
     def get(self,request):
@@ -117,14 +120,15 @@ class ThemeView(View):
 class ThemeEditView(View):
     def get(self,request,theme_id):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='2')
+        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='1')
+        th_id = theme_id
         if theme_id != '0':
             try:
                 theme = GiftTheme.objects\
                     .values('id','title','theme_pic','title_color','sku_title_first','status')\
                     .get(id=theme_id)
-                item_list = GiftThemeItem.objects.values('card_id','title').filter(theme_id=theme['id'])
-                pic_item_list = GiftThemePicItem.objects.values('background_pic','msg')\
+                item_list = GiftThemeItem.objects.values('id','wx_card_id','title').filter(theme_id=theme['id'])
+                pic_item_list = GiftThemePicItem.objects.values('id','background_pic','msg')\
                     .filter(theme_id=theme['id'])
             except Exception as e:
                 print(e)
@@ -135,6 +139,7 @@ class ThemeEditView(View):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='1')
         step_id = request.POST.get('step')
+        th_id = theme_id
         if step_id == '1':
             title = request.POST.get('title')
             title_color = request.POST.get('title_color')
@@ -160,38 +165,50 @@ class ThemeEditView(View):
                 res['status'] = 1
         if step_id == '2':
             th_id = request.POST.get('th_id')
-            card_ids = request.POST.getlist('item_card_id[]')
-            card_titles = request.POST.getlist('item_card_title[]')
-            try:
-                themeItem_list = []
-                for i in (0,len(card_ids)-1):
-                    themeItem = GiftThemeItem()
-                    themeItem.theme_id = th_id
-                    themeItem.card_id = card_ids[i]
-                    themeItem.title = card_titles[i]
-                    themeItem_list.append(themeItem)
-                GiftThemeItem.objects.bulk_create(themeItem_list)
-                res['status'] = 0
-            except Exception as e:
-                print(e)
-                res['status'] = 1
+            theme_ids = request.POST.getlist('theme_id[]')
+            theme_card_ids = request.POST.getlist('theme_card_id[]')
+            theme_card_titles = request.POST.getlist('theme_card_title[]')
+            if len(theme_ids)==0:
+                try:
+                    themeItem_list = []
+                    for i in range(0,len(theme_card_ids)):
+                        themeItem = GiftThemeItem()
+                        themeItem.theme_id = th_id
+                        themeItem.wx_card_id = theme_card_ids[i]
+                        themeItem.title = theme_card_titles[i]
+                        themeItem_list.append(themeItem)
+                    GiftThemeItem.objects.bulk_create(themeItem_list)
+                    res['status'] = 0
+                except Exception as e:
+                    print(e)
+                    res['status'] = 1
+            else:
+                for i in range(0, len(theme_card_ids) ):
+                    GiftThemeItem.objects.filter(id=theme_ids[i])\
+                        .update(wx_card_id=theme_card_ids[i],title=theme_card_titles[i])
         if step_id == '3':
             th_id = request.POST.get('th_id')
+            card_pic_ids = request.POST.getlist('card_pic_id[]')
             card_pics = request.POST.getlist('card_pic[]')
             card_msgs = request.POST.getlist('card_msg[]')
-            try:
-                themePicItem_list = []
-                for i in (0, len(card_pics)):
-                    themePicItem = GiftThemePicItem()
-                    themePicItem.theme_id = th_id
-                    themePicItem.background_pic = card_pics[i]
-                    themePicItem.msg = card_msgs[i]
-                    themePicItem_list.append(themePicItem)
-                GiftThemePicItem.objects.bulk_create(themePicItem_list)
-                res['status'] = 0
-            except Exception as e:
-                print(e)
-                res['status'] = 1
+            if len(card_pic_ids)==0:
+                try:
+                    themePicItem_list = []
+                    for i in range(0, len(card_pics)):
+                        themePicItem = GiftThemePicItem()
+                        themePicItem.theme_id = th_id
+                        themePicItem.background_pic = card_pics[i]
+                        themePicItem.msg = card_msgs[i]
+                        themePicItem_list.append(themePicItem)
+                    GiftThemePicItem.objects.bulk_create(themePicItem_list)
+                    res['status'] = 0
+                except Exception as e:
+                    print(e)
+                    res['status'] = 1
+            else:
+                for i in range(0, len(card_pics)):
+                    GiftThemePicItem.objects.filter(id=card_pic_ids[i])\
+                        .update(background_pic = card_pics[i],msg = card_msgs[i])
         return render(request, 'giftcard/theme_edit.html', locals())
 
 

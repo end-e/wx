@@ -5,8 +5,8 @@ from django.db import connection
 from django.conf import settings
 
 from admin.utils import constants
-from admin.models import RoleNav
-
+from admin.models import RoleNav, GiftTheme, GiftThemeItem, GiftThemePicItem
+from utils import db,consts
 
 def md5(data):
     md5 = hashlib.md5()
@@ -169,7 +169,7 @@ def createThemeList(themes,theme_categories):
     :return:
     """
     theme_list = []
-    for i in (0,len(themes)-1):
+    for i in range(0,len(themes)):
         # theme
         t = GiftTheme.objects.values('id', 'title', 'theme_pic', 'title_color', 'sku_title_first').get(id=themes[i])
 
@@ -181,11 +181,11 @@ def createThemeList(themes,theme_categories):
             "category_index": theme_categories[i] # 主题标号，对应category_list内的title字段
         }
         # item_list
-        items = GiftThemeItem.objects.values('card_id', 'title').filter(theme_id=t['id'])
+        items = GiftThemeItem.objects.values('wx_card_id', 'title').filter(theme_id=t['id'])
         item_list = []
         for item in items:
             i = {
-                "card_id": item['card_id'],  # 待上架的card_id
+                "card_id": item['wx_card_id'],  # 待上架的card_id
                 "title": item['title']  # 商品名，不填写默认为卡名称
             }
             item_list.append(i)
@@ -253,7 +253,6 @@ def createCardData(form):
     brand_name = form.cleaned_data['brand_name']
     description = form.cleaned_data['description']
     notice = form.cleaned_data['notice']
-    quantity = form.cleaned_data['quantity']
 
     data = {
         "card": {
@@ -278,7 +277,7 @@ def createCardData(form):
                         "type": "DATE_TYPE_PERMANENT"
                     },
                     "sku": {
-                        "quantity": int(quantity)
+                        "quantity": 0
                     },
                     "use_all_locations": False,
                     # "location_id_list": [
@@ -345,3 +344,21 @@ def createCardEditData(form):
     }
 
     return data
+
+def getCardCode():
+    conn = db.getMysqlConnection(
+        consts.DB_SERVER_11,
+        consts.DB_PORT_11,
+        consts.DB_USER_11,
+        consts.DB_PASSWORD_11,
+        consts.DB_DATABASE_11,
+    )
+
+    sql = "SELECT TOP 100 cardNo FROM guest WHERE cardType='12' AND Mode = '9'"
+    cur = conn.cursor()
+    cur.execute(sql)
+    cards = cur.fetchall()
+    
+    card_codes = [ card['card_no'] for card in cards]
+    
+    return card_codes

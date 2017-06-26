@@ -5,7 +5,8 @@ from django.conf.urls import url
 
 from admin.views.giftcard.base import ImgUploadView,ImgView,CategoryView,CategoryEditView,\
     ThemeView,ThemeEditView
-from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView
+from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeView,\
+    CardChangeCodeView
 from admin.views.giftcard.page import CreatePageView,UploadPageView,PageView
 from admin.views.giftcard.order import OrderView
 
@@ -28,6 +29,9 @@ urlpatterns = [
     url(r'^card/del/(?P<action>.*)/(?P<card_id>.*)/$',CardDelView.as_view(),name='card_del'),
     url(r'^card/wx/(?P<page_num>[0-9]+)/$$',CardWxView.as_view(),name='cards_wx'),
     url(r'^card/wx/info/(?P<wx_card_id>.*)$',CardInfoWxView.as_view(),name='card_wx'),
+    url(r'^card/code/upload/(?P<wx_card_id>.*)',CardUpCodeView.as_view(),name='card_code_upload'),
+    url(r'^card/code/change/(?P<wx_card_id>.*)',CardChangeCodeView.as_view(),name='card_code_change'),
+
     #订单
     url(r'^order/$',OrderView.as_view(),name='orders'),
 ]

@@ -40,7 +40,7 @@
                                 {% comment %}<a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>{% endcomment %}
-                                <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.card_id }}')">
+                                <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.card_id }}','wx')">
                                     <i class=" icon-trash"></i>
                                 </a>
                             </td>
@@ -81,8 +81,9 @@
 {% endblock %}
 {% block common_js %}
     <script>
-        function delCard(wx_card_id) {
-            var url = "{% url 'admin:giftcard:card_del' 'card_id' %}";
+        function delCard(wx_card_id,action) {
+            var url = "{% url 'admin:giftcard:card_del' 'action' 'card_id' %}";
+            url = url.replace('action',action);
             url = url.replace('card_id',wx_card_id);
             $.get(url,function (data) {
                 if(data.status==0){
