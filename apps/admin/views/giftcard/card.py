@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from admin.models import GiftCard, GiftImg,GiftThemeItem
 from admin.utils.myClass import MyView
 from admin.utils import method
-from admin.forms import GiftCardForm
+from admin.forms import GiftCardForm,GiftCardEditForm
 
 
 class CardView(View):
@@ -44,7 +44,7 @@ class CardEditView(MyView):
                 form = GiftCardForm(request.POST)
             else:
                 qs_card = GiftCard.objects.get(pk=card_id)
-                form = GiftCardForm(request.POST, instance=qs_card)
+                form = GiftCardEditForm(request.POST, instance=qs_card)
             if form.is_valid():
                 form.save()
                 return redirect(reverse('admin:giftcard:cards'))
@@ -53,7 +53,7 @@ class CardEditView(MyView):
                 form = GiftCardForm(request.POST)
             else:
                 qs_card = GiftCard.objects.get(pk=card_id)
-                form = GiftCardForm(request.POST, instance=qs_card)
+                form = GiftCardEditForm(request.POST, instance=qs_card)
             if form.is_valid():
                 # 处理本地数据
                 qs_wx_card_id = form.cleaned_data['wx_card_id']
@@ -104,7 +104,7 @@ class CardEditView(MyView):
 
 class CardWxView(MyView):
     def get(self, request, page_num):
-        count = 15
+        count = 10
         page_num = int(page_num)
         offset = (page_num - 1) * count
         access_token = MyView().token
@@ -185,37 +185,13 @@ class CardDelView(MyView):
 class CardUpCodeView(MyView):
     def get(self, request, wx_card_id):
         access_token = MyView().token
-        url = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
-            .format(token=access_token)
         code = method.getCardCode()
         data = {
             "card_id": wx_card_id,
             "code": code
         }
-        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-
-        rep = requests.post(url, data=data)
-        rep_data = json.loads(rep.text)
-        res = {}
-        if rep_data['errmsg'] == 'ok':
-            url = 'URL:https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
-                .format(access_token=access_token)
-            card = GiftCard.objects.filter(wx_card_id=wx_card_id).values('quantity').first()
-            data = {
-                "card_id": wx_card_id,
-                "increase_stock_value": int(card['quantity']),
-            }
-            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-
-            rep = requests.post(url, data=data)
-            rep_data = json.loads(rep.text)
-
-            if rep_data['errmsg'] == 'ok':
-                res["status"] = 0
-            else:
-                res["status"] = 1
-        else:
-            res["status"] = 1
+        res = method.upCardCode(access_token,wx_card_id,data)
+        return render(request,'')
 
 
 class CardChangeCodeView(MyView):

@@ -13,7 +13,7 @@ from admin.utils import method
 class UserView(View):
     def get(self, request):
         users = User.objects.values('id', 'nick', 'role', 'status', 'add_time')
-        paginator = MyPaginator(users, 15)
+        paginator = MyPaginator(users, 10)
         page_num = request.GET.get('page', 1)
         try:
             users = paginator.page(page_num)

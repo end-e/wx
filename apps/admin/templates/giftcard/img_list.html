@@ -26,14 +26,29 @@
                         <th>ID</th>
                         <th>Title</th>
                         <th>图片预览</th>
+                        <th>上传日期</th>
+                        <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for img in img_list %}
                         <tr>
-                            <td>{{ img.id }}</td>
+                            <td>{{ forloop.counter }}</td>
                             <td class="center">{{ img.title }}</td>
-                            <td class="center"><img src="{{ img.url }}" width="125px" height="115px"></td>
+                            <td class="center"><img src="{{ img.url }}" width="25px" height="21px"></td>
+                            <td>{{ img.create_time | date:'Y-m-d' }}</td>
+                            <td>
+                                {% if img.status == '0' %}
+                                <a class="btn btn-warning" title="失效" onclick="changeStatus('{{ img.id }}','1')">
+                                    <i class="icon-thumbs-down"></i>
+                                </a>
+                                {% else %}
+                                <a class="btn btn-primary" title="启用" onclick="changeStatus('{{ img.id }}','0')">
+                                    <i class="icon-thumbs-up"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -43,5 +58,19 @@
     </div>
 {% endblock %}
 {% block common_js %}
-
+    <script>
+        function changeStatus(id,status) {
+            var url = "{% url 'admin:giftcard:img_status' 0 1 %}";
+            url = url.replace(0,id);
+            url = url.replace(1,status);
+            $.get(url,function (data) {
+                if(data.status==0){
+                    noty({"text":"数据删除成功","layout":"bottom","type":"information"});
+                    window.location.reload()
+                }else {
+                    noty({"text":"数据删除失败","layout":"bottom","type":"error"});
+                }
+            },'json')
+        }
+    </script>
 {% endblock %}

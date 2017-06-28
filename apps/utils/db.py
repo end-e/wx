@@ -57,3 +57,15 @@ def getMysqlConnection(host, port, user, password, db):
         cursorclass=pymysql.cursors.DictCursor
     )
     return conn
+
+def getMsSqlConnection(host, port, user, password, db,as_dict=True):
+    conn = pymssql.connect(
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        database=db,
+        charset='utf8',
+        as_dict=as_dict
+    )
+    return conn

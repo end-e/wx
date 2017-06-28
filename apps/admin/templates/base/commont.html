@@ -77,7 +77,7 @@
             formLine.find('input').val('');
         }
         function delFormRow(obj) {
-            $(obj).parents('.list-item').remove();
+            $(obj).parent().parent().remove();
         }
 
         function addTheme(obj) {

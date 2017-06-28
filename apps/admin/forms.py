@@ -41,3 +41,8 @@ class GiftCardForm(forms.ModelForm):
                   'price','brand_name','quantity','status','max_give',
                   'notice','description','wx_card_id']
 
+class GiftCardEditForm(forms.ModelForm):
+    action = forms.CharField(required=True)
+    class Meta:
+        model = GiftCard
+        fields = ['logo','notice','description','wx_card_id']

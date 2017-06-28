@@ -1,4 +1,5 @@
 {% extends 'base/commont.html' %}
+{% load myFilter %}
 {% block current_page %}
     <a href="#">礼品卡</a>
     <a href="#" class="current">主题</a>
@@ -19,18 +20,28 @@
                         <li data-target="#step3"><span class="badge">3</span></li>
                     </ul>
                     <div class="actions">
-                        <button type="button" class="btn btn-primary" onclick="window.history.back()" style="margin-right:50px">
+                        <a href="{% url 'admin:giftcard:themes' %}" class="btn btn-primary" style="margin-right:50px">
                             返&nbsp;&nbsp;回<i class="icon-reply" style="margin-left: 10px"></i>
-                        </button>
-                        <button type="button" class="btn btn-prev"><i class="icon-arrow-left"></i> 上一步</button>
-                        <button type="button" class="btn btn-success btn-next" data-last="完成">
-                            下一步 <i class="icon-arrow-right"></i>
-                        </button>
+                        </a>
+                        {% if step_prev > 0 %}
+                            <a class="btn" href="{%url 'admin:giftcard:theme_edit' theme_id step_prev %}">
+                                <i class="icon-arrow-left"></i> 上一步
+                            </a>
+                        {% endif %}
+                        {% if step_next < 4  %}
+                            <a class="btn btn-success"href="{%url 'admin:giftcard:theme_edit' theme_id step_next %}">
+                                下一步 <i class="icon-arrow-right"></i>
+                            </a>
+                        {% elif step_next == 4 %}
+                            <a class="btn btn-success" data-last="" href="{%url 'admin:giftcard:themes'%}">
+                                完成 <i class="icon-arrow-right"></i>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="step-content">
                     <div id="step1" class="step-pane active">
-                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 1 %}">
                             {% csrf_token %}
                             <input type="hidden" name="step" value="1">
                             <div class="control-group">
@@ -71,8 +82,8 @@
                                 <div class="controls">
                                     <select name="status">
                                         <option>请选择</option>
-                                        <option value="0" {% if theme.stauts == '0' %}selected{% endif %}>启用</option>
-                                        <option value="1" {% if theme.stauts == '1' %}selected{% endif %}>禁用</option>
+                                        <option value="0" {% if theme.status == '0' %}selected{% endif %}>启用</option>
+                                        <option value="1" {% if theme.status == '1' %}selected{% endif %}>禁用</option>
                                     </select>
                                 </div>
                             </div>
@@ -82,15 +93,15 @@
                         </form>
                     </div>
                     <div id="step2" class="step-pane ">
-                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 2 %}">
                             {% csrf_token %}
                             <input type="hidden" name="th_id" value="{{ th_id }}">
                             <input type="hidden" name="step" value="2">
                             <div class="item_list list">
                                 {% for item in item_list %}
-                                    <div class="item list-item">
+                                    <div class="row-fluid">
                                         <input type="hidden" name="theme_id[]" value="{{ item.id }}">
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
                                                 <select name="theme_card_id[]">
@@ -109,7 +120,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
                                                 <input type="text" name="theme_card_title[]" value="{{ item.title }}">
@@ -125,8 +136,8 @@
                                         </div>
                                     </div>
                                 {% empty %}
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
+                                    <div class="row-fluid">
+                                        <div class="control-group span3">
                                             <label class="control-label">礼品卡ID:</label>
                                             <div class="controls">
                                                 <select name="theme_card_id[]">
@@ -137,61 +148,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="control-group span4">
-                                            <label class="control-label">礼品卡标题:</label>
-                                            <div class="controls">
-                                                <input type="text" name="theme_card_title[]" value="">
-                                            </div>
-                                        </div>
-                                        <div class="control-group span2 list-item-btn">
-                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
-                                                添加 <i class="icon-plus"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
-                                                删除 <i class="icon-minus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
-                                            <label class="control-label">礼品卡ID:</label>
-                                            <div class="controls">
-                                                <select name="theme_card_id[]">
-                                                    <option>请选择</option>
-                                                    {% for card in card_list %}
-                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="control-group span4">
-                                            <label class="control-label">礼品卡标题:</label>
-                                            <div class="controls">
-                                                <input type="text" name="theme_card_title[]" value="">
-                                            </div>
-                                        </div>
-                                        <div class="control-group span2 list-item-btn">
-                                            <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
-                                                添加 <i class="icon-plus"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
-                                                删除 <i class="icon-minus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
-                                            <label class="control-label">礼品卡ID:</label>
-                                            <div class="controls">
-                                                <select name="theme_card_id[]">
-                                                    <option>请选择</option>
-                                                    {% for card in card_list %}
-                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">
                                                 <input type="text" name="theme_card_title[]" value="">
@@ -214,16 +171,15 @@
                         </form>
                     </div>
                     <div id="step3" class="step-pane ">
-                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id %}">
+                        <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 3 %}">
                             {% csrf_token %}
                             <input type="hidden" name="th_id" value="{{ th_id }}">
                             <input type="hidden" name="step" value="3">
                             <div class="pic_item_list list">
                                 {% for pic_item in pic_item_list %}
-
-                                    <div class="item list-item">
+                                    <div class="row-fluid">
                                         <input type="hidden" name="card_pic_id[]" value="{{ pic_item.id }}">
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">卡面背景:</label>
                                             <div class="controls">
                                                 <select name="card_pic[]" >
@@ -236,7 +192,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">祝福语:</label>
                                             <div class="controls">
                                                 <input type="text" name="card_msg[]" value="{{ pic_item.msg }}">
@@ -254,8 +210,8 @@
                                         </div>
                                     </div>
                                 {% empty %}
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
+                                    <div class="row-fluid">
+                                        <div class="control-group span3">
                                             <label class="control-label">卡面背景:</label>
                                             <div class="controls">
                                                 <select name="card_pic[]" >
@@ -268,69 +224,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="control-group span4">
-                                            <label class="control-label">祝福语:</label>
-                                            <div class="controls">
-                                                <input type="text" name="card_msg[]" value="">
-                                            </div>
-                                        </div>
-                                        <div class="control-group span2 list-item-btn">
-                                            <button type="button" class="btn btn-small btn-success"
-                                                    onclick="addFormRow(this)">
-                                                添加 <i class="icon-plus"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-small btn-danger"
-                                                    onclick="delFormRow(this)">
-                                                删除 <i class="icon-minus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
-                                            <label class="control-label">卡面背景:</label>
-                                            <div class="controls">
-                                                <select name="card_pic[]" >
-                                                    <option>请选择</option>
-                                                    {% for pic in pic_list %}
-                                                        <option value="{{ pic.url }}">
-                                                            {{ pic.title }}
-                                                        </option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="control-group span4">
-                                            <label class="control-label">祝福语:</label>
-                                            <div class="controls">
-                                                <input type="text" name="card_msg[]" value="">
-                                            </div>
-                                        </div>
-                                        <div class="control-group span2 list-item-btn">
-                                            <button type="button" class="btn btn-small btn-success"
-                                                    onclick="addFormRow(this)">
-                                                添加 <i class="icon-plus"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-small btn-danger"
-                                                    onclick="delFormRow(this)">
-                                                删除 <i class="icon-minus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="item list-item">
-                                        <div class="control-group span4">
-                                            <label class="control-label">卡面背景:</label>
-                                            <div class="controls">
-                                                <select name="card_pic[]" >
-                                                    <option>请选择</option>
-                                                    {% for pic in pic_list %}
-                                                        <option value="{{ pic.url }}">
-                                                            {{ pic.title }}
-                                                        </option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="control-group span4">
+                                        <div class="control-group span3">
                                             <label class="control-label">祝福语:</label>
                                             <div class="controls">
                                                 <input type="text" name="card_msg[]" value="">
@@ -361,24 +255,37 @@
 {% endblock %}
 {% block common_js %}
     <script>
-        //表单提交
+       //表单提交
         function submitForm() {
            var step = $('.steps .active').attr('data-target');
             $(step+' #Form').submit();
         }
+
         //控制步骤显示
-        {% comment %}var step_id = {{ step_id | safe | default:'1' }};
-        console.log(step_id);
-        $('.steps li').removeClass('active').eq(step_id).addClass('active');
-        $('.step-content .step-pane').removeClass('active').eq(step_id).addClass('active');{% endcomment %}
+       var step_id = {{ step_id | safe | default:1 }}
+        goToStep(step_id-1);
 
-        var res_status = {{ res.status | safe | default:-1 }};
+        $(function(){
+            var res_status = {{ res.status | safe | default:-1 }};
+            if (res_status === 1) {
+                noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+            }
+        });
+        function goToStep(step_id) {
+            var step_total = $('.steps li').length;
+            $('.steps li').removeClass('active').removeClass('complete');
+            $('.step-content .step-pane').removeClass('active');
+            for(var i=0;i<step_total;i++){
+                if(i<step_id){
+                    $('.steps li').eq(i).addClass('complete');
+                }else if(i==step_id){
+                    $('.steps li').eq(i).addClass('active');
+                    $('.step-content .step-pane').eq(i).addClass('active');
+                }
+            }
+        }
 
-        if (res_status === 0) {
-            $('.btn-next').click()
-        }
-        else if (res_status === 1) {
-            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
-        }
+
+
     </script>
 {% endblock %}

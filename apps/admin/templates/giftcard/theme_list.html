@@ -15,7 +15,7 @@
             </div>
             <div class="box-content">
                 <div class="span12">
-                    <a class="btn btn-primary" href="{% url 'admin:giftcard:theme_edit' 0 %}">
+                    <a class="btn btn-primary" href="{% url 'admin:giftcard:theme_edit' 0 1 %}">
                         <i class="icon-plus"></i>
                         添加主题
                     </a>
@@ -26,7 +26,6 @@
                         <th>ID</th>
                         <th>名称</th>
                         <th>封面图</th>
-                        <th>所属分类</th>
                         <th>创建日期</th>
                         <th>操作</th>
                     </tr>
@@ -36,11 +35,10 @@
                         <tr>
                             <td>{{ theme.id }}</td>
                             <td>{{ theme.title }}</td>
-                            <td><img src="{{ theme.theme_pic }}" width="125" height="115"></td>
-                            <td>{{ theme.category }}</td>
+                            <td><img src="{{ theme.theme_pic }}" width="25" height="21"></td>
                             <td>{{ theme.create_time | date:'Y-m-d' }}</td>
                             <td class="center  sorting_1">
-                                <a class="btn btn-info" href="{% url 'admin:giftcard:theme_edit' theme.id %}" title="编辑">
+                                <a class="btn btn-info" href="{% url 'admin:giftcard:theme_edit' theme.id 1 %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>
                             </td>

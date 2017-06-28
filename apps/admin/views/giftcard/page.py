@@ -19,7 +19,6 @@ class UploadPageView(MyView):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         if page_id == '0':
             # TODO 新建
-            page_id = page_id
             return render(request, 'giftcard/page_create.html', locals())
 
         else:
@@ -157,12 +156,7 @@ class UploadPageView(MyView):
         return render(request, 'giftcard/page_create.html', locals())
 
 
-class CreatePageView(View):
-    def get(self,request):
-        return render(request,'giftcard/create_page_step.html')
 
-    def post(self,request):
-        pass
 
 
 class PageView(View):

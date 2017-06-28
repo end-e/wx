@@ -20,7 +20,7 @@ class OrderView(MyView):
         begin_time = method.getTimeStamp(begin+' 00:00:00')
         end = request.POST.get('end_time')
         end_time = method.getTimeStamp(end+' 23:59:59')
-        count = 15
+        count = 10
         page_num = request.POST.get('page_num',1)
         page_num = int(page_num)
         offset = (page_num - 1) * count

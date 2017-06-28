@@ -43,6 +43,9 @@
                                 <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>
+                                <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload' card.id %}" title="编辑">
+                                    <i class="icon-edit "></i>
+                                </a>
                                 <a class="btn btn-warning" title="线下删除" onclick="delCard('{{ card.id }}','local')">
                                     <i class=" icon-trash"></i>
                                 </a>
