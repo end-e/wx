@@ -43,7 +43,6 @@
                     <div id="step1" class="step-pane active">
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 1 %}">
                             {% csrf_token %}
-                            <input type="hidden" name="step" value="1">
                             <div class="control-group">
                                 <label class="control-label">主题标题</label>
                                 <div class="controls">
@@ -96,7 +95,6 @@
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 2 %}">
                             {% csrf_token %}
                             <input type="hidden" name="th_id" value="{{ th_id }}">
-                            <input type="hidden" name="step" value="2">
                             <div class="item_list list">
                                 {% for item in item_list %}
                                     <div class="row-fluid">
@@ -107,15 +105,9 @@
                                                 <select name="theme_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        {% if card.wx_card_id == item.wx_card_id %}
-                                                            <option value="{{ card.wx_card_id }}" selected>
-                                                                {{ card.title }}
-                                                            </option>
-                                                        {% else %}
-                                                            <option value="{{ card.wx_card_id }}">
-                                                                {{ card.title }}
-                                                            </option>
-                                                        {% endif %}
+                                                        <option value="{{ card.wx_card_id }}" {% if card.wx_card_id == item.wx_card_id %}selected{% endif %}>
+                                                            {{ card.title }}
+                                                        </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -174,7 +166,6 @@
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 3 %}">
                             {% csrf_token %}
                             <input type="hidden" name="th_id" value="{{ th_id }}">
-                            <input type="hidden" name="step" value="3">
                             <div class="pic_item_list list">
                                 {% for pic_item in pic_item_list %}
                                     <div class="row-fluid">

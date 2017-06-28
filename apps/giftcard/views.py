@@ -48,7 +48,7 @@ def conn(request):
                 type='99',
             )
             kwargs = {'wx_card_id':cardid}
-            return redirect(reverse('admin:giftcard:card_code_upload', kwargs=kwargs))
+            return redirect(reverse('admin:giftcard:card_code_upload_auto', kwargs=kwargs))
         elif event == 'user_gifting_card':
             cardid = xml.find('CardId').text
             kwargs = {'wx_card_id': cardid}

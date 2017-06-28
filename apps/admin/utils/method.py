@@ -346,7 +346,7 @@ def createCardEditData(form):
     return data
 
 
-def getCardCode():
+def getCardCode(value):
     conn = db.getMsSqlConnection(
         consts.DB_SERVER_22,
         consts.DB_PORT_22,
@@ -355,13 +355,36 @@ def getCardCode():
         consts.DB_DATABASE_22,
     )
 
-    sql = "SELECT TOP 100 cardNo FROM guest WHERE cardType='12' AND Mode = '9'"
+    sql = "SELECT TOP 100 cardNo FROM guest " \
+          "WHERE cardType='12' AND Mode = '9' AND New_amount={value}"\
+        .format(value=value)
     cur = conn.cursor()
     cur.execute(sql)
     cards = cur.fetchall()
     
     card_codes = [ card['cardNo'].strip() for card in cards]
     
+    return card_codes
+
+
+def getCardCode2(start,end):
+    conn = db.getMsSqlConnection(
+        consts.DB_SERVER_22,
+        consts.DB_PORT_22,
+        consts.DB_USER_22,
+        consts.DB_PASSWORD_22,
+        consts.DB_DATABASE_22,
+    )
+
+    sql = "SELECT TOP 100 cardNo FROM guest " \
+          "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}'"\
+        .format(start=start,end=end)
+    cur = conn.cursor()
+    cur.execute(sql)
+    cards = cur.fetchall()
+
+    card_codes = [card['cardNo'].strip() for card in cards]
+
     return card_codes
 
 

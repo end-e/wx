@@ -111,8 +111,6 @@ def send_temp(openid, data):
     secret = consts.APPSECRET
 
     # 用户openid
-    # oE9Pts9_cBLTWccP682FgWuvQ7js
-    # oE9Pts_Hk63sj3dlmCtfkXGWMV-8
     user_id = openid
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
@@ -124,16 +122,7 @@ def send_temp(openid, data):
     url = ''
     top_color = '#efefef'
     data = data
-
     res_send = message.send_template(user_id, template_id, url, top_color, data)
-
-    Log.objects.create(
-        open_id=openid,
-        errmsg=res_send['errmsg'],
-        errcode=res_send['errcode'],
-        type='02',
-    )
-
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志
         Log.objects.create(

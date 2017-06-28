@@ -39,12 +39,12 @@
                             <td>{{ img.create_time | date:'Y-m-d' }}</td>
                             <td>
                                 {% if img.status == '0' %}
-                                <a class="btn btn-warning" title="失效" onclick="changeStatus('{{ img.id }}','1')">
-                                    <i class="icon-thumbs-down"></i>
+                                <a class="btn btn-warning" title="禁用" onclick="changeStatus('{{ img.id }}','1')">
+                                    <i class="icon-lock"></i>
                                 </a>
                                 {% else %}
                                 <a class="btn btn-primary" title="启用" onclick="changeStatus('{{ img.id }}','0')">
-                                    <i class="icon-thumbs-up"></i>
+                                    <i class="icon-unlock"></i>
                                 </a>
                                 {% endif %}
                             </td>

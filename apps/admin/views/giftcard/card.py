@@ -17,15 +17,15 @@ from admin.forms import GiftCardForm,GiftCardEditForm
 
 class CardView(View):
     def get(self, request):
-        card_list = GiftCard.objects.values('id', 'wx_card_id', 'title', 'init_balance', 'price', 'quantity') \
-            .filter(status='1')
+        card_list = GiftCard.objects.values('id', 'wx_card_id', 'title', 'init_balance', 'price', 'quantity')
+
         return render(request, 'giftcard/card_list.html', locals())
 
 
 class CardEditView(MyView):
     def get(self, request, card_id):
         card_id = card_id
-        pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
+        pic_list = GiftImg.objects.values('title', 'id').filter(status='0')
         if card_id != '0':
             card = GiftCard \
                 .objects \
@@ -49,55 +49,52 @@ class CardEditView(MyView):
                 form.save()
                 return redirect(reverse('admin:giftcard:cards'))
         elif action == 'wx':
-            if card_id == '0':
-                form = GiftCardForm(request.POST)
-            else:
+            qs_wx_card_id = request.POST.get('wx_card_id','')
+            if qs_wx_card_id:
                 qs_card = GiftCard.objects.get(pk=card_id)
                 form = GiftCardEditForm(request.POST, instance=qs_card)
+            else:
+                if card_id == '0' :
+                    form = GiftCardForm(request.POST)
+                else:
+                    qs_card = GiftCard.objects.get(pk=card_id)
+                    form = GiftCardForm(request.POST, instance=qs_card)
             if form.is_valid():
                 # 处理本地数据
                 qs_wx_card_id = form.cleaned_data['wx_card_id']
                 res_save = form.save()
                 # 上传微信
+                res = {}
                 if qs_wx_card_id:
                     # TODO 修改卡实例信息
                     url = 'https://api.weixin.qq.com/card/update?access_token={access_token}' \
                         .format(access_token=access_token)
                     data = method.createCardEditData(form)
                     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-
                     rep = requests.post(url, data=data)
                     rep_data = json.loads(rep.text)
-                    res = {}
                     if rep_data['errmsg'] == 'ok':
                         return redirect(reverse('admin:giftcard:cards'))
                     else:
                         res["status"] = 1
-                        res["errcode"] = rep_data['errcode']
-                        res["errmsg"] = rep_data['errmsg']
-
                 else:
                     # TODO 新建卡实例信息
                     url = 'https://api.weixin.qq.com/card/create?access_token={access_token}' \
                         .format(access_token=access_token)
                     data = method.createCardData(form)
                     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+                    rep = requests.post(url, data=data)
+                    rep_data = json.loads(rep.text)
 
-                    response = requests.post(url, data=data)
-                    res_data = json.loads(response.text)
-
-                    msg = {}
-                    if res_data['errmsg'] == 'ok':
-                        wx_card_id = res_data['card_id']
+                    if rep_data['errmsg'] == 'ok':
+                        wx_card_id = rep_data['card_id']
                         if card_id == '0':
-                            GiftCard.objects.filter(id=res_save.id).update(wx_card_id=wx_card_id)
+                            GiftCard.objects.filter(id=res_save.id).update(wx_card_id=wx_card_id,status='2')
                         else:
-                            GiftCard.objects.filter(id=card_id).update(wx_card_id=wx_card_id)
+                            GiftCard.objects.filter(id=card_id).update(wx_card_id=wx_card_id,status='2')
                         return redirect(reverse('admin:giftcard:cards'))
                     else:
-                        msg['status'] = 1
-                        msg['text'] = res_data['errmsg']
-                        msg['errcode'] = res_data['errcode']
+                        res["status"] = 1
 
         return render(request, 'giftcard/card_edit.html', locals())
 
@@ -182,16 +179,29 @@ class CardDelView(MyView):
         return HttpResponse(json.dumps(res))
 
 
-class CardUpCodeView(MyView):
+class CardUpCodeAutoView(MyView):
     def get(self, request, wx_card_id):
         access_token = MyView().token
-        code = method.getCardCode()
-        data = {
-            "card_id": wx_card_id,
-            "code": code
-        }
-        res = method.upCardCode(access_token,wx_card_id,data)
-        return render(request,'')
+        try:
+            qs_card = GiftCard.objects.values('init_balance').filter(wx_card_id=wx_card_id)
+            value = qs_card['init_balance']
+            code = method.getCardCode(value)
+            data = {
+                "card_id": wx_card_id,
+                "code": code
+            }
+            res = method.upCardCode(access_token,wx_card_id,data)
+        except Exception as e :
+            print(e)
+
+
+class CardUpCodeManualView(MyView):
+    def get(self, request, wx_card_id):
+
+        return render(request,'giftcard/card_code_up.html')
+
+    def post(self,request, wx_card_id):
+        pass
 
 
 class CardChangeCodeView(MyView):

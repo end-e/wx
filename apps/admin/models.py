@@ -83,17 +83,6 @@ class GiftImg(models.Model):
         db_table = 'gift_img'
 
 
-class GiftCategory(models.Model):
-    title = models.CharField(max_length=12,verbose_name=u'名称')
-    create_time = models.DateField(max_length=128,verbose_name='创建日期',default=datetime.now)
-    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
-
-    class Meta:
-        verbose_name = u'分类'
-        verbose_name_plural = verbose_name
-        db_table = 'gift_category'
-
-
 class GiftTheme(models.Model):
     title = models.CharField(max_length=12,verbose_name=u'主题名称')
     theme_pic = models.CharField(max_length=128, verbose_name=u'封面图片')

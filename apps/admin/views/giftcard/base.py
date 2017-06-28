@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render,redirect
 from django.views.generic.base import View
 
-from admin.models import GiftImg,GiftCategory,GiftTheme,GiftThemeItem,GiftThemePicItem,GiftCard
+from admin.models import GiftImg,GiftTheme,GiftThemeItem,GiftThemePicItem,GiftCard
 from admin.utils.myClass import MyView
 from admin.utils.paginator import MyPaginator
 
@@ -97,33 +97,6 @@ class ImgStatusView(View):
         return HttpResponse(json.dumps(res))
 
 
-
-class CategoryView(View):
-    def get(self,request):
-        category_list = GiftCategory.objects.values('id','title').filter(status='0')
-        return render(request,'giftcard/category_list.html',locals())
-
-
-class CategoryEditView(View):
-    def get(self,request,category_id):
-        if category_id != '0':
-            try:
-                category = GiftCategory.objects.values('title','status').get(id=category_id)
-            except:
-                pass
-        return render(request,'giftcard/category_edit.html',locals())
-    def post(self,request,category_id):
-        title = request.POST.get('title')
-        status = request.POST.get('status')
-        res = {}
-        try:
-            GiftCategory.objects.create(title=title,status=status)
-            return redirect(reverse('admin:giftcard:categorys'))
-        except Exception as e:
-            res['status'] = 1
-            return render(request, 'giftcard/category_edit.html', locals())
-
-
 class ThemeView(View):
     def get(self,request):
         theme_list = GiftTheme.objects.values('id','title','theme_pic','create_time')\
@@ -134,7 +107,7 @@ class ThemeView(View):
 class ThemeEditView(View):
     def get(self,request,theme_id,step_id):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='1')
+        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='2')
         step_next = int(step_id)+1
         step_prev = int(step_id)-1
         th_id = theme_id
@@ -220,7 +193,6 @@ class ThemeEditView(View):
             #跳转下一步
             kwargs = {'theme_id': theme_id, 'step_id': int(step_id)}
             return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))
-
         except Exception as e:
             print(e)
             res['status'] = 1

@@ -8,7 +8,7 @@ import urllib.parse
 from django.shortcuts import render
 from django.views.generic.base import View
 
-from admin.models import GiftTheme,GiftImg,GiftPage,GiftCategory
+from admin.models import GiftTheme,GiftImg,GiftPage
 from admin.utils.myClass import MyView,MyException
 from admin.utils import method
 
@@ -46,7 +46,6 @@ class UploadPageView(MyView):
                 .get(pk=page_id)
             if page['categories'] != '':
                 category_list = page['categories'].split(',')
-                # category_list = GiftCategory.objects.values('title').filter(id__in=categories)
                 page['category_list']=category_list
             if page['themes'] != '':
                 theme_list = page['themes'].split(',')

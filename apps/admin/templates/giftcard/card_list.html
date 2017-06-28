@@ -43,15 +43,16 @@
                                 <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>
-                                <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload' card.id %}" title="编辑">
-                                    <i class="icon-edit "></i>
-                                </a>
+
                                 <a class="btn btn-warning" title="线下删除" onclick="delCard('{{ card.id }}','local')">
-                                    <i class=" icon-trash"></i>
+                                    <i class="icon-remove"></i>
                                 </a>
                                 {% if card.wx_card_id %}
                                 <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.wx_card_id }}','wx')">
                                     <i class=" icon-trash"></i>
+                                </a>
+                                <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
+                                    <i class="icon-cloud-upload"></i>
                                 </a>
                                 {% endif %}
                             </td>
