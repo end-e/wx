@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 from django.db import models
 
 
@@ -48,10 +50,9 @@ class Shops(models.Model):
 
 class DisCode(models.Model):
     dis_code = models.CharField(max_length=6, verbose_name=u'验证码')
-    batch = models.CharField(max_length=2,  blank=False, verbose_name=u'批次')
     remark = models.CharField(max_length=200, blank=True, null=True, verbose_name=u'备注')
-    has_usable = models.BooleanField(default=0, verbose_name=u'是否可用')
-    use_time = models.DateTimeField(verbose_name=u'使用时间', null=True)
+    start_time = models.DateTimeField(blank=True, null=False, default=datetime.now, verbose_name=u'开始时间')
+    end_time = models.DateTimeField(blank=True, null=False, default=datetime.now, verbose_name=u'到期时间')
 
     class Meta:
         verbose_name = u'券验证码'
