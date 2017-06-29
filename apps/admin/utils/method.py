@@ -3,9 +3,10 @@ import random,hashlib,time,json,requests
 
 from django.db import connection
 from django.conf import settings
+from django.db import transaction
 
 from admin.utils import constants
-from admin.models import RoleNav, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard
+from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard
 from utils import db,consts
 
 def md5(data):
@@ -262,7 +263,7 @@ def createCardData(form):
                 "background_pic_url": background_pic,
                 "base_info": {
                     "giftcard_info": {
-                        "price": int(price) * 100
+                        "price": float(price) * 100
                     },
                     "logo_url": logo + "?wx_fmt=gif",
                     "max_give_friend_times": int(max_give),
@@ -298,7 +299,7 @@ def createCardData(form):
                 "supply_balance": True,
                 "prerogative": "礼品卡享受更多优惠",
                 "auto_activate": True,
-                "init_balance": int(init_balance),
+                "init_balance": float(init_balance)* 100,
                 # "custom_field1": {
                 #     "name": "优惠券",
                 #     "url": "http://mp.weixin.qq.com/s?__biz=MjM5Mzc0OTEwMA==&mid=402699549&idx=1&sn=1fe0eb3fb0041e3f10b755c5470c7db3#rd"
@@ -367,18 +368,14 @@ def getCardCode(value):
     return card_codes
 
 
-def getCardCode2(start,end):
-    conn = db.getMsSqlConnection(
-        consts.DB_SERVER_22,
-        consts.DB_PORT_22,
-        consts.DB_USER_22,
-        consts.DB_PASSWORD_22,
-        consts.DB_DATABASE_22,
-    )
+def getCardCode2(start,end,value,num=100):
+    conn = db.getMsSqlConn22()
+    num_new =100 if int(num)>100 else int(num)
 
-    sql = "SELECT TOP 100 cardNo FROM guest " \
-          "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}'"\
-        .format(start=start,end=end)
+    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
+          "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value}"\
+        .format(start=start,end=end,value=value,num=num_new)
+
     cur = conn.cursor()
     cur.execute(sql)
     cards = cur.fetchall()
@@ -388,7 +385,7 @@ def getCardCode2(start,end):
     return card_codes
 
 
-def upCardCode(access_token,wx_card_id,data):
+def upLoadCardCode(access_token,wx_card_id,data):
     """
     步骤二：待卡券通过审核后，调用导入code接口并核查code；
     步骤三：调用修改库存接口，。
@@ -399,42 +396,99 @@ def upCardCode(access_token,wx_card_id,data):
     """
 
     #导入code
-    url1 = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
-        .format(token=access_token)
-    data1 = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep1 = requests.post(url1, data=data1)
-    rep_data1 = json.loads(rep1.text)
-    errcode = rep_data1['errcode']
-    fail_code = rep_data1['fail_code']
-
     res = {}
-    if errcode == 0 and fail_code == 0: #全部上传成功
-        #修改库存
-        url2 = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
-            .format(access_token=access_token)
-        card = GiftCard.objects.filter(wx_card_id=wx_card_id).values('quantity').first()
-        quantity = int(card['quantity'])
-        data2 = {
-            "card_id": wx_card_id,
-            "increase_stock_value": quantity,
-        }
-        data2 = json.dumps(data2, ensure_ascii=False).encode('utf-8')
+    try:
+        url1 = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
+            .format(token=access_token)
+        data1 = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        rep1 = requests.post(url1, data=data1)
+        rep_data1 = json.loads(rep1.text)
+        errcode = rep_data1['errcode']
 
-        rep2 = requests.post(url2, data=data2)
-        rep_data2 = json.loads(rep2.text)
-        if rep_data2['errmsg'] == 'ok':
-            res["status"] = 0
+        if errcode == 0: #全部上传成功
+            if len(rep_data1['fail_code']) == 0 :
+                res['status'] = 0
+            else: #未全部上传成功
+                #查询未上传成功的code
+                url3 = 'http://api.weixin.qq.com/card/code/checkcode?access_token={access_token}' \
+                    .format(access_token=access_token)
+                rep3 = requests.post(url3, data=data)
+                rep_data3 = json.loads(rep3.text)
+                if rep_data3['errcode'] == 0:
+                    not_exist_code = rep_data3['not_exist_code']
+                    upLoadCardCode(access_token,wx_card_id,not_exist_code)
+                else:
+                    res["status"] = 1
+                    res['msg'] = '查询未上传成功的code失败'
         else:
             res["status"] = 1
-    else: #未全部上传成功
-        #查询未上传成功的code
-        url3 = 'http://api.weixin.qq.com/card/code/checkcode?access_token={access_token}' \
-            .format(access_token=access_token)
-        rep3 = requests.post(url3, data=data)
-        rep_data3 = json.loads(rep3.text)
-        if rep_data3['errcode'] == 0:
-            not_exist_code = rep_data3['not_exist_code']
-            upCardCode(access_token,wx_card_id,not_exist_code)
+            res['msg'] = 'Code全部上传失败'
+    except Exception as e:
+        print(e)
         res["status"] = 1
+        res['msg'] = '程序异常，上传失败'
+    return res
+
+
+def modifyCardStock(access_token,wx_card_id,quantity):
+    url2 = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
+        .format(access_token=access_token)
+    data2 = {
+        "card_id": wx_card_id,
+        "increase_stock_value": quantity,
+    }
+    data2 = json.dumps(data2, ensure_ascii=False).encode('utf-8')
+
+    rep2 = requests.post(url2, data=data2)
+    rep_data2 = json.loads(rep2.text)
+    res = {}
+    if rep_data2['errmsg'] == 'ok':
+        res["status"] = 0
+    else:
+        res["status"] = 1
+
+    return res
+
+
+def updateCardMode(codes):
+    codes_str = ','.join(codes)
+    res = {}
+    conn = db.getMsSqlConn22()
+    cur = conn.cursor()
+    try:
+        conn.autocommit(False)
+        sql = "UPDATE Guest Set Mode='1' WHERE CardNo in '{codes_str}'" \
+            .format(codes_str=codes_str)
+
+        cur.execute(sql)
+        num_update = cur.rowcount
+        if num_update == len(codes):
+            res['status'] = 0
+            conn.rollback()
+        else:
+            res['status'] = 1
+            conn.commit()
+    except:
+        res['status'] = 1
+        conn.rollback()
+    finally:
+        cur.close()
+        return res
+
+def saveCardCode(wx_card_id,codes,card_id):
+    res = {}
+    try:
+        mode_list = []
+        with transaction.atomic():
+            for code in codes:
+                item = GiftCardCode()
+                item.card_id = card_id
+                item.code = code
+                mode_list.append(item)
+            GiftCardCode.objects.bulk_create(mode_list)
+            res['status'] = 0
+    except Exception as e:
+        print(e)
+        res['status'] = 1
 
     return res

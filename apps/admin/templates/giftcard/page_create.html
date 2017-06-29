@@ -22,8 +22,7 @@
                         <div class="controls">
                             <select name="banner_pic_url">
                                 {% for pic in pic_list %}
-                                    <option value="{{ pic.url }}" {% if theme.theme_pic == pic.url %}
-                                            selected{% endif %}>
+                                    <option value="{{ pic.url }}" {% if page.banner_pic == pic.url %} selected{% endif %}>
                                         {{ pic.title }}
                                     </option>
                                 {% endfor %}
@@ -148,11 +147,7 @@
             function submitForm() {
                 $('#Form').submit();
             }
-
-
         });
-
-
 
 
         function createSelect() {
@@ -166,8 +161,6 @@
                 }
             })
         }
-
-
 
         var res_status = {{ res.status | safe | default:-1 }};
         if (res_status === 0) {

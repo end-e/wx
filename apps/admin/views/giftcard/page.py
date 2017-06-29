@@ -155,9 +155,6 @@ class UploadPageView(MyView):
         return render(request, 'giftcard/page_create.html', locals())
 
 
-
-
-
 class PageView(View):
     def get(self,request):
         page_list = GiftPage.objects.values('id','title','wx_page_id')

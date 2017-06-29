@@ -25,7 +25,7 @@ class CardView(View):
 class CardEditView(MyView):
     def get(self, request, card_id):
         card_id = card_id
-        pic_list = GiftImg.objects.values('title', 'id').filter(status='0')
+        pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         if card_id != '0':
             card = GiftCard \
                 .objects \
@@ -183,12 +183,12 @@ class CardUpCodeAutoView(MyView):
     def get(self, request, wx_card_id):
         access_token = MyView().token
         try:
-            qs_card = GiftCard.objects.values('init_balance').filter(wx_card_id=wx_card_id)
+            qs_card = GiftCard.objects.values('init_balance').filter(wx_card_id=wx_card_id).first()
             value = qs_card['init_balance']
-            code = method.getCardCode(value)
+            codes = method.getCardCode(value)
             data = {
                 "card_id": wx_card_id,
-                "code": code
+                "code": codes
             }
             res = method.upCardCode(access_token,wx_card_id,data)
         except Exception as e :
@@ -198,10 +198,79 @@ class CardUpCodeAutoView(MyView):
 class CardUpCodeManualView(MyView):
     def get(self, request, wx_card_id):
 
-        return render(request,'giftcard/card_code_up.html')
+        return render(request,'giftcard/card_code_up.html',locals())
 
     def post(self,request, wx_card_id):
-        pass
+        action = request.POST.get('action','')
+        if action == 'query':
+            starts = request.POST.getlist('start[]')
+            ends = request.POST.getlist('end[]')
+
+            qs_card = GiftCard.objects.values('init_balance','quantity').filter(wx_card_id=wx_card_id).first()
+            init_balance = qs_card['init_balance']
+            quantity = qs_card['quantity']
+            card_code_list = []
+            card_code_list_old = []
+
+            for i in range(0,len(starts)):
+                for code in range(int(starts[i]),int(ends[i])+1):
+                    card_code_list_old.append(str(code))
+                start = starts[i].strip()
+                end = ends[i].strip()
+                card_codes = method.getCardCode2(start,end,init_balance,quantity)
+                card_code_list.extend(card_codes)
+
+            new= set(card_code_list)
+            if new:
+                codes_correct = json.dumps(card_code_list)
+            old= set(card_code_list_old)
+            code_err_list = [code for code in old if code not in new]
+            if code_err_list:
+                codes_error = json.dumps(code_err_list)
+
+            return render(request, 'giftcard/card_code_up.html', locals())
+        elif action == 'upload' :
+            access_token = MyView().token
+            codes = request.POST.getlist('codes[]')
+            qs_card = GiftCard.objects.values('init_balance').filter(wx_card_id=wx_card_id).first()
+            value = qs_card['init_balance']
+            quantity = int(qs_card['quantity'])
+            card_id = qs_card['id']
+            res = {}
+            res['status'] = 1
+            if len(codes)>100 :
+                data = {
+                    "card_id": wx_card_id,
+                    "code": codes
+                }
+
+                res_upload = method.upLoadCardCode(access_token, wx_card_id, data)
+                if res_upload['status'] == 0:
+                    res_save = method.saveCardCode(wx_card_id, codes, card_id)
+                    if res_save['status'] == 0:
+                        res_update = method.updateCardMode(codes)
+                        if res_update['status'] == 0 :
+                            res_modify_stock = method.modifyCardStock(access_token, wx_card_id, quantity)
+                            if res_modify_stock['status'] == 0:
+                                res['status'] = 0
+                            else:
+                                res['msg'] = '线上库存更新失败'
+                        else:
+                            res['msg'] = 'Code状态更新失败'
+                    else:
+                        res['msg'] = '本地card_code保存失败'
+                else:
+                    res['msg'] = res_upload['msg']
+            else:
+                res['status'] = 1
+                res['msg'] = 'Code上传数量大于100'
+
+            return HttpResponse(json.dumps(res))
+
+
+
+
+
 
 
 class CardChangeCodeView(MyView):
@@ -214,3 +283,8 @@ class CardChangeCodeView(MyView):
             "card_id": "pFS7Fjg8kV1IdDz01r4SQwMkuCKc",
             "new_code": "3495739475"
         }
+
+
+class CardChangeBalance(MyView):
+    def get(self):
+        pass

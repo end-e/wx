@@ -153,43 +153,33 @@ class ThemeEditView(View):
 
             if step_id == '2':
                 th_id = request.POST.get('th_id')
-                theme_ids = request.POST.getlist('theme_id[]')
-                theme_card_ids = request.POST.getlist('theme_card_id[]')
-                theme_card_titles = request.POST.getlist('theme_card_title[]')
-                if len(theme_ids)==0:
-                    themeItem_list = []
-                    for i in range(0,len(theme_card_ids)):
-                        themeItem = GiftThemeItem()
-                        themeItem.theme_id = th_id
-                        themeItem.wx_card_id = theme_card_ids[i]
-                        themeItem.title = theme_card_titles[i]
-                        themeItem_list.append(themeItem)
-                    GiftThemeItem.objects.bulk_create(themeItem_list)
+                item_ids = request.POST.getlist('item_id[]')
+                item_card_ids = request.POST.getlist('item_card_id[]')
+                item_card_titles = request.POST.getlist('item_card_title[]')
 
-                else:
-                    for i in range(0, len(theme_card_ids) ):
-                        GiftThemeItem.objects.filter(id=theme_ids[i])\
-                            .update(wx_card_id=theme_card_ids[i],title=theme_card_titles[i])
-
+                for i in range(0,len(item_card_ids)):
+                    item_id = item_ids[i]
+                    if item_id :
+                        GiftThemeItem.objects.filter(id=item_id) \
+                            .update(wx_card_id=item_card_ids[i], title=item_card_titles[i])
+                    else:
+                        GiftThemeItem.objects.create(
+                            theme_id=th_id,wx_card_id = item_card_ids[i],title = item_card_titles[i]
+                        )
             if step_id == '3':
                 th_id = request.POST.get('th_id')
-                card_pic_ids = request.POST.getlist('card_pic_id[]')
-                card_pics = request.POST.getlist('card_pic[]')
-                card_msgs = request.POST.getlist('card_msg[]')
-                if len(card_pic_ids)==0:
-                    themePicItem_list = []
-                    for i in range(0, len(card_pics)):
-                        themePicItem = GiftThemePicItem()
-                        themePicItem.theme_id = th_id
-                        themePicItem.background_pic = card_pics[i]
-                        themePicItem.msg = card_msgs[i]
-                        themePicItem_list.append(themePicItem)
-                    GiftThemePicItem.objects.bulk_create(themePicItem_list)
-                else:
-                    for i in range(0, len(card_pics)):
-                        GiftThemePicItem.objects.filter(id=card_pic_ids[i])\
-                            .update(background_pic = card_pics[i],msg = card_msgs[i])
-
+                pic_item_ids = request.POST.getlist('pic_item_id[]')
+                pic_item_pics = request.POST.getlist('pic_item_pic[]')
+                pic_item_msgs = request.POST.getlist('pic_item_msg[]')
+                for i in range(0, len(pic_item_pics)):
+                    pic_item_id = pic_item_ids[i]
+                    if pic_item_id :
+                        GiftThemePicItem.objects.filter(id=pic_item_id) \
+                            .update(background_pic=pic_item_pics[i], msg=pic_item_msgs[i])
+                    else:
+                        GiftThemePicItem.objects.create(
+                            theme_id=th_id,background_pic = pic_item_pics[i],msg = pic_item_msgs[i]
+                        )
             #跳转下一步
             kwargs = {'theme_id': theme_id, 'step_id': int(step_id)}
             return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))

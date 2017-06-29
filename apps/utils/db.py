@@ -19,6 +19,18 @@ def getMsSqlConn(as_dict=True):
     )
     return conn
 
+def getMsSqlConn22(as_dict=True):
+    conn = pymssql.connect(
+        host=consts.DB_SERVER_22,
+        port=consts.DB_PORT_22,
+        user=consts.DB_USER_22,
+        password=consts.DB_PASSWORD_22,
+        database=consts.DB_DATABASE_22,
+        charset='utf8',
+        as_dict=as_dict
+    )
+    return conn
+
 
 def getMysqlConn():
     conn = pymysql.connect(

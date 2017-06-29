@@ -132,3 +132,9 @@ class GiftPage(models.Model):
         verbose_name_plural = verbose_name
         db_table = 'gift_page'
 
+class GiftCardCode(models.Model):
+    card_id = models.IntegerField(verbose_name=u'卡实例ID')
+    code = models.CharField(max_length=12,verbose_name=u'线下Code')
+
+    class Meta:
+        db_table = 'gift_card_code'
