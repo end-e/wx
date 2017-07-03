@@ -165,6 +165,7 @@ CRONJOBS = [
     ('1 */1 * * *', 'api.views.cron.cron_get_ikg_token'),
     ('1 */1 * * *', 'api.views.cron.cron_get_kgcs_token'),
     ('* * * * *', 'api.views.cron.cron_send_temp'),
+    ('* * * * *', 'api.views.cron.cron_giftcard_balance_change'),
 ]
 
 

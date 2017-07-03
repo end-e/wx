@@ -7,8 +7,6 @@ from django.core.urlresolvers import reverse
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 
-from api.models import Log
-
 
 def conn(request):
     if request.method == 'GET':
@@ -41,12 +39,6 @@ def conn(request):
             # TODO 上传自定义CODE
 
             cardid = xml.find('CardId').text
-            Log.objects.create(
-                open_id='审核通过',
-                errmsg=cardid,
-                errcode=cardid,
-                type='99',
-            )
             kwargs = {'wx_card_id':cardid}
             return redirect(reverse('admin:giftcard:card_code_upload_auto', kwargs=kwargs))
         elif event == 'user_gifting_card':

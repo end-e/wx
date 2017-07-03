@@ -54,6 +54,8 @@
                                 <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
                                     <i class="icon-cloud-upload"></i>
                                 </a>
+                                <a href="#" class="btn btn-inverse btn-setting" title="修改库存" onclick="modifyStock('{{ card.wx_card_id }}')">
+                                    <i class="icon-inbox"></i></a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -65,6 +67,38 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <div class="modal hide fade" id="myModal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>修改库存</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <input type="hidden" name="action" value="query">
+                <div class="list" id="modify_stock">
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label">增加:</label>
+                            <div class="controls">
+                                <input id="increase" type="text" value="0">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">减少:</label>
+                            <div class="controls">
+                                <input id="reduce" type="text" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            <a href="#" class="btn btn-primary">确认</a>
         </div>
     </div>
 {% endblock %}
@@ -81,6 +115,21 @@
                 }else {
                     noty({"text":"数据删除失败","layout":"bottom","type":"error"});
                 }
+            },'json')
+        }
+
+        function modifyStock(wx_card_id){
+            var url = "{% url 'admin:giftcard:card_stock_modify'%}";
+            var increase=$('#modify_stock #increase').val();
+            var reduce=$('#modify_stock #reduce').val();
+            var data ={
+                increase :increase,
+                reduce :reduce,
+                wx_card_id :wx_card_id,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            };
+            $.post(url,data,function () {
+
             },'json')
         }
     </script>

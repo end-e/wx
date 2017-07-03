@@ -397,45 +397,35 @@ def upLoadCardCode(access_token,wx_card_id,data):
 
     #导入code
     res = {}
-    try:
-        url1 = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
-            .format(token=access_token)
-        data1 = json.dumps(data, ensure_ascii=False).encode('utf-8')
-        rep1 = requests.post(url1, data=data1)
-        rep_data1 = json.loads(rep1.text)
-        errcode = rep_data1['errcode']
+    url = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
+        .format(token=access_token)
+    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+    rep = requests.post(url, data=data)
+    rep_data = json.loads(rep.text)
 
-        if errcode == 0: #全部上传成功
-            if len(rep_data1['fail_code']) == 0 :
+    if rep_data['errcode'] == 0:
+        if len(rep_data['fail_code']) == 0 :#全部上传成功
+            if len(rep_data['duplicate_code']):
+                res['status'] = 2
+                res['duplicate_code'] = rep_data['duplicate_code']
+                res['succ_code'] = rep_data['succ_code']
+            else:
                 res['status'] = 0
-            else: #未全部上传成功
-                #查询未上传成功的code
-                url3 = 'http://api.weixin.qq.com/card/code/checkcode?access_token={access_token}' \
-                    .format(access_token=access_token)
-                rep3 = requests.post(url3, data=data)
-                rep_data3 = json.loads(rep3.text)
-                if rep_data3['errcode'] == 0:
-                    not_exist_code = rep_data3['not_exist_code']
-                    upLoadCardCode(access_token,wx_card_id,not_exist_code)
-                else:
-                    res["status"] = 1
-                    res['msg'] = '查询未上传成功的code失败'
         else:
             res["status"] = 1
-            res['msg'] = 'Code全部上传失败'
-    except Exception as e:
-        print(e)
+    else:
         res["status"] = 1
-        res['msg'] = '程序异常，上传失败'
     return res
 
 
-def modifyCardStock(access_token,wx_card_id,quantity):
+def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
     url2 = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
         .format(access_token=access_token)
+
     data2 = {
         "card_id": wx_card_id,
-        "increase_stock_value": quantity,
+        "increase_stock_value": int(increase),
+        "reduce_stock_value": int(reduce)
     }
     data2 = json.dumps(data2, ensure_ascii=False).encode('utf-8')
 
@@ -464,16 +454,18 @@ def updateCardMode(codes):
         num_update = cur.rowcount
         if num_update == len(codes):
             res['status'] = 0
-            conn.rollback()
+            conn.commit()
         else:
             res['status'] = 1
-            conn.commit()
-    except:
+            conn.rollback()
+    except Exception as e:
+        print(e)
         res['status'] = 1
         conn.rollback()
     finally:
         cur.close()
         return res
+
 
 def saveCardCode(wx_card_id,codes,card_id):
     res = {}
@@ -490,5 +482,21 @@ def saveCardCode(wx_card_id,codes,card_id):
     except Exception as e:
         print(e)
         res['status'] = 1
+
+    return res
+
+
+def checkCardCodeOnWx(access_token,data):
+    res = {}
+    url = 'http://api.weixin.qq.com/card/code/checkcode?access_token={access_token}' \
+        .format(access_token=access_token)
+    rep = requests.post(url, data=data)
+    rep_data = json.loads(rep.text)
+    if rep_data['errcode'] == 0:
+        res["not_exist_code"] = rep_data['not_exist_code']
+        res["exist_code"] = rep_data['exist_code']
+        res["status"] = 0
+    else:
+        res["status"] = 1
 
     return res

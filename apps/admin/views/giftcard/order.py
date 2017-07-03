@@ -5,7 +5,7 @@ import json,requests,math
 
 from django.shortcuts import render
 
-from admin.utils.myClass import MyView,MyException
+from admin.utils.myClass import MyView
 from admin.utils import method
 
 class OrderView(MyView):

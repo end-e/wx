@@ -133,8 +133,15 @@ class GiftPage(models.Model):
         db_table = 'gift_page'
 
 class GiftCardCode(models.Model):
-    card_id = models.IntegerField(verbose_name=u'卡实例ID')
-    code = models.CharField(max_length=12,verbose_name=u'线下Code')
+    wx_card_id = models.CharField(max_length=32,verbose_name=u'卡实例ID')
+    code = models.CharField(max_length=12,verbose_name=u'线下Code',unique=True)
 
     class Meta:
         db_table = 'gift_card_code'
+
+
+class GiftBalanceChangeLog(models.Model):
+    last_serial = models.BigIntegerField(verbose_name='每次轮询的最后一个ID')
+    create_time = models.DateTimeField(default=datetime.now)
+    class Meta:
+        db_table = 'gift_card_balance_change_log'

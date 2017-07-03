@@ -177,11 +177,9 @@
         }
 
         var res_status = {{ msg.status | safe | default:-1 }};
-        if (res_status === 0) {
-            alert('ok');
-            {#            window.location.href = "{% url 'admin:giftcard:card_create' 2 %}"#}
-        } else if (res_status === 1) {
+        if (res_status === 1) {
             noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+            window.location.reload(true);
         }
 
 

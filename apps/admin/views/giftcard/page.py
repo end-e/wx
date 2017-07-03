@@ -1,4 +1,6 @@
 # -*-  coding:utf-8 -*-
+from api.models import LogWx
+
 __author__ = ''
 __date__ = '2017/6/20 8:53'
 import json
@@ -49,7 +51,6 @@ class UploadPageView(MyView):
                 page['category_list']=category_list
             if page['themes'] != '':
                 theme_list = page['themes'].split(',')
-                # theme_list = GiftTheme.objects.values('id','title').filter(id__in=themes)
                 page['theme_list'] = theme_list
             return render(request, 'giftcard/page_create.html', locals())
 
@@ -145,12 +146,25 @@ class UploadPageView(MyView):
                 if rep_data['errmsg'] == 'ok':
                     res["status"] = 0
                 else:
-                    errcode = rep_data['errcode']
-                    errmsg = rep_data['errmsg']
+                    LogWx.objects.create(
+                        type='4',
+                        errmsg=rep_data['errmsg'],
+                        errcode=rep_data['errcode']
+                    )
+
             except Exception as e:
+                msg =e
                 res["status"] = 1
                 if hasattr(e, 'value'):
-                    res['msg'] = e.value
+                    msg = e.value
+                    res['msg'] = msg
+
+
+                LogWx.objects.create(
+                    type='0',
+                    errmsg=msg,
+                    errcode='0'
+                )
 
         return render(request, 'giftcard/page_create.html', locals())
 

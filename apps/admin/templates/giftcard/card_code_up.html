@@ -55,18 +55,21 @@
                     </div>
                     <div class="form-actions">
                         <button class="btn btn-primary">查询</button>
-                        <input class="btn btn-primary" type="button" value="上传" onclick="uploadeCode()">
                     </div>
                 </form>
 
                 {% if codes_error %}
                     <div class="alert alert-error">
                         <strong>异常Code!</strong> {{ codes_error }}.
+                        <br>
+                        <strong>合计：</strong> {{ codes_error_num }}.
                     </div>
                 {% endif %}
                 {% if codes_correct %}
                     <div class="alert alert-info">
                         <strong>正常Code!</strong> {{ codes_correct }}.
+                        <br>
+                        <strong>合计：</strong> {{ codes_correct_num }}.
                         <div class="row-fluid">
                             <button type="button" class="btn btn-primary pull-right" onclick="uploadeCode()">上传</button>
                         </div>
@@ -75,30 +78,66 @@
             </div>
         </div>
     </div>
+
+    <a class="btn btn-inverse btn-setting" style="display: none" id="res_box_switch">
+        <i class="icon-pencil"></i>
+    </a>
+    <div class="modal hide fade" id="myModal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3 class="res_title"></h3>
+        </div>
+        <div class="modal-body">
+            <p>
+                <strong>上传微信成功 [<span class="num1"></span>]：</strong>
+                <span class="res_body1"></span>
+            </p>
+            <p>
+                <strong>上传微信失败 [<span class="num1"></span>]：</strong>
+                <span class="res_body1"></span>
+            </p>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            <a href="#" class="btn btn-primary">确认</a>
+        </div>
+    </div>
 {% endblock %}
 {% block common_js %}
     <script type="text/javascript">
-    function uploadeCode() {
-        var codes_correct = {{ codes_correct | safe }};
-        $.post(
+        function uploadeCode() {
+            var codes_correct = {{ codes_correct | safe }};
+            $.post(
                 "{% url 'admin:giftcard:card_code_upload_manual' wx_card_id %}",
                 {
-                    codes:codes_correct,
-                    action : 'upload',
-                    csrfmiddlewaretoken:'{{ csrf_token }}'
+                    codes: codes_correct,
+                    action: 'upload',
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 function (data) {
-                    if(data.status == 0){
-                        noty({"text": "数据提交成", "layout": "bottom", "type": "information"});
-                        window.location.href = "{% url 'admin:giftcard:cards' %}"
-                    }else {
+                    $('#res_box_switch').click();
+                    if(data.status == 1){
                         text = data.msg;
-                        noty({"text": text, "layout": "bottom", "type": "error"});
+                        $('.res_title').text('错误提示：');
+                        $('.modal-body').empty();
+                        $('.modal-body').text(text);
+                    } else if(data.status == 0) {
+                        $('.res_title').text('温馨提示：上传微信成功，线下处理成功');
+                        $('.res_body1').text(data.code_success);
+                        $('.num1').text(data.code_success_num);
+                        $('.res_body2').text(data.code_fail);
+                        $('.num2').text(data.code_fail_num);
+                    } else if(data.status == 2){
+                        $('.res_title').text('错误提示：上传微信成功，但线下处理失败，请联系管理员');
+                        $('.res_body1').text(data.code_success);
+                        $('.num1').text(data.code_success_num);
+                        $('.res_body2').text(data.code_fail);
+                        $('.num2').text(data.code_fail_num);
                     }
                 },
                 'json'
-        )
-    }
+            )
+        }
 
     </script>
 {% endblock %}
