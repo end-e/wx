@@ -52,7 +52,6 @@
                         <th>支付时间</th>
                         <th>金额</th>
                         <th>购买者</th>
-                        <th>接收者</th>
                         <th>操作</th>
                     </tr>
                     </thead>
@@ -62,14 +61,13 @@
                             <td>{{ order.order_id }}</td>
                             <td>{{ order.page_id }}</td>
                             <td>{{ order.trans_id }}</td>
-                            <td>{{ order.create_time }}</td>
-                            <td>{{ order.pay_finish_time }}</td>
-                            <td>{{ order.total_price }}</td>
+                            <td>{{ order.create_time | toDate }}</td>
+                            <td>{{ order.pay_finish_time | toDate }}</td>
+                            <td>{{ order.total_price | divide:100 }}</td>
                             <td>{{ order.open_id }}</td>
-                            <td>{{ order.accepter_openid }}</td>
                             <td class="center  sorting_1">
-                                <a class="btn btn-info" href="" title="编辑">
-                                    <i class="icon-edit "></i>
+                                <a class="btn btn-info btn-toggle" title="详情">
+                                    <i class="icon-double-angle-down"></i>
                                 </a>
                             </td>
                         </tr>

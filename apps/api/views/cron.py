@@ -89,7 +89,7 @@ def cron_giftcard_balance_change(req):
                 if rep_data['errcode'] != 0:
                     # TODO 记录错误日志
                     LogWx.objects.create(
-                        type='1',
+                        type='2',
                         remark='code:{code},balance:{balance},card_id:{card_id}'.format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id']),
                         errmsg=rep_data['errmsg'],
                         errcode=rep_data['errcode']

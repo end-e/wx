@@ -155,10 +155,11 @@ def send_temp(openid, data):
     top_color = '#efefef'
     data = data
     res_send = message.send_template(user_id, template_id, url, top_color, data)
+
     if res_send['errmsg'] != 'ok':
         # TODO:记录发送失败日志
         LogWx.objects.create(
-            type='2',
+            type='1',
             remark='openid:'+openid,
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']

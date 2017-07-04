@@ -17,7 +17,7 @@
                       action="{% url 'admin:giftcard:card_edit' card_id %}">
                     {% csrf_token %}
                     <input type="hidden" id="action" name="action">
-                    {% if card.wx_card_id == '' %}
+                    {% if card.wx_card_id == '' or card_id == '0' %}
                         <div class="alert alert-block ">
                             <h4 class="alert-heading">警告!!!!!!</h4>
                             <p>
