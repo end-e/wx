@@ -439,15 +439,15 @@ def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
     return res
 
 
-def updateCardMode(codes):
+def updateCardMode(codes,old,new):
     codes_str = "'" + "','".join(codes) + "'"
     res = {}
     conn = db.getMsSqlConn22()
     cur = conn.cursor()
     try:
         conn.autocommit(False)
-        sql = "UPDATE Guest Set Mode='1' WHERE CardNo in ({codes_str})" \
-            .format(codes_str=codes_str)
+        sql = "UPDATE Guest Set Mode='{new}' WHERE CardNo in ({codes_str}) AND Mode='{old}'" \
+            .format(codes_str=codes_str,new=new,old=old)
 
         cur.execute(sql)
         num_update = cur.rowcount

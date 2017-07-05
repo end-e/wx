@@ -172,13 +172,34 @@ class CardDelView(MyView):
             rep_data = json.loads(rep.text)
 
             if rep_data['errmsg'] == 'ok':
-                GiftCard.objects.filter(wx_card_id=card_id).update(wx_card_id='', status='1')
-                GiftThemeItem.objects.filter(wx_card_id=card_id).delete()
-                res["status"] = 0
+                try:
+                    with transaction.atomic():
+                        GiftCard.objects.filter(wx_card_id=card_id).update(wx_card_id='', status='1')
+                        GiftThemeItem.objects.filter(wx_card_id=card_id).delete()
+                        qs_card_codes = GiftCardCode.objects.filter(wx_card_id=card_id)
+                        codes = qs_card_codes.values('code')
+                        code_list = [code['code'] for code in codes]
+                        qs_card_codes.delete()
+                        res_mssql = method.updateCardMode(code_list,1,9)
+                        if res_mssql['status'] != 0:
+                            raise MyException('Code状态更新失败')
+                        res["status"] = 0
+                except Exception as e:
+                    res["status"] = 1
+                    LogWx.objects.create(
+                        type='7',
+                        errmsg='线下处理数据失败',
+                        errcode='',
+                        remark='wx_card_id:{card},action:{action}'.format(card=card_id, action=action)
+                    )
             else:
                 res["status"] = 1
-                res["errcode"] = rep_data['errcode']
-                res["errmsg"] = rep_data['errmsg']
+                LogWx.objects.create(
+                    type='7',
+                    errmsg=rep_data['errmsg'],
+                    errcode=rep_data['errcode'],
+                    remark = 'wx_card_id:{card},action:{action}'.format(card=card_id,action=action)
+                )
         elif action == 'local':
             try:
                 GiftCard.objects.filter(id=card_id).update(status='0')
@@ -294,7 +315,7 @@ class CardUpCodeManualView(MyView):
                         mode_list.append(item)
                     GiftCardCode.objects.bulk_create(mode_list)
                     #更新guest中code的状态
-                    res_update1 = method.updateCardMode(codes)
+                    res_update1 = method.updateCardMode(codes,9,1)
                     if res_update1['status'] != 0:
                         raise MyException('Code状态更新失败')
 
