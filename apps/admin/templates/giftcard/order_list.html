@@ -85,7 +85,7 @@
                                         {% for card in order.card_list %}
                                             <tr>
                                                 <td>{{ card.card_id }}</td>
-                                                <td>{{ card.price }}</td>
+                                                <td>{{ card.price | divide:100 }}</td>
                                                 <td>{{ card.code }}</td>
                                             </tr>
                                         {% endfor %}

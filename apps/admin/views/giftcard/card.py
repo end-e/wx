@@ -110,8 +110,6 @@ class CardEditView(MyView):
                         return render(request, 'giftcard/card_edit.html', locals())
 
 
-
-
 class CardWxView(MyView):
     def get(self, request, page_num):
         count = 10
@@ -183,7 +181,7 @@ class CardDelView(MyView):
                 res["errmsg"] = rep_data['errmsg']
         elif action == 'local':
             try:
-                GiftCard.objects.filter(id=card_id).delete()
+                GiftCard.objects.filter(id=card_id).update(status='0')
                 GiftThemeItem.objects.filter(wx_card_id=card_id).delete()
                 res["status"] = 0
             except Exception as e:
@@ -329,49 +327,6 @@ class CardChangeCodeView(MyView):
         }
 
 
-class CardChangeBalance(MyView):
-    def get(self, request):
-        #1、查询消费记录
-        # conn = db.getMsSqlConn()
-        conn_226 = db.getMsSqlConn22()
-        start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
-        start = start.strftime('%Y-%m-%d %H:%M:%S')
-        start = '2017-07-03 11:35:52'
-        last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')
-        if last_purchserial:
-            whereStr = "a.PurchSerial> '{last_purchserial}'".format(last_purchserial=last_purchserial)
-        else:
-            whereStr = "a.PurchDateTime> '{start}'".format(start=start)
-
-        sql_order = "SELECT a.detail, a.CardNo " \
-              "FROM GuestPurch0 AS a,guest AS b, (SELECT cardno, MAX (purchserial) purchserial from GuestPurch0 GROUP BY cardno) AS c " \
-              "WHERE " + whereStr + " AND a.cardno=b.cardno AND b.cardtype = 12 AND a.purchserial=c.purchserial ORDER BY a.PurchSerial "
-        cur_226 = conn_226.cursor()
-        cur_226.execute(sql_order)
-        orders = cur_226.fetchall()
-        #2、拼接wx_card_id
-        for order in orders:
-            qs_card = GiftCardCode.objects.values('wx_card_id').filter(code=order['CardNo']).first()
-            order['wx_card_id'] = qs_card['wx_card_id']
-
-        access_token = MyView().token
-        for o in orders:
-            url ='https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
-                .format(token=access_token)
-            data = {
-                "code": o['CardNo'].strip(),
-                "card_id": o['wx_card_id'],
-                "balance": float(o['detail'])
-            }
-
-            data = json.dumps(data,ensure_ascii=False).encode('utf-8')
-            rep = requests.post(url,data=data)
-            rep_data = json.loads(rep.text)
-            if rep_data['errcode'] !=0:
-                #TODO 记录错误日志
-                pass
-
-
 class CardModifyStockView(MyView):
     def post(self,request):
         access_token = MyView().token
@@ -381,3 +336,4 @@ class CardModifyStockView(MyView):
         res_modify = method.modifyCardStock(access_token,wx_card_id,increase,reduce)
 
         return HttpResponse(json.dumps(res_modify))
+
