@@ -88,13 +88,13 @@
             <h3 class="res_title"></h3>
         </div>
         <div class="modal-body">
-            <p>
-                <strong>上传微信成功 [<span class="num1"></span>]：</strong>
-                <span class="res_body1"></span>
+            <p class="row success">
+                <strong>上传微信成功 [<span class="success-num"></span>]：</strong>
+                <span class="success-code"></span>
             </p>
-            <p>
-                <strong>上传微信失败 [<span class="num1"></span>]：</strong>
-                <span class="res_body1"></span>
+            <p class="row fail">
+                <strong>上传微信失败 [<span class="fail-num"></span>]：</strong>
+                <span class="fail-code"></span>
             </p>
         </div>
         <div class="modal-footer">
@@ -115,25 +115,32 @@
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 function (data) {
-                    $('#res_box_switch').click();
-                    if(data.status == 1){
-                        text = data.msg;
-                        $('.res_title').text('错误提示：');
-                        $('.modal-body').empty();
-                        $('.modal-body').text(text);
-                    } else if(data.status == 0) {
-                        $('.res_title').text('温馨提示：上传微信成功，线下处理成功');
-                        $('.res_body1').text(data.code_success);
-                        $('.num1').text(data.code_success_num);
-                        $('.res_body2').text(data.code_fail);
-                        $('.num2').text(data.code_fail_num);
-                    } else if(data.status == 2){
-                        $('.res_title').text('错误提示：上传微信成功，但线下处理失败，请联系管理员');
-                        $('.res_body1').text(data.code_success);
-                        $('.num1').text(data.code_success_num);
-                        $('.res_body2').text(data.code_fail);
-                        $('.num2').text(data.code_fail_num);
+
+                    if(data.status == 0){
+                        noty({"text": "数据处理成功", "layout": "bottom", "type": "information"});
+                    }else if(data.status == 2){
+                        noty({"text": "全部Code上传成功，线下处理失败，请再次上传或联系管理员", "layout": "bottom", "type": "error"});
+                    }else if(data.status == 5){
+                        noty({"text": "数据处理失败", "layout": "bottom", "type": "error"});
+                    }else{
+                        $('#res_box_switch').click();
+                        if(data.status == 1){
+                            $('.row').show();
+                            $('.res_title').text('部分Code(微信和本地)处理成功');
+                            $('.success-code').text(data.code_success);
+                            $('.success-num').text(data.code_success_num);
+                            $('.fail-code').text(data.code_fail);
+                            $('.fail-num').text(data.code_fail_num);
+                        } else if(data.status == 3){
+                            $('.row').show();
+                            $('.res_title').text('部分Code上传微信成功，线下处理失败');
+                            $('.success-code').text(data.code_success);
+                            $('.success-num').text(data.code_success_num);
+                            $('.fail-code').text(data.code_fail);
+                            $('.fail-num').text(data.code_fail_num);
+                        }
                     }
+
                 },
                 'json'
             )

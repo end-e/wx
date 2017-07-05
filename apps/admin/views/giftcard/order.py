@@ -46,5 +46,4 @@ class OrderView(MyView):
             errcode = rep_data['errcode']
             errmsg = rep_data['errmsg']
 
-
         return render(request, 'giftcard/order_list.html',locals())

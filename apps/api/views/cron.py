@@ -43,7 +43,7 @@ def cron_send_temp():
                 method.send_temp(openid, data)
 
 
-def cron_giftcard_balance_change(req):
+def cron_giftcard_balance_change():
     # 1、查询消费记录
     # conn_226 = db.getMsSqlConn()
     conn_226 = db.getMsSqlConn22()

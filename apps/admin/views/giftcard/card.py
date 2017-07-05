@@ -249,31 +249,36 @@ class CardUpCodeManualView(MyView):
             codes = request.POST.getlist('codes[]')
             res = {}
             if len(codes)>100 :
-                res['status'] = 1
+                res['status'] = 5
                 res['msg'] = 'Code上传数量大于100'
                 return HttpResponse(json.dumps(res))
             data = {
                 "card_id": wx_card_id,
                 "code": codes
             }
+            #上传code
             res_upload = method.upLoadCardCode(access_token, wx_card_id, data)
             code_success = []
             code_fail = []
-            code_duplicate = []
             if res_upload['status'] == 0:
                 code_success = codes
-            elif res_upload['status'] == 1:#code未全部上传成功，则查询上传成功的code
-                res_check = method.checkCardCodeOnWx(access_token,data)
-                if res_check['status'] == 0:
-                    code_fail = res_check['not_exist_code']
-                    code_success = res_check['exist_code']
-                else:
-                    res['status'] = 1
-                    res['msg'] = 'Code未全部上传成功，查询上传状态失败'
-                    return HttpResponse(json.dumps(res))
-            elif res_upload['status'] == 2:#上传code存在重复数据
-                code_success = res_upload['succ_code']
-                code_duplicate = res_upload['duplicate_code']
+            elif res_upload['status'] == 1:
+                # code未全部上传成功，则查询上传成功的code
+                code_success = res_upload['success_code']
+                code_fail = res_upload['fail_code']
+                # res_check = method.checkCardCodeOnWx(access_token,data)
+                # if res_check['status'] == 0:
+                #     code_fail = res_check['not_exist_code']
+                #     code_success = res_check['exist_code']
+                # else:
+                #     res['status'] = 4 #部分上传成功，查询失败
+                #     res['msg'] = 'Code未全部上传，查询上传状态失败'
+                #     return HttpResponse(json.dumps(res))
+            elif res_upload['status'] == 2:
+                #上传code报错
+                res['status'] = 5 #全部失败
+                res['msg'] = '上传Code微信过程报错'
+                return HttpResponse(json.dumps(res))
 
             res['code_success'] = ','.join(code_success)
             res['code_success_num'] = len(code_success)
@@ -282,7 +287,7 @@ class CardUpCodeManualView(MyView):
             try:
                 with transaction.atomic():
                     #存储wx_card_id与code的对应关系
-                    codes = code_success+code_duplicate
+                    codes = code_success
                     mode_list = []
                     for code in codes:
                         item = GiftCardCode()
@@ -293,11 +298,19 @@ class CardUpCodeManualView(MyView):
                     #更新guest中code的状态
                     res_update1 = method.updateCardMode(codes)
                     if res_update1['status'] != 0:
-                        raise MyException('successCode状态更新失败')
+                        raise MyException('Code状态更新失败')
+
+                    if res_upload['status'] == 0 :
+                        res['status'] = 0#全部成功
+                    elif res_upload['status'] == 1:
+                        res['status'] = 1#部分成功
+
 
             except Exception as e:
-                res['status'] = 2
-                res['msg'] = 'Code线下数据处理失败'
+                if res_upload['status'] == 0:
+                    res['status'] = 2  # 全部Code上传微信成功，线下处理失败
+                elif res_upload['status'] == 1:
+                    res['status'] = 3  # 部分Code上传微信成功，线下处理失败
                 if hasattr(e, 'value'):
                     res['msg'] = e.value
 

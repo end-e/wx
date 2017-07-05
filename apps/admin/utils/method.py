@@ -404,17 +404,16 @@ def upLoadCardCode(access_token,wx_card_id,data):
     rep_data = json.loads(rep.text)
 
     if rep_data['errcode'] == 0:
-        if len(rep_data['fail_code']) == 0 :#全部上传成功
-            if len(rep_data['duplicate_code']):
-                res['status'] = 2
-                res['duplicate_code'] = rep_data['duplicate_code']
-                res['succ_code'] = rep_data['succ_code']
-            else:
-                res['status'] = 0
+        if len(rep_data['fail_code']) == 0 :
+            # 全部上传成功
+            res['status'] = 0
         else:
+            # 部分上传成功
             res["status"] = 1
+            res['success_code'] = rep_data['duplicate_code'] + rep_data['succ_code']
+            res['fail_code'] = rep_data['fail_code']
     else:
-        res["status"] = 1
+        res["status"] = 2
     return res
 
 
@@ -441,13 +440,13 @@ def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
 
 
 def updateCardMode(codes):
-    codes_str = ','.join(codes)
+    codes_str = "'" + "','".join(codes) + "'"
     res = {}
     conn = db.getMsSqlConn22()
     cur = conn.cursor()
     try:
         conn.autocommit(False)
-        sql = "UPDATE Guest Set Mode='1' WHERE CardNo in '{codes_str}'" \
+        sql = "UPDATE Guest Set Mode='1' WHERE CardNo in ({codes_str})" \
             .format(codes_str=codes_str)
 
         cur.execute(sql)

@@ -54,23 +54,9 @@
                                 <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
                                     <i class="icon-cloud-upload"></i>
                                 </a>
-                                <a href="#" class="btn btn-inverse btn-setting" title="修改库存" onclick="modifyStock('{{ card.wx_card_id }}')">
+                                <a class="btn btn-inverse btn-setting" title="修改库存">
                                     <i class="icon-inbox"></i></a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6">暂无数据</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal hide fade" id="myModal">
+                                    <div class="modal hide fade" id="myModal">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">×</button>
             <h3>修改库存</h3>
@@ -98,9 +84,24 @@
         </div>
         <div class="modal-footer">
             <a href="#" class="btn" data-dismiss="modal">关闭</a>
-            <a href="#" class="btn btn-primary">确认</a>
+            <a onclick="modifyStock('{{ card.wx_card_id }}')" class="btn btn-primary">确认</a>
         </div>
     </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">暂无数据</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}
 {% block common_js %}
     <script>
@@ -128,8 +129,12 @@
                 wx_card_id :wx_card_id,
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             };
-            $.post(url,data,function () {
-
+            $.post(url,data,function (data) {
+                if(data.status==0){
+                    alert('ok')
+                }else {
+                    alert('err')
+                }
             },'json')
         }
     </script>
