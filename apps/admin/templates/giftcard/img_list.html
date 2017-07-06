@@ -48,11 +48,32 @@
                                 </a>
                                 {% endif %}
                             </td>
-
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="pagination pagination-centered">
+                    <ul>
+                        {% if img_list.has_previous %}
+                            <li><a title='上一页' href="{% url 'admin:giftcard:imgs' img_list.previous_page_number %}">上一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='上一页' href="#">上一页</a></li>
+                        {% endif %}
+                        {% for page in img_list.paginator.page_range_ext %}
+                            {% if page == img_list.number %}
+                                <li class="active"><a>{{ page }}</a>
+                            </li>
+                             {% else %}
+                                <li><a href="{% url 'admin:giftcard:imgs' page %}">{{ page }}</a>
+                             {% endif %}
+                        {% endfor %}
+                        {% if img_list.has_next %}
+                            <li><a title='下一页' href="{% url 'admin:giftcard:imgs' img_list.next_page_number %}">下一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='下一页' href="#">下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

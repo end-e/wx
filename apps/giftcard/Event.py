@@ -31,8 +31,7 @@ def giftcard_pay_done(order_id):
                 order = GiftOrder.objects.create(
                     order_id=order['order_id'], trans_id=order['trans_id'],
                     create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
-                    total_price=order['create_time'], open_id=order['pay_finish_time'],
-                    accepter_openid=order['accepter_openid']
+                    total_price=order['total_price'], open_id=order['pay_finish_time']
                 )
                 orderID = order.id
                 info_list = []

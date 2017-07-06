@@ -149,14 +149,13 @@ class GiftBalanceChangeLog(models.Model):
 
 
 class GiftOrder(models.Model):
-    order_id = models.CharField(max_length=32,verbose_name=u'订单号')
+    order_id = models.CharField(max_length=32,verbose_name=u'订单号',unique=True)
     # page_id = models.CharField(max_length=64,verbose_name=u'货架号')
     trans_id = models.CharField(max_length=32,verbose_name=u'微信支付交易订单号')
     create_time = models.IntegerField(verbose_name=u'订单创建时间')
     pay_finish_time = models.IntegerField(verbose_name=u'订单支付时间')
     total_price = models.IntegerField(verbose_name='全部金额')
     open_id = models.CharField(max_length=32,verbose_name=u'购买者')
-    accepter_openid = models.CharField(max_length=32,verbose_name=u'接收者')
 
     class Meta:
         db_table = 'gift_order'
@@ -165,7 +164,7 @@ class GiftOrderInfo(models.Model):
     order_id = models.IntegerField(verbose_name='对应gift_order的自增长id')
     card_id = models.CharField(max_length=32,verbose_name=u'卡类型ID')
     price = models.IntegerField(verbose_name=u'卡面值')
-    code = models.CharField(max_length=32,verbose_name=u'code')
+    code = models.CharField(max_length=32,verbose_name=u'code',unique=True)
 
     class Meta:
         db_table = 'gift_order_info'

@@ -46,6 +46,7 @@ class ImgView(View):
         img_list = GiftImg.objects.values('id','title','url','status','create_time').order_by('status','-create_time')
         page_id = int(page_id) if int(page_id) else 1
         paginator = MyPaginator(img_list,10)
+        img_list = paginator.page(page_id)
         return render(request, 'giftcard/img_list.html', locals())
 
 

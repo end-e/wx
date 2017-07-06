@@ -46,17 +46,23 @@ class CardEditView(MyView):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         action = request.POST.get('action')
         if action == 'local':
-            if card_id == '0':
-                form = GiftCardForm(request.POST)
-            else:
+            wx_card_id = request.POST.get('wx_card_id', '')
+            if wx_card_id:
                 qs_card = GiftCard.objects.get(pk=card_id)
                 form = GiftCardEditForm(request.POST, instance=qs_card)
+
+            else:
+                if card_id == '0' :
+                    form = GiftCardForm(request.POST)
+                else:
+                    qs_card = GiftCard.objects.get(pk=card_id)
+                    form = GiftCardForm(request.POST, instance=qs_card)
             if form.is_valid():
                 form.save()
                 return redirect(reverse('admin:giftcard:cards'))
         elif action == 'wx':
-            qs_wx_card_id = request.POST.get('wx_card_id','')
-            if qs_wx_card_id:
+            wx_card_id = request.POST.get('wx_card_id','')
+            if wx_card_id:
                 qs_card = GiftCard.objects.get(pk=card_id)
                 form = GiftCardEditForm(request.POST, instance=qs_card)
             else:
@@ -67,11 +73,11 @@ class CardEditView(MyView):
                     form = GiftCardForm(request.POST, instance=qs_card)
             if form.is_valid():
                 # 处理本地数据
-                qs_wx_card_id = form.cleaned_data['wx_card_id']
+                wx_card_id = form.cleaned_data['wx_card_id']
                 res_save = form.save()
                 # 上传微信
                 res = {}
-                if qs_wx_card_id:
+                if wx_card_id:
                     # TODO 修改卡实例信息
                     url = 'https://api.weixin.qq.com/card/update?access_token={access_token}' \
                         .format(access_token=access_token)
@@ -164,7 +170,7 @@ class CardInfoWxView(MyView):
 
 
 class CardDelView(MyView):
-    def get(self, request, action, card_id):
+    def post(self, request, action, card_id):
         res = {}
         if action == 'wx':
             access_token = MyView().token

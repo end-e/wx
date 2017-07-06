@@ -7,6 +7,7 @@ from django.db import transaction
 
 from admin.utils import constants
 from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard
+from api.models import LogWx
 from utils import db,consts
 
 def md5(data):
@@ -419,23 +420,28 @@ def upLoadCardCode(access_token,wx_card_id,data):
 
 
 def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
-    url2 = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
+    url = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
         .format(access_token=access_token)
 
-    data2 = {
+    data = {
         "card_id": wx_card_id,
         "increase_stock_value": int(increase),
         "reduce_stock_value": int(reduce)
     }
-    data2 = json.dumps(data2, ensure_ascii=False).encode('utf-8')
+    data2 = json.dumps(data, ensure_ascii=False).encode('utf-8')
 
-    rep2 = requests.post(url2, data=data2)
-    rep_data2 = json.loads(rep2.text)
+    rep = requests.post(url, data=data2)
+    rep_data = json.loads(rep.text)
     res = {}
-    if rep_data2['errmsg'] == 'ok':
+    if rep_data['errmsg'] == 'ok':
         res["status"] = 0
     else:
         res["status"] = 1
+        LogWx.objects.create(
+            type='8',
+            errmsg=rep_data['errmsg'],
+            errcode=rep_data['errcode']
+        )
 
     return res
 

@@ -44,7 +44,7 @@
                                     <i class="icon-edit "></i>
                                 </a>
 
-                                <a class="btn btn-warning" title="线下删除" onclick="delCard('{{ card.id }}','local')">
+                                <a class="btn btn-warning" title="线下删除" onclick="delCard('{{ card.id }}','local','1')">
                                     <i class="icon-remove"></i>
                                 </a>
                                 {% if card.wx_card_id %}
@@ -54,39 +54,8 @@
                                 <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
                                     <i class="icon-cloud-upload"></i>
                                 </a>
-                                <a class="btn btn-inverse btn-setting" title="修改库存">
+                                <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
                                     <i class="icon-inbox"></i></a>
-                                    <div class="modal hide fade" id="myModal">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">×</button>
-            <h3>修改库存</h3>
-        </div>
-        <div class="modal-body">
-            <form class="form-horizontal">
-                <input type="hidden" name="action" value="query">
-                <div class="list" id="modify_stock">
-                    <div class="row-fluid">
-                        <div class="control-group">
-                            <label class="control-label">增加:</label>
-                            <div class="controls">
-                                <input id="increase" type="text" value="0">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">减少:</label>
-                            <div class="controls">
-                                <input id="reduce" type="text" value="0">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="btn" data-dismiss="modal">关闭</a>
-            <a onclick="modifyStock('{{ card.wx_card_id }}')" class="btn btn-primary">确认</a>
-        </div>
-    </div>
                                 {% endif %}
                             </td>
                         </tr>
@@ -101,28 +70,66 @@
         </div>
     </div>
 
-
+<div class="modal hide fade" id="myModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>修改库存</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal">
+            <input type="hidden" name="wx_card_id" id="wx_card_id">
+            <div class="list" id="modify_stock">
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label class="control-label">增加:</label>
+                        <div class="controls">
+                            <input id="increase" type="text" value="0">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">减少:</label>
+                        <div class="controls">
+                            <input id="reduce" type="text" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">关闭</a>
+        <a onclick="modifyStock()" class="btn btn-primary">确认</a>
+    </div>
+</div>
 {% endblock %}
 {% block common_js %}
     <script>
-        function delCard(wx_card_id,action) {
-            var url = "{% url 'admin:giftcard:card_del' 'action' 'card_id' %}";
-            url = url.replace('action',action);
-            url = url.replace('card_id',wx_card_id);
-            $.get(url,function (data) {
-                if(data.status==0){
+        function delCard(wx_card_id,action,status) {
+            var url = "{% url 'admin:giftcard:card_del'%}";
+            var data ={
+                action:action,
+                card_id:wx_card_id,
+                status:status,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            };
+
+            $.post(url,data,function (res) {
+                if(res.status==0){
                     noty({"text":"数据删除成功","layout":"bottom","type":"information"});
-                    window.location.reload()
+{#                    window.location.reload()#}
                 }else {
                     noty({"text":"数据删除失败","layout":"bottom","type":"error"});
                 }
             },'json')
         }
-
-        function modifyStock(wx_card_id){
+        function showFadeBox(wx_card_id) {
+            $('#wx_card_id').val(wx_card_id);
+        }
+        function modifyStock(){
             var url = "{% url 'admin:giftcard:card_stock_modify'%}";
             var increase=$('#modify_stock #increase').val();
             var reduce=$('#modify_stock #reduce').val();
+            var wx_card_id = $('#wx_card_id').val();
             var data ={
                 increase :increase,
                 reduce :reduce,

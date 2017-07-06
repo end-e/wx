@@ -82,11 +82,15 @@
 {% block common_js %}
     <script>
         function delCard(wx_card_id,action) {
-            var url = "{% url 'admin:giftcard:card_del' 'action' 'card_id' %}";
-            url = url.replace('action',action);
-            url = url.replace('card_id',wx_card_id);
-            $.get(url,function (data) {
-                if(data.status==0){
+            var url = "{% url 'admin:giftcard:card_del'%}";
+
+            var data={
+                action:action,
+                wx_card_id:wx_card_id,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            };
+            $.post(url,data,function (res) {
+                if(res.status==0){
                     noty({"text":"数据删除成功","layout":"bottom","type":"information"});
                     window.location.reload()
                 }else {

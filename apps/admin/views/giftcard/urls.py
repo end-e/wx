@@ -24,7 +24,7 @@ urlpatterns = [
     #card
     url(r'^card/$',CardView.as_view(),name='cards'),
     url(r'^card/edit/(?P<card_id>[0-9]+)/$',CardEditView.as_view(),name='card_edit'),
-    url(r'^card/del/(?P<action>[\S]+)/(?P<card_id>[\S]+)/$',CardDelView.as_view(),name='card_del'),
+    url(r'^card/del/$',CardDelView.as_view(),name='card_del'),
     url(r'^card/wx/(?P<page_num>[0-9]+)/$',CardWxView.as_view(),name='cards_wx'),
     url(r'^card/wx/info/(?P<wx_card_id>[\S]+)$',CardInfoWxView.as_view(),name='card_wx'),
     url(r'^card/code/upload/auto/(?P<wx_card_id>[\S]+)',CardUpCodeAutoView.as_view(),name='card_code_upload_auto'),

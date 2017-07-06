@@ -19,7 +19,7 @@ class LogWx(models.Model):
     errcode = models.CharField(max_length=8, verbose_name=u'错误编码')
     type = models.CharField(max_length=2,default='0',
                             verbose_name='错误类型(0:;1:send_temp,2:cron_giftcard_balance_change,3:CardEditView,4:UploadPageView,'
-                                         '5:,6:giftcard_pay_done,7:CardDelView)'
+                                         '5:,6:giftcard_pay_done,7:CardDelView,8:modifyCardStock)'
                             )
     remark = models.CharField(max_length=128, verbose_name='备注', blank=True, null=True)
     add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
