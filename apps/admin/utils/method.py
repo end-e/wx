@@ -373,7 +373,8 @@ def getCardCode2(start,end,value,num=100):
     num_new =100 if int(num)>100 else int(num)
 
     sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
-          "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value}"\
+          "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value} " \
+          "ORDER BY cardNo"\
         .format(start=start,end=end,value=value,num=num_new)
 
     cur = conn.cursor()
@@ -463,24 +464,6 @@ def updateCardMode(codes,old,new):
         conn.rollback()
     finally:
         cur.close()
-        return res
-
-
-def saveCardCode(wx_card_id,codes,card_id):
-    res = {}
-    try:
-        mode_list = []
-        with transaction.atomic():
-            for code in codes:
-                item = GiftCardCode()
-                item.card_id = card_id
-                item.code = code
-                mode_list.append(item)
-            GiftCardCode.objects.bulk_create(mode_list)
-            res['status'] = 0
-    except Exception as e:
-        print(e)
-        res['status'] = 1
 
     return res
 

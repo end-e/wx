@@ -158,12 +158,10 @@ class UploadPageView(MyView):
                 if hasattr(e, 'value'):
                     msg = e.value
                     res['msg'] = msg
-
-
                 LogWx.objects.create(
-                    type='0',
+                    type='4',
                     errmsg=msg,
-                    errcode='0'
+                    errcode='4'
                 )
 
         return render(request, 'giftcard/page_create.html', locals())

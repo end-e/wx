@@ -2,7 +2,9 @@
 # __author__ = ''
 # __date__ = '2017/4/18 15:02'
 from django.conf.urls import url,include
+
 from api.views import views, cron, sms,pay
+
 urlpatterns = [
     # 微信后台配置的url
     url(r'^checksignature/$', views.conn, name='checksignature'),

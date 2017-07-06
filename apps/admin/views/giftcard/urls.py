@@ -5,9 +5,9 @@ from django.conf.urls import url
 
 from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ThemeEditView,ImgStatusView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeAutoView, \
-    CardUpCodeManualView,CardChangeCodeView,CardModifyStockView
+    CardUpCodeManualView,CardModifyStockView
 from admin.views.giftcard.page import UploadPageView,PageView
-from admin.views.giftcard.order import OrderView,OrderLocalCreateView
+from admin.views.giftcard.order import OrderView
 
 urlpatterns = [
     #图片素材
@@ -29,7 +29,6 @@ urlpatterns = [
     url(r'^card/wx/info/(?P<wx_card_id>[\S]+)$',CardInfoWxView.as_view(),name='card_wx'),
     url(r'^card/code/upload/auto/(?P<wx_card_id>[\S]+)',CardUpCodeAutoView.as_view(),name='card_code_upload_auto'),
     url(r'^card/code/upload/manual/(?P<wx_card_id>[\S]+)',CardUpCodeManualView.as_view(),name='card_code_upload_manual'),
-    url(r'^card/code/change/(?P<wx_card_id>[\S]+)',CardChangeCodeView.as_view(),name='card_code_change'),
     url(r'^card/code/get/','admin.utils.method.getCardCode2',name='card_code_get_guest'),
 
 
@@ -39,5 +38,5 @@ urlpatterns = [
 
     #订单
     url(r'^order/$',OrderView.as_view(),name='orders'),
-    url(r'^order/local/create/(?P<order_id>[\S]+)',OrderLocalCreateView.as_view,name='order_local_create'),
+
 ]

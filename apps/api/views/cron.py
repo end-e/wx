@@ -103,7 +103,7 @@ def cron_giftcard_balance_change():
                 GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
         except Exception as e:
             LogWx.objects.create(
-                type='0',
+                type='2',
                 errmsg=e,
-                errcode='0'
+                errcode='2'
             )

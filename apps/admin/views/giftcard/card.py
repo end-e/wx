@@ -107,6 +107,11 @@ class CardEditView(MyView):
                         return redirect(reverse('admin:giftcard:cards'))
                     else:
                         res["status"] = 1
+                        LogWx.objects.create(
+                            type='3',
+                            errmsg=rep_data['errmsg'],
+                            errcode=rep_data['errcode']
+                        )
                         return render(request, 'giftcard/card_edit.html', locals())
 
 
@@ -176,7 +181,8 @@ class CardDelView(MyView):
                     with transaction.atomic():
                         GiftCard.objects.filter(wx_card_id=card_id).update(wx_card_id='', status='1')
                         GiftThemeItem.objects.filter(wx_card_id=card_id).delete()
-                        qs_card_codes = GiftCardCode.objects.filter(wx_card_id=card_id)
+                        #处理未出售的code
+                        qs_card_codes = GiftCardCode.objects.filter(wx_card_id=card_id,status='0')
                         codes = qs_card_codes.values('code')
                         code_list = [code['code'] for code in codes]
                         qs_card_codes.delete()
@@ -189,7 +195,7 @@ class CardDelView(MyView):
                     LogWx.objects.create(
                         type='7',
                         errmsg='线下处理数据失败',
-                        errcode='',
+                        errcode='7',
                         remark='wx_card_id:{card},action:{action}'.format(card=card_id, action=action)
                     )
             else:
@@ -285,14 +291,7 @@ class CardUpCodeManualView(MyView):
                 # code未全部上传成功，则查询上传成功的code
                 code_success = res_upload['success_code']
                 code_fail = res_upload['fail_code']
-                # res_check = method.checkCardCodeOnWx(access_token,data)
-                # if res_check['status'] == 0:
-                #     code_fail = res_check['not_exist_code']
-                #     code_success = res_check['exist_code']
-                # else:
-                #     res['status'] = 4 #部分上传成功，查询失败
-                #     res['msg'] = 'Code未全部上传，查询上传状态失败'
-                #     return HttpResponse(json.dumps(res))
+
             elif res_upload['status'] == 2:
                 #上传code报错
                 res['status'] = 5 #全部失败
@@ -324,7 +323,6 @@ class CardUpCodeManualView(MyView):
                     elif res_upload['status'] == 1:
                         res['status'] = 1#部分成功
 
-
             except Exception as e:
                 if res_upload['status'] == 0:
                     res['status'] = 2  # 全部Code上传微信成功，线下处理失败
@@ -334,18 +332,6 @@ class CardUpCodeManualView(MyView):
                     res['msg'] = e.value
 
             return HttpResponse(json.dumps(res))
-
-
-class CardChangeCodeView(MyView):
-    def get(self, request, wx_card_id):
-        access_token = MyView().token
-        url = 'https://api.weixin.qq.com/card/code/update?access_token={token}' \
-            .format(token=access_token)
-        data = {
-            "code": "12345678",
-            "card_id": "pFS7Fjg8kV1IdDz01r4SQwMkuCKc",
-            "new_code": "3495739475"
-        }
 
 
 class CardModifyStockView(MyView):
