@@ -18,6 +18,7 @@ urlpatterns = [
     #基础主题
     url(r'^theme/$',ThemeView.as_view(),name='themes'),
     url(r'^theme/edit/(?P<theme_id>[0-9]+)/(?P<step_id>[0-9])$',ThemeEditView.as_view(),name='theme_edit'),
+    url(r'^theme/item/del$','admin.views.giftcard.base.themeItemDel',name='theme_item_del'),
     #货架
     url(r'^page/$', PageView.as_view(), name='page'),
     url(r'^page/edit/(?P<page_id>[\S]+)/$',UploadPageView.as_view(),name='page_edit'),

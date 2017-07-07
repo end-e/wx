@@ -43,19 +43,25 @@
                                 <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                     <i class="icon-edit "></i>
                                 </a>
-
-                                <a class="btn btn-warning" title="线下删除" onclick="delCard('{{ card.id }}','local','1')">
-                                    <i class="icon-remove"></i>
-                                </a>
+                                {% if card.status == '0' %}
+                                    <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','1')">
+                                        <i class=" icon-unlock"></i>
+                                    </a>
+                                {% elif card.status == '1'  %}
+                                    <a class="btn btn-warning" title="禁用" onclick="delCard('{{ card.id }}','local','0')">
+                                        <i class="icon-lock"></i>
+                                    </a>
+                                {% endif %}
                                 {% if card.wx_card_id %}
-                                <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.wx_card_id }}','wx')">
-                                    <i class=" icon-trash"></i>
-                                </a>
-                                <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
-                                    <i class="icon-cloud-upload"></i>
-                                </a>
-                                <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
-                                    <i class="icon-inbox"></i></a>
+                                    <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.wx_card_id }}','wx','1')">
+                                        <i class=" icon-trash"></i>
+                                    </a>
+                                    <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
+                                        <i class="icon-cloud-upload"></i>
+                                    </a>
+                                    <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
+                                        <i class="icon-inbox"></i>
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -108,7 +114,7 @@
             var url = "{% url 'admin:giftcard:card_del'%}";
             var data ={
                 action:action,
-                card_id:wx_card_id,
+                wx_card_id:wx_card_id,
                 status:status,
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             };
@@ -116,7 +122,7 @@
             $.post(url,data,function (res) {
                 if(res.status==0){
                     noty({"text":"数据删除成功","layout":"bottom","type":"information"});
-{#                    window.location.reload()#}
+                    window.location.reload()
                 }else {
                     noty({"text":"数据删除失败","layout":"bottom","type":"error"});
                 }

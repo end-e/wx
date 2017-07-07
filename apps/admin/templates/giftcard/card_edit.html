@@ -138,9 +138,9 @@
                         </div>
                     </div>
                     <div class="control-group {% if form.errors.description %}error{% endif %}">
-                        <label class="control-label">使用说明</label>
+                        <label class="control-label">使用须知</label>
                         <div class="controls">
-                            <input type="text" name="description" value="{{ card.description }}" required>
+                            <textarea name="description" required>{{ card.description }}</textarea>
                             {% if form.errors.description %}<span class="help-inline">此字段必填</span>{% endif %}
                         </div>
                     </div>
@@ -179,7 +179,10 @@
         var res_status = {{ msg.status | safe | default:-1 }};
         if (res_status === 1) {
             noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
-            window.location.reload(true);
+            window.location.href="{% url 'admin:giftcard:card_edit' card_id %}";
+        }else if(res_status === 0){
+            noty({"text": "数据提交成功", "layout": "bottom", "type": "information"});
+            window.location.href="{% url 'admin:giftcard:cards' %}";
         }
 
 

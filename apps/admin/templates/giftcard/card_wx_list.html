@@ -37,9 +37,6 @@
                             <td class="center">{{ card.general_card.init_balance | divide:100  }}</td>
                             <td class="center">{{ card.general_card.sub_card_type }}</td>
                             <td class="center">
-                                {% comment %}<a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
-                                    <i class="icon-edit "></i>
-                                </a>{% endcomment %}
                                 <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.card_id }}','wx')">
                                     <i class=" icon-trash"></i>
                                 </a>
@@ -81,12 +78,12 @@
 {% endblock %}
 {% block common_js %}
     <script>
-        function delCard(wx_card_id,action) {
+        function delCard(wx_card_id,action,status) {
             var url = "{% url 'admin:giftcard:card_del'%}";
-
             var data={
                 action:action,
                 wx_card_id:wx_card_id,
+                status:status,
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             };
             $.post(url,data,function (res) {

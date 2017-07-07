@@ -79,6 +79,17 @@
         function delFormRow(obj) {
             $(obj).parent().parent().remove();
         }
+        function delFormRow2(obj,type,id) {
+            $(obj).parent().parent().remove();
+            url = "{% url 'admin:giftcard:theme_item_del' %}?item="+id+"&type="+type;
+            $.get(url,function (res) {
+                if(res.status==1){
+                    noty({"text": "数据删除失败", "layout": "bottom", "type": "error"});
+                }else {
+                    noty({"text":"数据删除成功","layout":"bottom","type":"information"});
+                }
+            })
+        }
 
         function addTheme(obj) {
             var themeBox = $(obj).parents('.theme-list');

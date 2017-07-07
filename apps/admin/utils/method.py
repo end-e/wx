@@ -370,7 +370,7 @@ def getCardCode(value):
 
 
 def getCardCode2(start,end,value,num=100):
-    conn = db.getMsSqlConn22()
+    conn = db.getMsSqlConn()
     num_new =100 if int(num)>100 else int(num)
 
     sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
@@ -449,7 +449,7 @@ def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
 def updateCardMode(codes,old,new):
     codes_str = "'" + "','".join(codes) + "'"
     res = {}
-    conn = db.getMsSqlConn22()
+    conn = db.getMsSqlConn()
     cur = conn.cursor()
     try:
         conn.autocommit(False)

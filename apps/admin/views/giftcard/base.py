@@ -191,3 +191,16 @@ class ThemeEditView(View):
 
 
 
+def themeItemDel(request):
+    item_type= request.GET.get('type')
+    item_id = request.GET.get('item')
+    res = {}
+    try:
+        if item_type == 'card':
+            GiftThemeItem.objects.filter(id=item_id).delete()
+        elif item_type == 'pic':
+            GiftThemePicItem.objects.filter(id=item_id).delete()
+        res['status'] = 0
+    except Exception as e:
+        print(e)
+        res['status'] = 1
