@@ -46,7 +46,6 @@ def cron_send_temp():
 def cron_giftcard_balance_change():
     # 1、查询消费记录
     conn_226 = db.getMsSqlConn()
-    # conn_226 = db.getMsSqlConn22()
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
     balanceChangeLog = GiftBalanceChangeLog.objects.values('last_serial').first()

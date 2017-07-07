@@ -181,9 +181,7 @@ class ThemeEditView(View):
                         GiftThemePicItem.objects.create(
                             theme_id=th_id,background_pic = pic_item_pics[i],msg = pic_item_msgs[i]
                         )
-            #跳转下一步
-            kwargs = {'theme_id': theme_id, 'step_id': int(step_id)}
-            return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))
+            res['status'] = 0
         except Exception as e:
             print(e)
             res['status'] = 1

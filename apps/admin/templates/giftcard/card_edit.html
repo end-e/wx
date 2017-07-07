@@ -176,12 +176,12 @@
 
         }
 
-        var res_status = {{ msg.status | safe | default:-1 }};
+        var res_status = {{ res.status | safe | default:-1 }};
         if (res_status === 1) {
-            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+            alert("数据提交失败");
             window.location.href="{% url 'admin:giftcard:card_edit' card_id %}";
         }else if(res_status === 0){
-            noty({"text": "数据提交成功", "layout": "bottom", "type": "information"});
+            alert("数据提交成功");
             window.location.href="{% url 'admin:giftcard:cards' %}";
         }
 

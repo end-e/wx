@@ -164,10 +164,11 @@
 
         var res_status = {{ res.status | safe | default:-1 }};
         if (res_status === 0) {
-            noty({"text": "数据提交成", "layout": "bottom", "type": "information"});
+            alert("数据提交成");
             window.location.href = "{% url 'admin:giftcard:page' %}"
         } else if (res_status === 1) {
-            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+            alert("数据提交失败");
+            window.location.href = "{% url 'admin:giftcard:page_edit' page_id %}"
         }
 
 

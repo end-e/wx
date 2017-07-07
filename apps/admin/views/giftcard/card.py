@@ -67,7 +67,7 @@ class CardEditView(MyView):
                     res['status'] = 1
                     LogWx.objects.create(type='3',errmsg=e,errcode='3')
 
-            return HttpResponse(json.dumps(res))
+            return render(request, 'giftcard/card_edit.html', locals())
         #直接上传微信
         elif action == 'wx':
             wx_card_id = request.POST.get('wx_card_id','')
@@ -180,52 +180,50 @@ class CardDelView(MyView):
     def post(self, request):
         res = {}
         action = request.POST.get('action')
-        wx_card_id = request.POST.get('card_id')
+        wx_card_id = request.POST.get('wx_card_id')
         status = request.POST.get('status')
         if action == 'wx':
-            access_token = MyView().token
-            url = 'https://api.weixin.qq.com/card/delete?access_token={token}' \
-                .format(token=access_token)
-            data = {"card_id": wx_card_id}
-            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            try:
+                #1、处理线下业务流程
+                with transaction.atomic():
+                    GiftCard.objects.filter(wx_card_id=wx_card_id).update(wx_card_id='', status=status)
+                    GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
+                    # 处理未出售的code
+                    qs_card_codes = GiftCardCode.objects.filter(wx_card_id=wx_card_id, status='0')
+                    codes = qs_card_codes.values('code')
+                    code_list = [code['code'] for code in codes]
+                    qs_card_codes.delete()
+                    res_mssql = method.updateCardMode(code_list, 1, 9)
+                    if res_mssql['status'] != 0:
+                        raise MyException('Code状态更新失败')
+                #2、处理线上业务流程
+                access_token = MyView().token
+                url = 'https://api.weixin.qq.com/card/delete?access_token={token}' \
+                    .format(token=access_token)
+                data = {"card_id": wx_card_id}
+                data = json.dumps(data, ensure_ascii=False).encode('utf-8')
 
-            rep = requests.post(url, data=data)
-            rep_data = json.loads(rep.text)
+                rep = requests.post(url, data=data)
+                rep_data = json.loads(rep.text)
 
-            if rep_data['errmsg'] == 'ok':
-                try:
-                    with transaction.atomic():
-                        GiftCard.objects.filter(wx_card_id=wx_card_id).update(wx_card_id='', status=status)
-                        GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
-                        #处理未出售的code
-                        qs_card_codes = GiftCardCode.objects.filter(wx_card_id=wx_card_id,status='0')
-                        codes = qs_card_codes.values('code')
-                        code_list = [code['code'] for code in codes]
-                        qs_card_codes.delete()
-                        res_mssql = method.updateCardMode(code_list,1,9)
-                        if res_mssql['status'] != 0:
-                            raise MyException('Code状态更新失败')
-                        res["status"] = 0
-                except Exception as e:
-                    res["status"] = 1
-                    LogWx.objects.create(
-                        type='7',
-                        errmsg='线下处理数据失败',
-                        errcode='7',
-                        remark='wx_card_id:{card},action:{action}'.format(card=wx_card_id, action=action)
-                    )
-            else:
+                if rep_data['errmsg'] == 'ok':
+                    res["status"] = 0
+                else:
+                    res["status"] = 2
+                    LogWx.objects.create(type='7', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
+                         remark='wx_card_id:{card},action:{action}'.format(card=wx_card_id,action=action)
+                 )
+
+            except Exception as e:
                 res["status"] = 1
-                LogWx.objects.create(
-                    type='7',
-                    errmsg=rep_data['errmsg'],
-                    errcode=rep_data['errcode'],
-                    remark = 'wx_card_id:{card},action:{action}'.format(card=wx_card_id,action=action)
+                LogWx.objects.create(type='7', errmsg=e, errcode='7',
+                     remark='wx_card_id:{card},action:{action}'.format(card=wx_card_id, action=action)
                 )
+
         elif action == 'local':
             try:
                 GiftCard.objects.filter(wx_card_id=wx_card_id).update(status=status)
-                # GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
+                GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
                 res["status"] = 0
             except Exception as e:
                 print(e)

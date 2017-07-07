@@ -118,11 +118,14 @@
 
                     if(data.status == 0){
                         noty({"text": "数据处理成功", "layout": "bottom", "type": "information"});
-                    }else if(data.status == 2){
+                    }
+                    else if(data.status == 2){
                         noty({"text": "全部Code上传成功，线下处理失败，请再次上传或联系管理员", "layout": "bottom", "type": "error"});
-                    }else if(data.status == 5){
+                    }
+                    else if(data.status == 5){
                         noty({"text": "数据处理失败", "layout": "bottom", "type": "error"});
-                    }else{
+                    }
+                    else{
                         $('#res_box_switch').click();
                         if(data.status == 1){
                             $('.row').show();

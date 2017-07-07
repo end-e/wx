@@ -258,7 +258,18 @@
         $(function(){
             var res_status = {{ res.status | safe | default:-1 }};
             if (res_status === 1) {
-                noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+                alert("数据提交失败");
+                window.location.href = "{% url 'admin:giftcard:theme_edit' theme_id step_id %}"
+            }else if(res_status === 0) {
+                alert("数据提交成功");
+                var step_id_next = {{ step_id | int }} +1;
+                if(step_id_next<4){
+                    url = "{% url 'admin:giftcard:theme_edit' theme_id 0 %}";
+                    window.location.href = url.replace(0,step_id_next);
+                }else if(step_id_next==4){
+                    window.location.href = "{% url 'admin:giftcard:themes' %}";
+                }
+
             }
         });
         function goToStep(step_id) {

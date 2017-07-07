@@ -51,7 +51,7 @@
 
         var res_status = {{ res.status | safe | default:-1 }};
         if(res_status === 1) {
-            noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+            alert("数据提交失败");
         }
     </script>
 {% endblock %}
