@@ -110,11 +110,11 @@
                             <li class="disabled"><a title='上一页' href="#">上一页</a></li>
                         {% endif %}
                         {% for i in total_page|range %}
-                            {% if forloop.counter0 == offset|int %}
+                            {% if i == page_num|int %}
                                 <li class="active"><a>{{ i }}</a> </li>
-                             {% else %}
+                            {% else %}
                                 <li><a onclick="switchPage({{ i }})">{{ i }}</a>
-                             {% endif %}
+                            {% endif %}
                         {% endfor %}
                         {% if page_num != total_page %}
                             <li><a title='下一页'  onclick="switchPage({{ next_page }})">下一页</a></li>

@@ -29,7 +29,7 @@ class OrderView(MyView):
         data = {
             "begin_time": begin_time,
             "end_time": end_time,
-            "sort_type": "ASC",
+            "sort_type": "DESC",
             "offset": offset,
             "count": count
         }

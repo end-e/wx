@@ -12,24 +12,23 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:img_upload' %}"
-                      enctype="multipart/form-data">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:img_upload' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="control-group">
                         <label class="control-label">图片标题</label>
                         <div class="controls">
-                            <input type="text" name="title">
+                            <input type="text" name="title" id="title">
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label">上传图片</label>
                         <div class="controls">
-                            <input type="file" name="img">
+                            <input type="file" name="img" id="img">
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <button class="btn btn-primary" onclick="submitForm()">上传</button>
+                        <a class="btn btn-primary" onclick="submitForm()">上传</a>
                         <button type="reset" class="btn" onclick="window.history.back()">取消</button>
                     </div>
                 </form>
@@ -40,7 +39,14 @@
 {% block common_js %}
     <script>
         function submitForm() {
-            $('#Form').submit();
+            var title = $('#title').val();
+            var img = $('#img').val();
+            if(!img || !title){
+                noty({"text": "补全信息后，再次提交", "layout": "bottom", "type": "error"});
+                return false;
+            }else{
+                $('#Form').submit();
+            }
         }
 
         var res_status = {{ res.status | safe | default:-1 }};

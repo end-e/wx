@@ -173,7 +173,6 @@ class CardInfoWxView(MyView):
         rep_data = json.loads(rep.text)
         if rep_data['errmsg'] == 'ok':
             card = rep_data['card']
-
             return card
 
 
