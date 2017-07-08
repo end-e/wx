@@ -17,7 +17,7 @@
                     <div class="control-group">
                         <label class="control-label">图片标题</label>
                         <div class="controls">
-                            <input type="text" name="title" id="title">
+                            <input type="text" name="title" id="title" value="{{ img.title }}">
                         </div>
                     </div>
                     <div class="control-group">
@@ -26,7 +26,13 @@
                             <input type="file" name="img" id="img">
                         </div>
                     </div>
-
+                    <div class="control-group">
+                        <label class="control-label">原图：</label>
+                        <div class="controls">
+                            <img src="{{ img.url }}" height="210" width="250">
+                        </div>
+                    </div>
+                    <input type="hidden" name="img_id" value="{{ img_id }}">
                     <div class="form-actions">
                         <a class="btn btn-primary" onclick="submitForm()">上传</a>
                         <button type="reset" class="btn" onclick="window.history.back()">取消</button>

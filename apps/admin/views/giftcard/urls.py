@@ -3,7 +3,7 @@ __author__ = ''
 __date__ = '2017/6/14 10:26'
 from django.conf.urls import url
 
-from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ThemeEditView,ImgStatusView
+from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView,ThemeEditView,ImgStatusView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeAutoView, \
     CardUpCodeManualView,CardModifyStockView
 from admin.views.giftcard.page import UploadPageView,PageView
@@ -11,9 +11,11 @@ from admin.views.giftcard.order import OrderView
 
 urlpatterns = [
     #图片素材
-    url(r'^upload/img',ImgUploadView.as_view(),name='img_upload'),
+    url(r'^img/edit/$',ImgUploadView.as_view(),name='img_upload'),
     url(r'^img/(?P<page_id>[0-9]+)$',ImgView.as_view(),name='imgs'),
-    url(r'^img/status/(?P<img_id>[0-9]+)/(?P<status>[0-9])', ImgStatusView.as_view(), name='img_status'),
+    url(r'^img/del/',ImgDelView.as_view(),name='img_del'),
+    url(r'^img/status/(?P<img_id>[0-9]+)/(?P<status>[0-9])$', ImgStatusView.as_view(), name='img_status'),
+
 
     #基础主题
     url(r'^theme/$',ThemeView.as_view(),name='themes'),

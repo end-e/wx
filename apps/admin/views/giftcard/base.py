@@ -52,10 +52,13 @@ class ImgView(View):
 
 class ImgUploadView(MyView):
     """
-    form表单提交
+    form表单提交Z
     """
     def get(self, request):
-        return render(request, 'giftcard/upload_img.html')
+        img_id = request.GET.get('id','')
+        if img_id:
+            img = GiftImg.objects.values('title','url').filter(id=img_id).first()
+        return render(request, 'giftcard/upload_img.html',locals())
 
     def post(self, request):
         access_token = MyView().token
@@ -73,9 +76,13 @@ class ImgUploadView(MyView):
 
         res = {}
         if 'url' in rep_data.keys():
-            img_url = rep_data['url']
+            cdn_url = rep_data['url']
             try:
-                GiftImg.objects.create(title = title,url=img_url)
+                img_id = request.POST.get('img_id','')
+                if img_id:
+                    GiftImg.objects.filter(id=img_id).update(title=title,url=cdn_url)
+                else:
+                    GiftImg.objects.create(title = title,url=cdn_url)
                 return redirect(reverse('admin:giftcard:imgs',kwargs={'page_id':1}))
             except Exception as e:
                 print(e)
@@ -95,6 +102,19 @@ class ImgStatusView(View):
             res['status'] = 0
         else:
             res['status'] = 1
+        return HttpResponse(json.dumps(res))
+
+
+class ImgDelView(View):
+    def get(self,request):
+        img_id = request.GET.get('id','')
+        res = {}
+        try:
+            GiftImg.objects.filter(id=img_id).delete()
+            res['status'] = 0
+        except Exception as e:
+            res['status'] = 1
+
         return HttpResponse(json.dumps(res))
 
 
@@ -181,7 +201,9 @@ class ThemeEditView(View):
                         GiftThemePicItem.objects.create(
                             theme_id=th_id,background_pic = pic_item_pics[i],msg = pic_item_msgs[i]
                         )
-            res['status'] = 0
+            #跳转下一步
+            kwargs = {'theme_id': theme_id, 'step_id': int(step_id)}
+            return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))
         except Exception as e:
             print(e)
             res['status'] = 1
@@ -190,7 +212,7 @@ class ThemeEditView(View):
 
 
 def themeItemDel(request):
-    item_type= request.GET.get('type')
+    item_type = request.GET.get('type')
     item_id = request.GET.get('item')
     res = {}
     try:
@@ -202,3 +224,5 @@ def themeItemDel(request):
     except Exception as e:
         print(e)
         res['status'] = 1
+
+    return HttpResponse(json.dumps(res))

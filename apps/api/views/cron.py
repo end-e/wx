@@ -1,13 +1,13 @@
 # -*-  coding:utf-8 -*-
 # __author__ = ''
 # __date__ = '2017/4/19 14:04'
-import datetime,json,requests
+import datetime, json, requests
 
 from django.core.cache import caches
 
 from admin.models import GiftCardCode, GiftBalanceChangeLog
 from api.models import LogWx
-from utils import db, consts,method
+from utils import db, consts, method
 
 
 def cron_get_ikg_token():
@@ -17,7 +17,7 @@ def cron_get_ikg_token():
     '''
     app_id = consts.APPID
     secret = consts.APPSECRET
-    method.get_access_token( 'ikg',app_id, secret,)
+    method.get_access_token('ikg', app_id, secret, )
 
 
 def cron_get_kgcs_token():
@@ -27,7 +27,7 @@ def cron_get_kgcs_token():
     """
     app_id = consts.KG_APPID
     secret = consts.KG_APPSECRET
-    method.get_access_token('kgcs',app_id, secret)
+    method.get_access_token('kgcs', app_id, secret)
 
 
 def cron_send_temp():
@@ -79,7 +79,7 @@ def cron_giftcard_balance_change():
                 data = {
                     "code": o['CardNo'].strip(),
                     "card_id": o['wx_card_id'],
-                    "balance": float(o['detail'])
+                    "balance": float(o['detail'])*100
                 }
 
                 data = json.dumps(data, ensure_ascii=False).encode('utf-8')
@@ -89,15 +89,16 @@ def cron_giftcard_balance_change():
                     # TODO 记录错误日志
                     LogWx.objects.create(
                         type='2',
-                        remark='code:{code},balance:{balance},card_id:{card_id}'.format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id']),
+                        remark='code:{code},balance:{balance},card_id:{card_id}'
+                            .format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id']),
                         errmsg=rep_data['errmsg'],
                         errcode=rep_data['errcode']
                     )
 
             this_last_serial = orders[-1]['PurchSerial']
             if prev_last_serial:
-                GiftBalanceChangeLog.objects.update(last_serial=this_last_serial) \
-                    .filter(last_serial=prev_last_serial, create_time=datetime.datetime.now)
+                GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial)\
+                    .update(last_serial=this_last_serial, create_time=datetime.datetime.now)
             else:
                 GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
         except Exception as e:

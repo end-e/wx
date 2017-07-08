@@ -66,6 +66,8 @@ class CardEditView(MyView):
                 except Exception as e:
                     res['status'] = 1
                     LogWx.objects.create(type='3',errmsg=e,errcode='3')
+            else:
+                res['status'] = 1
 
             return render(request, 'giftcard/card_edit.html', locals())
         #直接上传微信
@@ -116,7 +118,7 @@ class CardEditView(MyView):
                     if rep_data['errmsg'] == 'ok':
                         wx_card_id = rep_data['card_id']
                         try:
-                            if card_id == '0':
+                            if card_id != '0':
                                 GiftCard.objects.filter(id=res_save.id).update(wx_card_id=wx_card_id,status='2')
                             else:
                                 GiftCard.objects.filter(id=card_id).update(wx_card_id=wx_card_id,status='2')
