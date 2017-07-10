@@ -26,6 +26,9 @@ class CardView(View):
         card_list = GiftCard.objects.values('id', 'wx_card_id', 'title', 'init_balance', 'price', 'quantity','status')\
             .order_by('-status','-id')
 
+        for card in card_list:
+            GiftCardCode.objects.filter(wx_card_id=card)
+
         return render(request, 'giftcard/card_list.html', locals())
 
 
@@ -118,7 +121,7 @@ class CardEditView(MyView):
                     if rep_data['errmsg'] == 'ok':
                         wx_card_id = rep_data['card_id']
                         try:
-                            if card_id != '0':
+                            if card_id == '0':
                                 GiftCard.objects.filter(id=res_save.id).update(wx_card_id=wx_card_id,status='2')
                             else:
                                 GiftCard.objects.filter(id=card_id).update(wx_card_id=wx_card_id,status='2')
@@ -133,7 +136,7 @@ class CardEditView(MyView):
 
 class CardWxView(MyView):
     def get(self, request, page_num):
-        count = 10
+        count = 15
         page_num = int(page_num)
         offset = (page_num - 1) * count
         access_token = MyView().token
@@ -307,7 +310,6 @@ class CardUpCodeManualView(MyView):
                 # code未全部上传成功，则查询上传成功的code
                 code_success = res_upload['success_code']
                 code_fail = res_upload['fail_code']
-
             elif res_upload['status'] == 2:
                 #上传code报错
                 res['status'] = 5 #全部失败

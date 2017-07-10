@@ -365,14 +365,31 @@ def getCardCode(value):
     return card_codes
 
 
-def getCardCode2(start,end,value,num=100):
+def getCardCode2(start,end,value,count=100):
     conn = db.getMsSqlConn()
-    num_new =100 if int(num)>100 else int(num)
+    num_new =100 if int(count)>100 else int(count)
 
     sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
           "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value} " \
           "ORDER BY cardNo"\
         .format(start=start,end=end,value=value,num=num_new)
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    cards = cur.fetchall()
+
+    card_codes = [card['cardNo'].strip() for card in cards]
+
+    return card_codes
+
+
+def getCardCode3(sheet_id,value,count=100):
+    conn = db.getMsSqlConn()
+    num_new =100 if int(count)>100 else int(count)
+
+    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
+          "WHERE cardType='12' AND Mode = '9' AND sheetID='{sheet_id}' AND New_amount={value} " \
+        .format(sheet_id=sheet_id,value=value,num=num_new)
 
     cur = conn.cursor()
     cur.execute(sql)
@@ -395,10 +412,10 @@ def upLoadCardCode(access_token,wx_card_id,data):
 
     #导入code
     res = {}
-    url = 'http://api.weixin.qq.com/card/code/deposit?access_token={token}' \
+    url = 'https://api.weixin.qq.com/card/code/deposit?access_token={token}' \
         .format(token=access_token)
-    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data)
+    data_post = json.dumps(data, ensure_ascii=False).encode('utf-8')
+    rep = requests.post(url, data=data_post)
     rep_data = json.loads(rep.text)
 
     if rep_data['errcode'] == 0:
@@ -412,6 +429,8 @@ def upLoadCardCode(access_token,wx_card_id,data):
             res['fail_code'] = rep_data['fail_code']
     else:
         res["status"] = 2
+
+
     return res
 
 

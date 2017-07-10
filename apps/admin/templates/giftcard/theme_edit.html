@@ -94,7 +94,7 @@
                     <div id="step2" class="step-pane ">
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 2 %}">
                             {% csrf_token %}
-                            <input type="hidden" name="th_id" value="{{ th_id }}">
+                            <input type="hidden" name="th_id" value="{{ theme_id }}">
                             <div class="item_list list">
                                 {% for item in item_list %}
                                     <div class="row-fluid">
@@ -122,7 +122,7 @@
                                             <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
                                                 添加 <i class="icon-plus"></i>
                                             </button>
-                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow2(this,'card','{{ item.title }}')">
+                                            <button type="button" class="btn btn-small btn-danger" onclick="delFormRow2(this,'card','{{ item.id }}')">
                                                 删除 <i class="icon-minus"></i>
                                             </button>
                                         </div>
@@ -166,7 +166,7 @@
                     <div id="step3" class="step-pane ">
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 3 %}">
                             {% csrf_token %}
-                            <input type="hidden" name="th_id" value="{{ th_id }}">
+                            <input type="hidden" name="th_id" value="{{ theme_id }}">
                             <div class="pic_item_list list">
                                 {% for pic_item in pic_item_list %}
                                     <div class="row-fluid">
@@ -259,16 +259,7 @@
             var res_status = {{ res.status | safe | default:-1 }};
             if (res_status === 1) {
                 alert("数据提交失败");
-                window.location.href = "{% url 'admin:giftcard:theme_edit' theme_id step_id %}"
-            }else if(res_status === 0) {
-                alert("数据提交成功");
-                var step_id_next = {{ step_id | int }} +1;
-                if(step_id_next<4){
-                    url = "{% url 'admin:giftcard:theme_edit' theme_id 0 %}";
-                    window.location.href = url.replace(0,step_id_next);
-                }else if(step_id_next==4){
-                    window.location.href = "{% url 'admin:giftcard:themes' %}";
-                }
+                window.location.href = "{% url 'admin:giftcard:theme_edit' theme_id step_id %}";
 
             }
         });
@@ -285,8 +276,6 @@
                 }
             }
         }
-
-
 
     </script>
 {% endblock %}

@@ -161,7 +161,7 @@ class ThemeEditView(View):
                     th = GiftTheme.objects.create(
                         title=title,theme_pic=theme_pic,title_color=title_color,status=status,sku_title_first=sku_title_first
                     )
-                    th_id = th.id
+                    theme_id = th.id
                 else:
                     GiftTheme.objects.filter(id=theme_id) \
                         .update(title=title, theme_pic=theme_pic, title_color=title_color,status=status,sku_title_first=sku_title_first)
@@ -194,7 +194,11 @@ class ThemeEditView(View):
                         GiftThemePicItem.objects.create(
                             theme_id=th_id,background_pic = pic_item_pics[i],msg = pic_item_msgs[i]
                         )
-            res['status'] = 0
+            if int(step_id)<3:
+                kwargs = {'theme_id': theme_id, 'step_id': int(step_id)+1}
+                return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))
+            else:
+                return redirect(reverse('admin:giftcard:themes'))
         except Exception as e:
             print(e)
             res['status'] = 1
