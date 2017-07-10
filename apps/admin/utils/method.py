@@ -228,11 +228,11 @@ def carePageData(page_title, banner_pic_url, theme_list, category_list):
             "biz_description": "退款指引",
             "cell_1": {
                 "title": "申请发票",
-                "url": "https://open.weixin.qq.com"
+                "url": "400 111 0314"
             },
             "cell_2": {
                 "title": "申请退款",
-                "url": "https://mp.weixin.qq.com"
+                "url": "400 111 0314"
             }
         }
     }
@@ -292,8 +292,8 @@ def createCardData(form):
                     # "center_title": "立即使用",
                     # "center_sub_title": "按钮下方的wording",
                     # "center_url": "www.qq.com",
-                    # "custom_url_name": "新品推荐",
-                    # "custom_url": "https://www.starbucks.com.cn/",
+                    "custom_url_name": "我也要送",
+                    "custom_url": "https://mp.weixin.qq.com/bizmall/giftcard?action=homepage&page_id=sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA%3d#wechat_redirect",
                     # "need_push_on_view": True
                 },
                 "supply_bonus": False,
@@ -333,14 +333,16 @@ def createCardEditData(form):
                 "logo_url": logo + "?wx_fmt=gif",
                 "notice": notice,
                 "description": description,
-                "service_phone": "400 111 0314",
-                "color": "Color020",
-                "code_type": "CODE_TYPE_QRCODE",
-                "date_info": {
-                    "type": "DATE_TYPE_PERMANENT"
-                },
-                "get_limit": 0,
-                "can_give_friend": True
+                # "service_phone": "400 111 0314",
+                # "color": "Color020",
+                # "code_type": "CODE_TYPE_QRCODE",
+                # "date_info": {
+                #     "type": "DATE_TYPE_PERMANENT"
+                # },
+                # "get_limit": 0,
+                # "can_give_friend": True,
+                "custom_url_name": "我也要送",
+                "custom_url": "https://mp.weixin.qq.com/bizmall/giftcard?action=homepage&page_id=sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA%3d#wechat_redirect",
             }
         }
     }

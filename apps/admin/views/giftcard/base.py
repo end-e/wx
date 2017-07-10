@@ -113,6 +113,7 @@ class ImgDelView(View):
             GiftImg.objects.filter(id=img_id).delete()
             res['status'] = 0
         except Exception as e:
+            print(e)
             res['status'] = 1
 
         return HttpResponse(json.dumps(res))
@@ -135,17 +136,14 @@ class ThemeEditView(View):
         if theme_id != '0':
             try:
                 if step_id == '1':
-                    theme = GiftTheme.objects\
-                        .values('id','title','theme_pic','title_color','sku_title_first','status')\
+                    theme = GiftTheme.objects.values('id','title','theme_pic','title_color','sku_title_first','status')\
                         .get(id=theme_id)
                 elif step_id == '2':
                     item_list = GiftThemeItem.objects.values('id','wx_card_id','title').filter(theme_id=theme_id)
                 elif step_id == '3':
-                    pic_item_list = GiftThemePicItem.objects.values('id','background_pic','msg')\
-                        .filter(theme_id=theme_id)
+                    pic_item_list = GiftThemePicItem.objects.values('id','background_pic','msg').filter(theme_id=theme_id)
             except Exception as e:
                 print(e)
-                pass
         return render(request,'giftcard/theme_edit.html',locals())
     def post(self,request,theme_id,step_id):
         res = {}
@@ -161,16 +159,12 @@ class ThemeEditView(View):
                 status = request.POST.get('status')
                 if theme_id == '0' :
                     th = GiftTheme.objects.create(
-                        title=title,theme_pic=theme_pic,title_color=title_color,
-                        status=status,sku_title_first=sku_title_first
+                        title=title,theme_pic=theme_pic,title_color=title_color,status=status,sku_title_first=sku_title_first
                     )
                     th_id = th.id
                 else:
-                    GiftTheme \
-                        .objects \
-                        .filter(id=theme_id) \
-                        .update(title=title, theme_pic=theme_pic, title_color=title_color,
-                                status=status,sku_title_first=sku_title_first)
+                    GiftTheme.objects.filter(id=theme_id) \
+                        .update(title=title, theme_pic=theme_pic, title_color=title_color,status=status,sku_title_first=sku_title_first)
 
             if step_id == '2':
                 th_id = request.POST.get('th_id')
@@ -195,20 +189,16 @@ class ThemeEditView(View):
                 for i in range(0, len(pic_item_pics)):
                     pic_item_id = pic_item_ids[i]
                     if pic_item_id :
-                        GiftThemePicItem.objects.filter(id=pic_item_id) \
-                            .update(background_pic=pic_item_pics[i], msg=pic_item_msgs[i])
+                        GiftThemePicItem.objects.filter(id=pic_item_id).update(background_pic=pic_item_pics[i], msg=pic_item_msgs[i])
                     else:
                         GiftThemePicItem.objects.create(
                             theme_id=th_id,background_pic = pic_item_pics[i],msg = pic_item_msgs[i]
                         )
-            #跳转下一步
-            kwargs = {'theme_id': theme_id, 'step_id': int(step_id)}
-            return redirect(reverse('admin:giftcard:theme_edit', kwargs=kwargs))
+            res['status'] = 0
         except Exception as e:
             print(e)
             res['status'] = 1
         return render(request, 'giftcard/theme_edit.html', locals())
-
 
 
 def themeItemDel(request):

@@ -7,7 +7,7 @@ from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeAutoView, \
     CardUpCodeManualView,CardModifyStockView
 from admin.views.giftcard.page import UploadPageView,PageView
-from admin.views.giftcard.order import OrderView
+from admin.views.giftcard.report import OrderView,BizuininfoView
 
 urlpatterns = [
     #图片素材
@@ -39,7 +39,8 @@ urlpatterns = [
     url(r'^card/balance/change/$','api.views.cron.cron_giftcard_balance_change',name='card_balance_change'),
 
 
-    #订单
+    #Report
     url(r'^order/$',OrderView.as_view(),name='orders'),
+    url(r'^bizuininfo/$',BizuininfoView.as_view(),name='bizuininfo'),
 
 ]

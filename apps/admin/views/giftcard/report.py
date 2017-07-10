@@ -10,8 +10,7 @@ from admin.utils import method
 
 class OrderView(MyView):
     def get(self,request):
-
-        return render(request,'giftcard/order_list.html',locals())
+        return render(request,'giftcard/order_list.html')
     def post(self,request):
         access_token = MyView().token
         url = "https://api.weixin.qq.com/card/giftcard/order/batchget?access_token={access_token}" \
@@ -50,3 +49,28 @@ class OrderView(MyView):
 
 
 
+class BizuininfoView(MyView):
+    def get(self,request):
+        return render(request,'giftcard/bizuininfo.html')
+    def post(self,request):
+        access_token = MyView().token
+        url = "https://api.weixin.qq.com/datacube/getcardbizuininfo?access_token={access_token}" \
+            .format(access_token=access_token)
+        begin = request.POST.get('begin_time')
+        end = request.POST.get('end_time')
+
+        data = {
+            "begin_date": begin,
+            "end_date": end,
+            "cond_source": 1
+        }
+
+        data = json.dumps(data,ensure_ascii=False).encode('utf-8')
+        rep = requests.post(url, data=data)
+        rep_data = json.loads(rep.text)
+        res = {}
+        try:
+            info_list = rep_data['list']
+        except:
+            res['status'] = 1
+        return render(request,'giftcard/bizuininfo.html',locals())

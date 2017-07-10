@@ -98,7 +98,7 @@ def cron_giftcard_balance_change():
             this_last_serial = orders[-1]['PurchSerial']
             if prev_last_serial:
                 GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial)\
-                    .update(last_serial=this_last_serial, create_time=datetime.datetime.now)
+                    .update(last_serial=this_last_serial)
             else:
                 GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
         except Exception as e:
