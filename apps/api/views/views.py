@@ -67,19 +67,29 @@ def create_nav(request):
         "button": [
             {
                 "type": "view",
+                "name": "礼品卡",
+                "url": "https://mp.weixin.qq.com/bizmall/giftcard?action=homepage&page_id=sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA%3d#wechat_redirect"
+            },
+            {
+                "type": "view",
                 "name": "慧购",
                 "url": "http://www.huigo.com/mobile"
             },
             {
-                "type": "view",
-                "name": "会员绑定",
-                "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
-            },
-            {
-                "type": "view",
-                "name": "会员卡",
-                "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersimage&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
-            },
+                "name": "会员",
+                "sub_button": [
+                    {
+                        "type": "view",
+                        "name": "会员绑定",
+                        "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
+                    },
+                    {
+                        "type": "view",
+                        "name": "会员卡",
+                        "url": u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersimage&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
+                    },
+                ]
+            }
         ]
     })
     return HttpResponse(json.dumps(menu_create))
@@ -107,5 +117,3 @@ def get_session_key(request):
     res = requests.get(url, params=param)
 
     return HttpResponse(res, code)
-
-
