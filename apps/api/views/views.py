@@ -72,7 +72,7 @@ def create_nav(request):
             },
             {
                 "type": "view",
-                "name": "慧购",
+                "name": "宽广购",
                 "url": "http://www.huigo.com/mobile"
             },
             {
