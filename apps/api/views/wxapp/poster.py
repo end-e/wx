@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-import json, datetime
+import json
+import datetime
+
 from django.http import HttpResponse
+
 from wxapp.models import PosterImage
 from wxapp.constants import MEDIA_URL
 from api.decorator import signature
@@ -25,6 +28,7 @@ def getPosterList(request):
             vardict['begin_date'] = str(item.begin_date.strftime("%Y-%m-%d"))
             vardict['end_date'] = str(item.end_date.strftime("%Y-%m-%d"))
             vardict['poster_image'] = MEDIA_URL + str(item.poster_image)
+            vardict['link_address'] = str(item.link_address)
             msg.append(vardict)
 
         result_dict['status'] = 0
