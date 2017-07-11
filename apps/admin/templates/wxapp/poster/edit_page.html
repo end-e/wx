@@ -9,12 +9,18 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data" action="{% url 'wxapp:poster_save' %}">
+                <form class="form-horizontal" id="Form" method="post" enctype="multipart/form-data"
+                      action="{% url 'wxapp:poster_save' %}">
                     {% csrf_token %}
                     <input type="hidden" value="{{ poster.id }}" name="poster_id">
                     <div class="control-group ">
                         <label>海报名称：
                             <input name="poster_name" type="text" value="{{ poster.poster_name }}">
+                        </label>
+                    </div>
+                    <div class="control-group ">
+                        <label>链接地址：
+                            <input name="link_address" type="text" value="{{ poster.link_address|default_if_none:'' }}">
                         </label>
                     </div>
                     <div class="control-group">
