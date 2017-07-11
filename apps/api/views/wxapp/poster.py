@@ -51,6 +51,7 @@ def getPosterInfo(request):
         msg['begin_date'] = str(poster.begin_date.strftime("%Y-%m-%d"))
         msg['end_date'] = str(poster.end_date.strftime("%Y-%m-%d"))
         msg['poster_image'] = MEDIA_URL + str(poster.poster_image)
+        msg['link_address'] = str(poster.link_address)
 
         result_dict['status'] = 0
         result_dict['msg'] = msg
