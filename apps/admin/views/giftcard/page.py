@@ -17,7 +17,7 @@ from admin.utils import method
 
 class UploadPageView(MyView):
     def get(self, request, page_id):
-        base_theme_list = GiftTheme.objects.values('title', 'id').filter(status='0')
+        base_theme_list = GiftTheme.objects.values('name', 'id').filter(status='0')
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         if page_id == '0':
             # TODO 新建
@@ -25,25 +25,6 @@ class UploadPageView(MyView):
 
         else:
             # TODO 查询相关信息，供修改页面展示
-            # page_id=sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA=
-            # page_id=urllib.parse.quote(page_id)
-            # page_id = 'sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA%3d'
-            # page_id = urllib.parse.unquote(page_id)
-            # access_token = MyView().token
-            # url = 'https://api.weixin.qq.com/card/giftcard/page/get?access_token={access_token}' \
-            #     .format(access_token=access_token)
-            # data = {"page_id": page_id}
-            # data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-            #
-            # response = requests.post(url, data=data)
-            # res_data = json.loads(response.text)
-            #
-            # if res_data['errmsg'] == 'ok':
-            #     page = res_data['page']
-            # else:
-            #     errcode = res_data['errcode']
-            #     errmsg = res_data['errmsg']
-
             page = GiftPage.objects.values('title','banner_pic','categories','themes','wx_page_id')\
                 .get(pk=page_id)
             if page['categories'] != '':
@@ -84,7 +65,7 @@ class UploadPageView(MyView):
             # 3.2、theme_list
             theme_list = method.createThemeList(themes,theme_categories)
             # 3.3、data
-            data = method.carePageData(page_title,banner_pic_url,theme_list,category_list)
+            data = method.caretPageData(page_title,banner_pic_url,theme_list,category_list)
             data = json.dumps(data, ensure_ascii=False).encode('utf-8')
             # 3.4、post数据
             response = requests.post(url, data=data)
@@ -135,7 +116,7 @@ class UploadPageView(MyView):
                 # 2、theme_list
                 theme_list = method.createThemeList(themes,theme_categories)
                 # 3、data
-                data = method.carePageData(page_title, banner_pic_url, theme_list, category_list)
+                data = method.caretPageData(page_title, banner_pic_url, theme_list, category_list)
                 data['page']['page_id'] = wx_page_id
                 data = json.dumps(data, ensure_ascii=False).encode('utf-8')
                 # 4、post数据
@@ -146,11 +127,8 @@ class UploadPageView(MyView):
                 if rep_data['errmsg'] == 'ok':
                     res["status"] = 0
                 else:
-                    LogWx.objects.create(
-                        type='4',
-                        errmsg=rep_data['errmsg'],
-                        errcode=rep_data['errcode']
-                    )
+                    res["status"] = 1
+                    LogWx.objects.create(type='4',errmsg=rep_data['errmsg'],errcode=rep_data['errcode'])
 
             except Exception as e:
                 msg =e
@@ -158,11 +136,7 @@ class UploadPageView(MyView):
                 if hasattr(e, 'value'):
                     msg = e.value
                     res['msg'] = msg
-                LogWx.objects.create(
-                    type='4',
-                    errmsg=msg,
-                    errcode='4'
-                )
+                LogWx.objects.create(type='4',errmsg=msg,errcode='4')
 
         return render(request, 'giftcard/page_create.html', locals())
 

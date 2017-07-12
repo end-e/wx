@@ -77,10 +77,10 @@
                                         <select name="theme[]">
                                             <option>请选择</option>
                                             {% for base_theme in base_theme_list %}
-                                                {% if theme|slice:":1"|int == base_theme.id %}
-                                                    <option value="{{ base_theme.id }}" selected>{{ base_theme.title }}</option>
+                                                {% if theme|getListItem:0|int == base_theme.id %}
+                                                    <option value="{{ base_theme.id }}" selected>{{ base_theme.name }}</option>
                                                 {% else %}
-                                                    <option value="{{ base_theme.id }}">{{ base_theme.title }}</option>
+                                                    <option value="{{ base_theme.id }}">{{ base_theme.name }}</option>
                                                 {% endif %}
 
                                             {% endfor %}
@@ -90,7 +90,7 @@
                                 <div class="control-group span3">
                                     <label class="control-label">所属分类:</label>
                                     <div class="controls">
-                                        <input type="text" name="theme_category[]" value="{{ theme|slice:"2:" }}">
+                                        <input type="text" name="theme_category[]" value="{{ theme|getListItem:1 }}">
                                         {% comment %}<select name="" class="theme_category_index"></select>{% endcomment %}
                                     </div>
                                 </div>

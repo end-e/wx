@@ -123,8 +123,6 @@ class CardPaidView(MyView):
                     item['price'] = card['price']
                     item['code'] = card['code']
                     card_code_list.append(item)
-
-
         else:
             errcode = rep_data['errcode']
             errmsg = rep_data['errmsg']

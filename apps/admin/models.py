@@ -49,7 +49,8 @@ class User(models.Model):
 
 
 class GiftCard(models.Model):
-    title = models.CharField(max_length=12,verbose_name=u'名称')
+    name = models.CharField(max_length=12,verbose_name=u'名称-本地',default='礼品卡')
+    title = models.CharField(max_length=12,verbose_name=u'名称-微信')
     wx_card_id = models.CharField(max_length=32,verbose_name=u'微信返回ID',blank=True,null=True)
     background_pic = models.CharField(max_length=128,verbose_name=u'背景图片')
     logo = models.CharField(max_length=128,verbose_name='logo')
@@ -60,7 +61,7 @@ class GiftCard(models.Model):
     max_give = models.SmallIntegerField(verbose_name=u'最大赠送次数',default=9999)
     notice = models.CharField(verbose_name=u'使用提醒',max_length=12,default='')
     description = models.CharField(verbose_name=u'使用说明',max_length=1000,default='')
-    status = models.CharField(max_length=1, verbose_name=u'状态(0:线下失效,1:线下生效,2:已上线)', default='1')
+    status = models.CharField(max_length=1, verbose_name=u'状态(0:禁用,1:启用,2:上线;9:封存)', default='1')
     # supply_bonus = models.CharField(max_length=1, verbose_name=u'支持积分',default='1')
     # supply_balance = models.CharField(max_length=1, verbose_name=u'支持余额',default='0')
     # auto_activate = models.CharField(max_length=1, verbose_name=u'自动激活',default='1')
@@ -84,13 +85,14 @@ class GiftImg(models.Model):
 
 
 class GiftTheme(models.Model):
-    title = models.CharField(max_length=12,verbose_name=u'主题名称')
+    name = models.CharField(max_length=12,verbose_name=u'名称-本地',default='礼品卡')
+    title = models.CharField(max_length=12,verbose_name=u'名称-微信')
     theme_pic = models.CharField(max_length=128, verbose_name=u'封面图片')
     title_color = models.CharField(max_length=7, verbose_name=u'主题字体颜色',default='#FB966E')
     sku_title_first = models.CharField(max_length=1, verbose_name=u'突出商品名(1:是,0:否)', default='0')
     create_time = models.DateField(max_length=128,verbose_name='创建日期',default=datetime.now)
     status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
-
+    is_banner = models.CharField(max_length=1, verbose_name=u'状态', default='0')
     class Meta:
         verbose_name = u'主题'
         verbose_name_plural = verbose_name

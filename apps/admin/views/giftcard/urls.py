@@ -33,10 +33,7 @@ urlpatterns = [
     url(r'^card/code/upload/auto/(?P<wx_card_id>[\S]+)',CardUpCodeAutoView.as_view(),name='card_code_upload_auto'),
     url(r'^card/code/upload/manual/(?P<wx_card_id>[\S]+)',CardUpCodeManualView.as_view(),name='card_code_upload_manual'),
     url(r'^card/code/get/','admin.utils.method.getCardCode2',name='card_code_get_guest'),
-
-
     url(r'^card/stock/modify/$',CardModifyStockView.as_view(),name='card_stock_modify'),
-    url(r'^card/balance/change/$','api.views.cron.cron_giftcard_balance_change',name='card_balance_change'),
 
 
     #Report

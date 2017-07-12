@@ -1,11 +1,14 @@
-import random,hashlib,datetime
+import random,hashlib,datetime,json,requests,time
 
 from django.core.cache import caches
+from django.db import transaction
 from wechatpy import WeChatClient
+
+
 from user.models import WechatMembers
 from api.models import LogWx
-
 from utils import db,consts
+from admin.models import GiftOrder,GiftOrderInfo,GiftCardCode
 
 def createNonceStr(length = 16):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -74,6 +77,11 @@ def get_access_token(app_name,app_id,secret):
     caches['default'].set(key, token, 7200)
 
     return token
+
+
+def getTimeStamp(str):
+    time.strptime(str, '%Y-%m-%d %H:%M:%S')
+    return time.mktime(time.strptime(str, '%Y-%m-%d %H:%M:%S'))
 
 
 def get_user_order():
@@ -164,3 +172,93 @@ def send_temp(openid, data):
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']
         )
+
+
+def gift_compare_order(offset=0):
+    res ={}
+    res['status'] = 0
+    res_get = gift_get_Wx_order(offset)
+    if res_get['status'] == 0:
+        offset=res_get['offset']
+        total_count=res_get['total_count']
+        wx_orders=res_get['wx_orders']
+        gift_save_local_order(wx_orders)
+
+        if total_count > (offset + 1) * 100:
+            gift_compare_order(offset + 1)
+
+    else:
+        res['status'] = 1
+
+    return res
+
+
+def gift_get_Wx_order(offset=0):
+    access_token = caches['default'].get('wx_kgcs_access_token', '')
+    if not access_token:
+        get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+
+    url = "https://api.weixin.qq.com/card/giftcard/order/batchget?access_token={access_token}" \
+        .format(access_token=access_token)
+    today = datetime.date.today().strftime('%Y-%m-%d')
+    begin_time = getTimeStamp(today + ' 00:00:00')
+    end_time = getTimeStamp(today + ' 23:59:59')
+    data = {
+        "begin_time": begin_time,
+        "end_time": end_time,
+        "sort_type": "DESC",
+        "offset": offset,
+        "count": 100
+    }
+    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+    rep = requests.post(url, data=data)
+    rep_data = json.loads(rep.text)
+    res = {}
+    if rep_data['errmsg'] == 'ok':
+        total_count = rep_data['total_count']
+        wx_orders = rep_data['order_list']
+        res['status'] = 0
+        res['offset'] = offset
+        res['total_count'] = total_count
+        res['wx_orders'] = wx_orders
+    else:
+        res['status'] = 1
+        LogWx.objects.create(type='6',errmsg=rep_data['errmsg'],errcode=rep_data['errcode'],remark='cron_giftcard_wx_local')
+
+    return res
+
+
+def gift_save_local_order(wx_orders):
+    for order in wx_orders:
+        order_qs = GiftOrder.objects.filter(order_id=order['order_id'])
+        if not order_qs:
+            try:
+                with transaction.atomic():
+                    order_save = GiftOrder.objects.create(
+                        order_id=order['order_id'], trans_id=order['trans_id'],
+                        create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
+                        total_price=order['total_price'], open_id=order['pay_finish_time']
+                    )
+                    orderID = order_save.id
+                    info_list = []
+                    code_list = []
+                    for card in order['card_list']:
+                        code_list.append(card['code'])
+                        info = GiftOrderInfo()
+                        info.order_id = orderID
+                        info.card_id = card['card_id']
+                        info.price = card['price']
+                        info.code = card['code']
+                        info_list.append(info)
+                    GiftOrderInfo.objects.bulk_create(info_list)
+                    GiftCardCode.objects.filter(code__in=code_list).update(status='1')
+                raise Exception
+            except Exception as e:
+                print(e)
+                LogWx.objects.create(
+                    type='6',
+                    errmsg=e,
+                    errcode='6',
+                    remark='wx_order_id:{order}'.format(order=order['order_id'])
+                )
+

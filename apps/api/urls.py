@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'cron/token/ikg', cron.cron_get_ikg_token, name='cron_get_ikg_token'),
     url(r'cron/token/kgcs', cron.cron_get_kgcs_token, name='cron_get_kgcs_token'),
     url(r'cron/temp/', cron.cron_send_temp, name='cron_send_temp'),
-    url(r'cron/gift/card/check', cron.cron_giftcard_check, name='cron_gift_card_check'),
+    url(r'cron/gift/card/check', cron.cron_gift_compare_order, name='cron_gift_card_check'),
 
     # 配置自定义菜单(https://www.zisai.net/api/menu/create/)
     url(r'^menu/create/$', views.create_nav, name='menu_create'),

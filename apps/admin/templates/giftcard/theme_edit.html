@@ -44,21 +44,27 @@
                         <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:theme_edit' theme_id 1 %}">
                             {% csrf_token %}
                             <div class="control-group">
-                                <label class="control-label">主题标题</label>
+                                <label class="control-label">线下标题</label>
                                 <div class="controls">
-                                    <input type="text" name="title" value="{{ theme.title }}">
+                                    <input type="text" name="title" value="{{ theme.name }}" required>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">线上标题</label>
+                                <div class="controls">
+                                    <input type="text" name="title" value="{{ theme.title }}" required>
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label">标题颜色</label>
                                 <div class="controls">
-                                    <input type="text" name="title_color" value="{{ theme.title_color }}">
+                                    <input type="text" name="title_color" value="{{ theme.title_color }}" required>
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label">封面图片</label>
                                 <div class="controls">
-                                    <select name="theme_pic" id="">
+                                    <select name="theme_pic" id="" required>
                                         <option>请选择</option>
                                         {% for pic in pic_list %}
                                             <option value="{{ pic.url }}" {% if theme.theme_pic == pic.url %} selected{% endif %}>
@@ -77,10 +83,18 @@
                                 </div>
                             </div>
                             <div class="control-group">
+                                <label class="control-label">设置为Banner</label>
+                                <div class="controls">
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" name="is_banner" value="1" {% if theme.is_banner == '1' %} checked{% endif %}/>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="control-group">
                                 <label class="control-label">状态</label>
                                 <div class="controls">
-                                    <select name="status">
-                                        <option>请选择</option>
+                                    <select name="status" required>
+                                        <option value="">请选择</option>
                                         <option value="0" {% if theme.status == '0' %}selected{% endif %}>启用</option>
                                         <option value="1" {% if theme.status == '1' %}selected{% endif %}>禁用</option>
                                     </select>
@@ -106,12 +120,13 @@
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
                                                         <option value="{{ card.wx_card_id }}" {% if card.wx_card_id == item.wx_card_id %}selected{% endif %}>
-                                                            {{ card.title }}
+                                                            {{ card.name }}
                                                         </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="control-group span3">
                                             <label class="control-label">礼品卡标题:</label>
                                             <div class="controls">

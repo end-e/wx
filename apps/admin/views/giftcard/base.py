@@ -129,14 +129,14 @@ class ThemeView(View):
 class ThemeEditView(View):
     def get(self,request,theme_id,step_id):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='2')
+        card_list = GiftCard.objects.values('name', 'wx_card_id').filter(status='2')
         step_next = int(step_id)+1
         step_prev = int(step_id)-1
         th_id = theme_id
         if theme_id != '0':
             try:
                 if step_id == '1':
-                    theme = GiftTheme.objects.values('id','title','theme_pic','title_color','sku_title_first','status')\
+                    theme = GiftTheme.objects.values('id','name','title','theme_pic','title_color','sku_title_first','status','is_banner')\
                         .get(id=theme_id)
                 elif step_id == '2':
                     item_list = GiftThemeItem.objects.values('id','wx_card_id','title').filter(theme_id=theme_id)
@@ -148,23 +148,28 @@ class ThemeEditView(View):
     def post(self,request,theme_id,step_id):
         res = {}
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('title', 'wx_card_id').filter(status='1')
+        card_list = GiftCard.objects.values('name', 'wx_card_id').filter(status='1')
         th_id = theme_id
         try:
             if step_id == '1':
+                name = request.POST.get('name')
                 title = request.POST.get('title')
                 title_color = request.POST.get('title_color')
                 theme_pic = request.POST.get('theme_pic')
                 sku_title_first = request.POST.get('sku_title_first','0')
+                is_banner = request.POST.get('is_banner','0')
                 status = request.POST.get('status')
                 if theme_id == '0' :
                     th = GiftTheme.objects.create(
-                        title=title,theme_pic=theme_pic,title_color=title_color,status=status,sku_title_first=sku_title_first
+                        name=name,title=title,theme_pic=theme_pic,title_color=title_color,status=status,
+                        sku_title_first=sku_title_first,is_banner=is_banner
                     )
                     theme_id = th.id
                 else:
-                    GiftTheme.objects.filter(id=theme_id) \
-                        .update(title=title, theme_pic=theme_pic, title_color=title_color,status=status,sku_title_first=sku_title_first)
+                    GiftTheme.objects.filter(id=theme_id).update(
+                        name=name,title=title, theme_pic=theme_pic, title_color=title_color,
+                        status=status, sku_title_first=sku_title_first, is_banner=is_banner
+                    )
 
             if step_id == '2':
                 th_id = request.POST.get('th_id')

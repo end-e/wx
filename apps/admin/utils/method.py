@@ -173,15 +173,19 @@ def createThemeList(themes,theme_categories):
     theme_list = []
     for i in range(0,len(themes)):
         # theme
-        t = GiftTheme.objects.values('id', 'title', 'theme_pic', 'title_color', 'sku_title_first').get(id=themes[i])
+        t = GiftTheme.objects.values('id', 'title', 'theme_pic', 'title_color', 'sku_title_first','is_banner').get(id=themes[i])
 
         d = {
             "theme_pic_url": t['theme_pic'],  # 主题的封面图片
             "title": t['title'],  # 主题名称
             "title_color": t['title_color'],  # 主题title的颜色
             "show_sku_title_first": bool(int(t['sku_title_first'])),  # 该主题购买页是否突出商品名显示
-            "category_index": theme_categories[i] # 主题标号，对应category_list内的title字段
         }
+        if theme_categories[i]:
+            d['category_index'] = int(theme_categories[i])
+        if bool(int(t['is_banner'])):
+            d['is_banner'] = bool(int(t['is_banner']))
+
         # item_list
         items = GiftThemeItem.objects.values('wx_card_id', 'title').filter(theme_id=t['id'])
         item_list = []
@@ -208,7 +212,7 @@ def createThemeList(themes,theme_categories):
     return theme_list
 
 
-def carePageData(page_title, banner_pic_url, theme_list, category_list):
+def caretPageData(page_title, banner_pic_url, theme_list, category_list):
     """
     拼接货架页面信息
     :param page_title: 页面标题
@@ -409,28 +413,29 @@ def upLoadCardCode(access_token,wx_card_id,data):
     :param data:
     :return:
     """
-
-    #导入code
     res = {}
     url = 'https://api.weixin.qq.com/card/code/deposit?access_token={token}' \
         .format(token=access_token)
     data_post = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data_post)
-    rep_data = json.loads(rep.text)
+    try:
+        rep = requests.post(url, data=data_post)
+        rep_data = json.loads(rep.text)
 
-    if rep_data['errcode'] == 0:
-        if len(rep_data['fail_code']) == 0 :
-            # 全部上传成功
-            res['status'] = 0
+        if rep_data['errcode'] == 0:
+            if len(rep_data['fail_code']) == 0 :
+                # 全部上传成功
+                res['status'] = 0
+            else:
+                # 部分上传成功
+                res["status"] = 1
+                res['success_code'] = rep_data['duplicate_code'] + rep_data['succ_code']
+                res['fail_code'] = rep_data['fail_code']
         else:
-            # 部分上传成功
-            res["status"] = 1
-            res['success_code'] = rep_data['duplicate_code'] + rep_data['succ_code']
-            res['fail_code'] = rep_data['fail_code']
-    else:
-        res["status"] = 2
-
-
+            res["status"] = 2
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        time.sleep(5)
+        upLoadCardCode(access_token, wx_card_id, data)
     return res
 
 

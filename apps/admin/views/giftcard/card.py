@@ -23,11 +23,13 @@ from admin.forms import GiftCardForm,GiftCardEditForm
 
 class CardView(View):
     def get(self, request):
-        card_list = GiftCard.objects.values('id', 'wx_card_id', 'title', 'init_balance', 'price', 'quantity','status')\
+        card_list = GiftCard.objects.values('id','name','wx_card_id', 'title', 'init_balance', 'price', 'quantity','status')\
             .order_by('-status','-id')
 
         for card in card_list:
-            GiftCardCode.objects.filter(wx_card_id=card)
+            qs_code = GiftCardCode.objects.filter(wx_card_id=card['wx_card_id'],status='1')
+            if qs_code:
+                card['die'] = 1
 
         return render(request, 'giftcard/card_list.html', locals())
 
@@ -37,9 +39,8 @@ class CardEditView(MyView):
         card_id = card_id
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
         if card_id != '0':
-            card = GiftCard \
-                .objects \
-                .values('id', 'title', 'background_pic', 'logo', 'init_balance', 'price', 'brand_name', 'quantity',
+            card = GiftCard .objects \
+                .values('id', 'name', 'title', 'background_pic', 'logo', 'init_balance', 'price', 'brand_name', 'quantity',
                         'status', 'max_give', 'notice', 'description', 'wx_card_id') \
                 .get(id=card_id)
 
@@ -134,6 +135,16 @@ class CardEditView(MyView):
                     return render(request, 'giftcard/card_edit.html', locals())
 
 
+class CardInfoView(MyView):
+    def get(self, request, card_id):
+        card = GiftCard .objects \
+            .values('id', 'name', 'title', 'background_pic', 'logo', 'init_balance', 'price', 'brand_name', 'quantity',
+                    'status', 'max_give', 'notice', 'description', 'wx_card_id') \
+            .get(id=card_id)
+
+        return render(request, 'giftcard/card_edit.html', locals())
+
+
 class CardWxView(MyView):
     def get(self, request, page_num):
         count = 10
@@ -165,10 +176,10 @@ class CardWxView(MyView):
                 cardInfo = cardInfoClass.get(card_id)
                 cardInfo['card_id'] = card_id
                 card_list.append(cardInfo)
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e :
+            print(e)
             time.sleep(5)
             self.get(request, page_num)
-
 
         return render(request, 'giftcard/card_wx_list.html', locals())
 
@@ -198,13 +209,19 @@ class CardDelView(MyView):
             try:
                 #1、处理线下业务流程
                 with transaction.atomic():
-                    GiftCard.objects.filter(wx_card_id=wx_card_id).update(wx_card_id='', status=status)
+                    if status == '9':
+                        GiftCard.objects.filter(wx_card_id=wx_card_id).update(status=status)
+                    if status == '2':
+                        GiftCard.objects.filter(wx_card_id=wx_card_id).update(wx_card_id='',status=status)
+                    #1.1删除主题下的此卡
                     GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
-                    # 处理未出售的code
+                    #1.2处理未出售的code
                     qs_card_codes = GiftCardCode.objects.filter(wx_card_id=wx_card_id, status='0')
                     codes = qs_card_codes.values('code')
                     code_list = [code['code'] for code in codes]
+                    #1.2.1删除gift_card_code中对应的code
                     qs_card_codes.delete()
+                    # 1.2.2更新guest的mode
                     res_mssql = method.updateCardMode(code_list, 1, 9)
                     if res_mssql['status'] != 0:
                         raise MyException('Code状态更新失败')

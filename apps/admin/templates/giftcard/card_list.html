@@ -24,7 +24,8 @@
                     <thead>
                     <tr>
                         <th>ID</th>
-                        <th>名称</th>
+                        <th>名称-本地</th>
+                        <th>名称-微信</th>
                         <th>面值</th>
                         <th>售价</th>
                         <th>初始库存</th>
@@ -35,33 +36,47 @@
                     {% for card in card_list %}
                         <tr>
                             <td>{{ card.id }}</td>
+                            <td class="center">{{ card.name }}</td>
                             <td class="center">{{ card.title }}</td>
                             <td class="center">{{ card.init_balance }}</td>
                             <td class="center">{{ card.price }}</td>
                             <td class="center">{{ card.quantity }}</td>
                             <td class="center">
-                                <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
-                                    <i class="icon-edit "></i>
-                                </a>
-                                {% if card.status == '0' %}
-                                    <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','1')">
-                                        <i class=" icon-unlock"></i>
+                                {% if card.status == 9 %}
+                                    <a class="btn btn-inverse btn-setting" title="查看" href="">
+                                        <i class="icon-zoom-in"></i>
                                     </a>
-                                {% elif card.status == '1'  %}
-                                    <a class="btn btn-warning" title="禁用" onclick="delCard('{{ card.id }}','local','0')">
-                                        <i class="icon-lock"></i>
+
+                                {% else %}
+                                      <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
+                                        <i class="icon-edit "></i>
                                     </a>
-                                {% endif %}
-                                {% if card.wx_card_id %}
-                                    <a class="btn btn-danger" title="下线" onclick="delCard('{{ card.wx_card_id }}','wx','1')">
-                                        <i class=" icon-trash"></i>
-                                    </a>
-                                    <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
-                                        <i class="icon-cloud-upload"></i>
-                                    </a>
-                                    <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
-                                        <i class="icon-inbox"></i>
-                                    </a>
+                                    {% endif %}
+                                    {% if card.status == '0' %}
+                                        <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','1')">
+                                            <i class=" icon-unlock"></i>
+                                        </a>
+                                    {% elif card.status == '1'  %}
+                                        <a class="btn btn-warning" title="禁用" onclick="delCard('{{ card.id }}','local','0')">
+                                            <i class="icon-lock"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if card.wx_card_id %}
+                                        {% if card.die == 1 %}
+                                            <a class="btn btn-danger" title="下架封存" onclick="delCard('{{ card.wx_card_id }}','wx','9')">
+                                                <i class=" icon-trash"></i>
+                                            </a>
+                                        {% else %}
+                                            <a class="btn btn-warning" title="普通下架" onclick="delCard('{{ card.wx_card_id }}','wx','2')">
+                                                <i class=" icon-trash"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a class="btn btn-primary" href="{% url 'admin:giftcard:card_code_upload_manual' card.wx_card_id %}" title="上传Code">
+                                            <i class="icon-cloud-upload"></i>
+                                        </a>
+                                        <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
+                                            <i class="icon-inbox"></i>
+                                        </a>
                                 {% endif %}
                             </td>
                         </tr>

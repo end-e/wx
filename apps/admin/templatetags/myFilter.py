@@ -46,3 +46,9 @@ def toDate(data):
     x = time.localtime(float(data))
     return time.strftime('%y-%m-%d %H:%M:%S', x)
 
+
+@register.filter
+def getListItem(str,index):
+    list = str.split(':')
+    return list[index]
+

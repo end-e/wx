@@ -4,14 +4,12 @@
 import datetime, json, requests
 
 from django.core.cache import caches
-from django.db import transaction
 from django.http import HttpResponse
 
 from admin.models import GiftCardCode, GiftBalanceChangeLog
 from api.models import LogWx
 from utils import db, consts, method
-from admin.utils import method as a_method
-from admin.models import GiftOrder,GiftOrderInfo,GiftCardCode
+
 
 def cron_get_ikg_token(req):
     '''
@@ -46,7 +44,7 @@ def cron_send_temp():
                 method.send_temp(openid, data)
 
 
-def cron_giftcard_balance_change():
+def cron_gift_change_balance():
     # 1、查询消费记录
     conn_226 = db.getMsSqlConn()
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
@@ -65,6 +63,8 @@ def cron_giftcard_balance_change():
     cur_226 = conn_226.cursor()
     cur_226.execute(sql_order)
     orders = cur_226.fetchall()
+    cur_226.colse()
+    conn_226.colse()
     if len(orders) > 0:
         try:
             # 2、拼接wx_card_id
@@ -91,11 +91,9 @@ def cron_giftcard_balance_change():
                 if rep_data['errcode'] != 0:
                     # TODO 记录错误日志
                     LogWx.objects.create(
-                        type='2',
+                        type='2',errmsg=rep_data['errmsg'],errcode=rep_data['errcode'],
                         remark='code:{code},balance:{balance},card_id:{card_id}'
-                            .format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id']),
-                        errmsg=rep_data['errmsg'],
-                        errcode=rep_data['errcode']
+                            .format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id'])
                     )
 
             this_last_serial = orders[-1]['PurchSerial']
@@ -104,105 +102,19 @@ def cron_giftcard_balance_change():
                     .update(last_serial=this_last_serial)
             else:
                 GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
+            res_msg = 'ok'
         except Exception as e:
-            LogWx.objects.create(
-                type='2',
-                errmsg=e,
-                errcode='2'
-            )
-
-
-def cron_giftcard_check(req):
-    do_check()
-
-
-def do_check(offset=0):
-    res = queryWxOrder(offset)
-    if res['status'] == 0:
-        offset=res['offset']
-        total_count=res['total_count']
-        wx_orders=res['wx_orders']
-
-        for order in wx_orders:
-            order_qs = GiftOrder.objects.filter(order_id=order['order_id'])
-            if not order_qs:
-                try:
-                    with transaction.atomic():
-                        order_save = GiftOrder.objects.create(
-                            order_id=order['order_id'], trans_id=order['trans_id'],
-                            create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
-                            total_price=order['total_price'], open_id=order['pay_finish_time']
-                        )
-                        orderID = order_save.id
-                        info_list = []
-                        code_list = []
-                        for card in order['card_list']:
-                            code_list.append(card['code'])
-                            info = GiftOrderInfo()
-                            info.order_id = orderID
-                            info.card_id = card['card_id']
-                            info.price = card['price']
-                            info.code = card['code']
-                            info_list.append(info)
-                        GiftOrderInfo.objects.bulk_create(info_list)
-                        GiftCardCode.objects.filter(code__in=code_list).update(status='1')
-                    res['status'] = 0
-                except Exception as e:
-                    print(e)
-                    LogWx.objects.create(
-                        type='6',
-                        errmsg=e,
-                        errcode='6',
-                        remark='wx_order_id:{order}'.format(order=order['order_id'])
-                    )
-
-        if total_count > (offset + 1) * 100:
-            do_check(offset + 1)
-
-        return HttpResponse('ok')
+            LogWx.objects.create(type='2',errmsg=e,errcode='2')
+            res_msg = e
     else:
+        res_msg = 'no order'
+
+    return HttpResponse(res_msg)
+
+
+def cron_gift_compare_order():
+    res = method.gift_compare_order()
+    if res['status'] == 1:
         return HttpResponse('fail')
+    return HttpResponse('ok')
 
-
-
-
-def queryWxOrder(offset=0):
-    access_token = caches['default'].get('wx_kgcs_access_token', '')
-    if not access_token:
-        method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
-
-    url = "https://api.weixin.qq.com/card/giftcard/order/batchget?access_token={access_token}" \
-        .format(access_token=access_token)
-    today = datetime.date.today().strftime('%Y-%m-%d')
-    begin_time = a_method.getTimeStamp(today + ' 00:00:00')
-    end_time = a_method.getTimeStamp(today + ' 23:59:59')
-    data = {
-        "begin_time": begin_time,
-        "end_time": end_time,
-        "sort_type": "DESC",
-        "offset": offset,
-        "count": 100
-    }
-    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data)
-    rep_data = json.loads(rep.text)
-    res = {}
-    if rep_data['errmsg'] == 'ok':
-        total_count = rep_data['total_count']
-        wx_orders = rep_data['order_list']
-        res['status'] = 0
-        res['offset'] = offset
-        res['total_count'] = total_count
-        res['wx_orders'] = wx_orders
-
-
-    else:
-        res['status'] = 1
-        LogWx.objects.create(
-            type='6',
-            errmsg=rep_data['errmsg'],
-            errcode=rep_data['errcode'],
-            remark='cron_giftcard_wx_local'
-        )
-
-    return res
