@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-
 from django.db import models
 
 
@@ -26,6 +24,7 @@ class PosterImage(models.Model):
     poster_name = models.CharField(max_length=32, default='', verbose_name=u'海报名称')
     begin_date = models.DateTimeField(blank=True, null=True, verbose_name=u'开始日期')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=u'截至日期')
+    link_address = models.URLField(default='', blank=True, max_length=200, verbose_name=u'链接地址')
     poster_image = models.ImageField(upload_to='upload', blank=True, null=True, verbose_name=u'海报图片')
 
 
@@ -50,9 +49,10 @@ class Shops(models.Model):
 
 class DisCode(models.Model):
     dis_code = models.CharField(max_length=6, verbose_name=u'验证码')
+    batch = models.CharField(max_length=2, blank=True, verbose_name=u'批次')
     remark = models.CharField(max_length=200, blank=True, null=True, verbose_name=u'备注')
-    start_time = models.DateTimeField(blank=True, null=False, default=datetime.now, verbose_name=u'开始时间')
-    end_time = models.DateTimeField(blank=True, null=False, default=datetime.now, verbose_name=u'到期时间')
+    has_usable = models.BooleanField(default=0, verbose_name=u'是否可用')
+    use_time = models.DateTimeField(verbose_name=u'使用时间', null=True)
 
     class Meta:
         verbose_name = u'券验证码'
