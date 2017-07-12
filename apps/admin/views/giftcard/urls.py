@@ -7,7 +7,7 @@ from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeAutoView, \
     CardUpCodeManualView,CardModifyStockView
 from admin.views.giftcard.page import UploadPageView,PageView
-from admin.views.giftcard.report import OrderView,BizuininfoView
+from admin.views.giftcard.report import OrderView,BizuininfoView,CardPaidView
 
 urlpatterns = [
     #图片素材
@@ -42,5 +42,6 @@ urlpatterns = [
     #Report
     url(r'^order/$',OrderView.as_view(),name='orders'),
     url(r'^bizuininfo/$',BizuininfoView.as_view(),name='bizuininfo'),
+    url(r'^paid/$',CardPaidView.as_view(),name='card_paid'),
 
 ]

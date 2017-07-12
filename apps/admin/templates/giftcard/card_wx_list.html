@@ -58,7 +58,7 @@
                             <li class="disabled"><a title='上一页' href="#">上一页</a></li>
                         {% endif %}
                         {% for i in total_page|range %}
-                            {% if forloop.counter0 == offset|int %}
+                            {% if forloop.counter == page_num|int %}
                                 <li class="active"><a>{{ i }}</a>
                             </li>
                              {% else %}
@@ -71,6 +71,10 @@
                             <li class="disabled"><a title='下一页'>下一页</a></li>
                         {% endif %}
                     </ul>
+                </div>
+
+                <div  class="pagination" style="text-align: center;margin:20px auto;">
+                    <ul id="pagination1"></ul>
                 </div>
             </div>
         </div>

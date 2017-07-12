@@ -19,7 +19,8 @@ def giftcard_pay_done(order_id):
         .format(token=access_token)
     data = {"order_id": order_id}
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data)
+    client = requests.Session()
+    rep = client.post(url, data=data, headers={'Connection': 'close'})
     rep_data = json.loads(rep.text)
 
     res = {}

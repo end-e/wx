@@ -5,7 +5,7 @@ from api.models import LogWx
 
 __author__ = ''
 __date__ = '2017/6/20 8:52'
-import json, math,datetime
+import json, math,time
 import requests
 
 from django.shortcuts import render,redirect
@@ -136,7 +136,7 @@ class CardEditView(MyView):
 
 class CardWxView(MyView):
     def get(self, request, page_num):
-        count = 15
+        count = 10
         page_num = int(page_num)
         offset = (page_num - 1) * count
         access_token = MyView().token
@@ -149,20 +149,27 @@ class CardWxView(MyView):
         }
         data = json.dumps(data, ensure_ascii=False).encode('utf-8')
 
-        rep = requests.post(url, data=data)
-        rep_data = json.loads(rep.text)
-        total_num = rep_data['total_num']
-        total_page = math.ceil(total_num / count)
-        next_page = method.getNextPageNum2(page_num, total_num)
-        prev_page = method.getPrePageNum2(page_num)
+        # headers = {'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+        try:
+            rep = requests.post(url, data=data,headers={'Connection':'close'})
+            rep_data = json.loads(rep.text)
+            total_num = rep_data['total_num']
+            total_page = math.ceil(total_num / count)
+            next_page = method.getNextPageNum2(page_num, total_num)
+            prev_page = method.getPrePageNum2(page_num)
 
-        card_id_list = rep_data['card_id_list']
-        card_list = []
-        for card_id in card_id_list:
-            cardInfoClass = CardInfoWxView()
-            cardInfo = cardInfoClass.get(card_id)
-            cardInfo['card_id'] = card_id
-            card_list.append(cardInfo)
+            card_id_list = rep_data['card_id_list']
+            card_list = []
+            for card_id in card_id_list:
+                cardInfoClass = CardInfoWxView()
+                cardInfo = cardInfoClass.get(card_id)
+                cardInfo['card_id'] = card_id
+                card_list.append(cardInfo)
+        except requests.exceptions.ConnectionError:
+            time.sleep(5)
+            self.get(request, page_num)
+
+
         return render(request, 'giftcard/card_wx_list.html', locals())
 
 
@@ -254,7 +261,6 @@ class CardUpCodeAutoView(MyView):
 
 class CardUpCodeManualView(MyView):
     def get(self, request, wx_card_id):
-
         return render(request,'giftcard/card_code_up.html',locals())
 
     def post(self,request, wx_card_id):
