@@ -252,7 +252,6 @@ def gift_save_local_order(wx_orders):
                         info_list.append(info)
                     GiftOrderInfo.objects.bulk_create(info_list)
                     GiftCardCode.objects.filter(code__in=code_list).update(status='1')
-                raise Exception
             except Exception as e:
                 print(e)
                 LogWx.objects.create(

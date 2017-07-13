@@ -46,7 +46,7 @@
                             <div class="control-group">
                                 <label class="control-label">线下标题</label>
                                 <div class="controls">
-                                    <input type="text" name="title" value="{{ theme.name }}" required>
+                                    <input type="text" name="name" value="{{ theme.name }}" required>
                                 </div>
                             </div>
                             <div class="control-group">
@@ -151,7 +151,7 @@
                                                 <select name="item_card_id[]">
                                                     <option>请选择</option>
                                                     {% for card in card_list %}
-                                                        <option value="{{ card.wx_card_id }}">{{ card.title }}</option>
+                                                        <option value="{{ card.wx_card_id }}">{{ card.name }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>

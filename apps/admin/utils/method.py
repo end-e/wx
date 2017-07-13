@@ -432,8 +432,11 @@ def upLoadCardCode(access_token,wx_card_id,data):
                 res['fail_code'] = rep_data['fail_code']
         else:
             res["status"] = 2
+            LogWx.objects.create(type='5', errmsg=rep_data['errmsg'], errcode=rep_data['errmsg'])
+
     except requests.exceptions.ConnectionError as e:
         print(e)
+        LogWx.objects.create(type='5', errmsg='ConnectionError', errcode='',remark=e)
         time.sleep(5)
         upLoadCardCode(access_token, wx_card_id, data)
     return res

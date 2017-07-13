@@ -57,14 +57,11 @@ def cron_gift_change_balance():
     else:
         whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial " \
-                "FROM GuestPurch0 AS a,guest AS b, (SELECT cardno, MAX (purchserial) PurchSerial from GuestPurch0 GROUP BY cardno) AS c " \
-                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 AND a.PurchSerial=c.PurchSerial ORDER BY a.PurchSerial "
+    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
+                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
     cur_226 = conn_226.cursor()
     cur_226.execute(sql_order)
     orders = cur_226.fetchall()
-    cur_226.colse()
-    conn_226.colse()
     if len(orders) > 0:
         try:
             # 2、拼接wx_card_id
@@ -82,7 +79,7 @@ def cron_gift_change_balance():
                 data = {
                     "code": o['CardNo'].strip(),
                     "card_id": o['wx_card_id'],
-                    "balance": float(o['detail'])*100
+                    "balance": float(o['detail']) * 100
                 }
 
                 data = json.dumps(data, ensure_ascii=False).encode('utf-8')
@@ -91,20 +88,22 @@ def cron_gift_change_balance():
                 if rep_data['errcode'] != 0:
                     # TODO 记录错误日志
                     LogWx.objects.create(
-                        type='2',errmsg=rep_data['errmsg'],errcode=rep_data['errcode'],
+                        type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
                         remark='code:{code},balance:{balance},card_id:{card_id}'
-                            .format(code=o['CardNo'].strip(),balance=str(float(o['detail'])),card_id=o['wx_card_id'])
+                            .format(code=o['CardNo'].strip(), balance=str(float(o['detail'])),
+                                    card_id=o['wx_card_id'])
                     )
 
             this_last_serial = orders[-1]['PurchSerial']
             if prev_last_serial:
-                GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial)\
-                    .update(last_serial=this_last_serial)
+                now = datetime.datetime.now()
+                GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial) \
+                    .update(last_serial=this_last_serial,create_time=now.strftime('%Y-%m-%d %H:%M:%S'))
             else:
                 GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
             res_msg = 'ok'
         except Exception as e:
-            LogWx.objects.create(type='2',errmsg=e,errcode='2')
+            LogWx.objects.create(type='0', errmsg=e, errcode='0')
             res_msg = e
     else:
         res_msg = 'no order'
@@ -115,6 +114,7 @@ def cron_gift_change_balance():
 def cron_gift_compare_order():
     res = method.gift_compare_order()
     if res['status'] == 1:
+        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
         return HttpResponse('fail')
     return HttpResponse('ok')
 

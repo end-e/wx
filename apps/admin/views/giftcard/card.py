@@ -8,16 +8,13 @@ __date__ = '2017/6/20 8:52'
 import json, math,time
 import requests
 
-from django.shortcuts import render,redirect
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic.base import View
-from django.core.urlresolvers import reverse
-from django.core.cache import caches
 
 from admin.models import GiftCard, GiftImg,GiftThemeItem, GiftCardCode
 from admin.utils.myClass import MyView, MyException
 from admin.utils import method
-from utils import db
 from admin.forms import GiftCardForm,GiftCardEditForm
 
 
@@ -365,6 +362,7 @@ class CardUpCodeManualView(MyView):
                         res['status'] = 1#部分成功
 
             except Exception as e:
+                LogWx.objects.create(type='5', errmsg='transaction roll back', errcode='', remark=e)
                 if res_upload['status'] == 0:
                     res['status'] = 2  # 全部Code上传微信成功，线下处理失败
                 elif res_upload['status'] == 1:

@@ -42,16 +42,12 @@
                             <td class="center">{{ card.price }}</td>
                             <td class="center">{{ card.quantity }}</td>
                             <td class="center">
-                                {% if card.status == 9 %}
-                                    <a class="btn btn-inverse btn-setting" title="查看" href="">
-                                        <i class="icon-zoom-in"></i>
-                                    </a>
+                                {% if card.status != '9' %}
 
-                                {% else %}
-                                      <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
+                                    <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                         <i class="icon-edit "></i>
                                     </a>
-                                    {% endif %}
+
                                     {% if card.status == '0' %}
                                         <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','1')">
                                             <i class=" icon-unlock"></i>
@@ -77,6 +73,11 @@
                                         <a class="btn btn-inverse btn-setting" title="修改库存" onclick="showFadeBox('{{ card.wx_card_id }}')">
                                             <i class="icon-inbox"></i>
                                         </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a class="btn btn-inverse btn-setting" title="查看" href="">
+                                        <i class="icon-zoom-in"></i>
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>

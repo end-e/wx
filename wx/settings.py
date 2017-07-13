@@ -166,7 +166,7 @@ CRONJOBS = [
     ('1 */1 * * *', 'api.views.cron.cron_get_kgcs_token'),
     ('* 6-23 * * *', 'api.views.cron.cron_send_temp'),
     ('* 6-23 * * *', 'api.views.cron.cron_gift_change_balance'),
-    ('30 23 * * *', 'api.views.cron.cron_gift_order_compare'),
+    ('30 23 * * *', 'api.views.cron.cron_gift_compare_order'),
 ]
 
 
