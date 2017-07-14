@@ -38,7 +38,7 @@ class GiftCardForm(forms.ModelForm):
     class Meta:
         model = GiftCard
         fields = ['name','title','background_pic','logo','init_balance',
-                  'price','brand_name','quantity','status','max_give',
+                  'price','brand_name','quantity','max_give',
                   'notice','description','wx_card_id']
 
 class GiftCardEditForm(forms.ModelForm):

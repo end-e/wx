@@ -5,7 +5,7 @@ from django.conf.urls import url
 
 from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView,ThemeEditView,ImgStatusView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView,CardUpCodeAutoView, \
-    CardUpCodeManualView,CardModifyStockView
+    CardUpCodeManualView,CardModifyStockView,CheckCodeInfo
 from admin.views.giftcard.page import UploadPageView,PageView
 from admin.views.giftcard.report import OrderView,BizuininfoView,CardPaidView
 
@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^card/code/upload/manual/(?P<wx_card_id>[\S]+)',CardUpCodeManualView.as_view(),name='card_code_upload_manual'),
     url(r'^card/code/get/','admin.utils.method.getCardCode2',name='card_code_get_guest'),
     url(r'^card/stock/modify/$',CardModifyStockView.as_view(),name='card_stock_modify'),
+    url(r'^card/check/code/wx$',CheckCodeInfo.as_view(),name='card_check_code_wx'),
 
 
     #Report

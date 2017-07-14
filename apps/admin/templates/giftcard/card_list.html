@@ -42,24 +42,23 @@
                             <td class="center">{{ card.price }}</td>
                             <td class="center">{{ card.quantity }}</td>
                             <td class="center">
-                                {% if card.status != '9' %}
-
+                                {% if card.status != '0' %}
                                     <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">
                                         <i class="icon-edit "></i>
                                     </a>
 
-                                    {% if card.status == '0' %}
-                                        <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','1')">
+                                    {% if card.status == '1' %}
+                                        <a class="btn btn-primary" title="启用" onclick="delCard('{{ card.id }}','local','2')">
                                             <i class=" icon-unlock"></i>
                                         </a>
-                                    {% elif card.status == '1'  %}
-                                        <a class="btn btn-warning" title="禁用" onclick="delCard('{{ card.id }}','local','0')">
+                                    {% elif card.status == '2'  %}
+                                        <a class="btn btn-warning" title="禁用" onclick="delCard('{{ card.id }}','local','1')">
                                             <i class="icon-lock"></i>
                                         </a>
                                     {% endif %}
                                     {% if card.wx_card_id %}
                                         {% if card.die == 1 %}
-                                            <a class="btn btn-danger" title="下架封存" onclick="delCard('{{ card.wx_card_id }}','wx','9')">
+                                            <a class="btn btn-danger" title="下架封存" onclick="delCard('{{ card.wx_card_id }}','local','0')">
                                                 <i class=" icon-trash"></i>
                                             </a>
                                         {% else %}

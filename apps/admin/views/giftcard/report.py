@@ -1,7 +1,7 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/6/21 10:00'
-import json,requests,math
+import json,requests,math,datetime
 
 from django.shortcuts import render
 
@@ -11,18 +11,19 @@ from admin.utils import method
 class OrderView(MyView):
     def get(self,request):
         page_num = 1
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
         return render(request,'giftcard/order_list.html',locals())
     def post(self,request):
         access_token = MyView().token
         url = "https://api.weixin.qq.com/card/giftcard/order/batchget?access_token={access_token}" \
             .format(access_token=access_token)
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
         begin = request.POST.get('begin')
         begin_time = method.getTimeStamp(begin+' 00:00:00')
         end = request.POST.get('end')
         end_time = method.getTimeStamp(end+' 23:59:59')
-        count = 10
-        page_num = request.POST.get('page_num',1)
-        page_num = int(page_num)
+        page_num = int(request.POST.get('page_num', 1))
+        count = int(request.POST.get('count', 10))
         offset = (page_num - 1) * count
         if not offset:
             offset = 0
@@ -80,18 +81,19 @@ class BizuininfoView(MyView):
 class CardPaidView(MyView):
     def get(self,request):
         page_num = 1
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
         return render(request, 'giftcard/card_paid.html', locals())
     def post(self,request):
         access_token = MyView().token
         url = "https://api.weixin.qq.com/card/giftcard/order/batchget?access_token={access_token}" \
             .format(access_token=access_token)
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
         begin = request.POST.get('begin')
         begin_time = method.getTimeStamp(begin+' 00:00:00')
         end = request.POST.get('end')
         end_time = method.getTimeStamp(end+' 23:59:59')
-        count = 10
-        page_num = request.POST.get('page_num',1)
-        page_num = int(page_num)
+        page_num = int(request.POST.get('page_num',1))
+        count = int(request.POST.get('count', 10))
         offset = (page_num - 1) * count
         if not offset:
             offset = 0

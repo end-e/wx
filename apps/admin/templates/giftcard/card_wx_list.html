@@ -23,24 +23,22 @@
                         <th>现有库存</th>
                         <th>售价</th>
                         <th>面值</th>
-                        <th>类型</th>
-                        <th>操作</th>
+{#                        <th>操作</th>#}
                     </tr>
                     </thead>
                     <tbody>
                     {% for card in card_list %}
                         <tr>
-                            <td class="center">{{ card.general_card.base_info.title }}</td>
-                            <td class="center">{{ card.general_card.base_info.sku.total_quantity }}</td>
-                            <td class="center">{{ card.general_card.base_info.sku.quantity }}</td>
-                            <td class="center">{{ card.general_card.base_info.giftcard_info.price | divide:100  }}</td>
-                            <td class="center">{{ card.general_card.init_balance | divide:100  }}</td>
-                            <td class="center">{{ card.general_card.sub_card_type }}</td>
-                            <td class="center">
+                            <td class="center">{{ card.title }}</td>
+                            <td class="center">{{ card.total_quantity }}</td>
+                            <td class="center">{{ card.quantity }}</td>
+                            <td class="center">{{ card.price | divide:100  }}</td>
+                            <td class="center">{{ card.init_balance | divide:100  }}</td>
+                            {% comment %}<td class="center">
                                 <a class="btn btn-danger" title="线上删除" onclick="delCard('{{ card.card_id }}','wx')">
                                     <i class=" icon-trash"></i>
                                 </a>
-                            </td>
+                            </td>{% endcomment %}
                         </tr>
                     {% empty %}
                         <tr>
@@ -81,23 +79,5 @@
     </div>
 {% endblock %}
 {% block common_js %}
-    <script>
-        function delCard(wx_card_id,action,status) {
-            var url = "{% url 'admin:giftcard:card_del'%}";
-            var data={
-                action:action,
-                wx_card_id:wx_card_id,
-                status:status,
-                csrfmiddlewaretoken: '{{ csrf_token }}'
-            };
-            $.post(url,data,function (res) {
-                if(res.status==0){
-                    noty({"text":"数据删除成功","layout":"bottom","type":"information"});
-                    window.location.reload()
-                }else {
-                    noty({"text":"数据删除失败","layout":"bottom","type":"error"});
-                }
-            },'json')
-        }
-    </script>
+
 {% endblock %}

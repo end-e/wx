@@ -21,19 +21,23 @@
                         {% csrf_token %}
                         <div data-date-format="yyyy-mm-dd" class="input-group date form_date span3">
                             <label>开始日期：
-                                <input type="text" name="begin" id="begin" class="form-control" required readonly value="{{ begin }}">
+                                <input type="text" name="begin" id="begin" class="form-control" required readonly value="{{ begin|default:today }}">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                             </label>
                         </div>
                         <div data-date-format="yyyy-mm-dd" class="input-group date form_date span3">
                             <label>截止日期：
-                                <input type="text" name="end" id="end" class="form-control" required readonly value="{{ end }}">
+                                <input type="text" name="end" id="end" class="form-control" required readonly value="{{ end |default:today }}">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                             </label>
                         </div>
-
+                        <div class="input-group span3">
+                            <label>每页条数：
+                                <input type="text" name="count" class="form-control" required value="{{ count | default:10 }}">
+                            </label>
+                        </div>
                         <input type="hidden" name="page_num" id="page_num" value="1">
                         <button class="btn btn-primary" type="submit">
                             <i class="icon-search"></i>
