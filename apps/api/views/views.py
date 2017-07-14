@@ -1,29 +1,36 @@
 import json
-import datetime
 import requests
-from urllib import parse
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.cache import caches
+from django.views.decorators.csrf import csrf_exempt
 
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
-from wechatpy import WeChatClient, WeChatOAuth
+from wechatpy import WeChatClient, parse_message
+
 from utils import consts
+from message import views as message_v
 
 
+@csrf_exempt
 def conn(request):
-    signature = request.GET.get('signature', '')
-    timestamp = request.GET.get('timestamp', '')
-    nonce = request.GET.get('nonce', '')
-    echostr = request.GET.get('echostr', '')
-    token = 'ikuanguang'
-    try:
-        check_signature(token, signature, timestamp, nonce)
-        return HttpResponse(echostr)
-    except InvalidSignatureException:
-        return HttpResponse(u'验证失败')
+    if request.method == 'GET':
+        signature = request.GET.get('signature', '')
+        timestamp = request.GET.get('timestamp', '')
+        nonce = request.GET.get('nonce', '')
+        echostr = request.GET.get('echostr', '')
+        token = 'ikuanguang'
+        try:
+            check_signature(token, signature, timestamp, nonce)
+            return HttpResponse(echostr)
+        except InvalidSignatureException:
+            return HttpResponse(u'验证失败')
+    elif request.method == 'POST':
+        xml = request.body
+        msg = parse_message(xml)
+        return HttpResponse(message_v.switch_type(msg))
 
 
 # 微信回调域名校验文件
