@@ -26,9 +26,9 @@ def switch_type(msg):
 
     if from_type == 'text':
         if from_content == '红包':
-            to_content = '将图文 “宽广超市丨年中庆嗨翻狂潮！购物满100立减20！这样玩才更疯狂！”发送到朋友圈后截图到宽广超市（kgcsjt)微信公众号摇一摇获红包。微信红包100元--1元不等！祝您好运~'
+            to_content = '活动已结束！'
         else:
-            to_content = '请输入正确的关键字。[疑问]\n本公众号主要提供会员绑定、消费提醒等，如需查看门店营业时间和电话、海报信息、各种活动推广等请关注公众号“宽广超市”，感谢关注。'
+            to_content = '本公众号主要提供会员绑定、消费提醒等，如需查看门店营业时间和电话、海报信息、各种活动推广等请关注公众号“宽广超市”，感谢关注。'
         reply = TextReply(content=to_content, message=msg)
         xml = reply.render()
         return xml
