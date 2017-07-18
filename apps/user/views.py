@@ -1,19 +1,18 @@
 # -*- coding:utf-8 -*-
 from urllib import parse
-import json,time
+import json, time
 
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.core.cache import caches
-from wechatpy import WeChatOAuth,WeChatClient
+from wechatpy import WeChatOAuth, WeChatClient
 
 from utils import db
 from .models import WechatMembers
 from .form import BoundForm
-from utils import consts,method
-
+from utils import consts, method
 
 
 class MembersBoundView(View):
@@ -43,9 +42,9 @@ class MembersBoundView(View):
         ticket = jsapi.get_jsapi_ticket()
         noncestr = method.createNonceStr()
         timestamp = int(time.time())
-        url = "http://www.zisai.net/user/membersbound?code="+code+"&state=STATE"
-        signature = jsapi.get_jsapi_signature(noncestr,ticket,timestamp,url)
-        return render(request, 'members_bound.html',locals())
+        url = "http://www.zisai.net/user/membersbound?code=" + code + "&state=STATE"
+        signature = jsapi.get_jsapi_signature(noncestr, ticket, timestamp, url)
+        return render(request, 'members_bound.html', locals())
 
     def post(self, request):
         bound_form = BoundForm(request.POST)
@@ -54,9 +53,9 @@ class MembersBoundView(View):
             username = request.POST.get('username', '').strip()
             telphone = request.POST.get('telphone', '').strip()
             vcode = request.POST.get('vcode', '').strip()
-            sms_code = caches['default'].get('sms_'+str(telphone),'')
-            if not sms_code :
-                #验证码不存在或失效
+            sms_code = caches['default'].get('sms_' + str(telphone), '')
+            if not sms_code:
+                # 验证码不存在或失效
                 msg['status'] = 4
                 return HttpResponse(json.dumps(msg))
             if sms_code != int(vcode):
@@ -74,15 +73,15 @@ class MembersBoundView(View):
             if str(idnumber)[-1] == 'x':
                 idnumber = str(idnumber).upper()
             sql = "SELECT mem_number,wx_tel FROM uc_memcontent " \
-                  "WHERE idc_name='{0}' AND RIGHT(idc_id,6)='{1}'"\
-                  .format(username, idnumber)
+                  "WHERE idc_name='{0}' AND RIGHT(idc_id,6)='{1}'" \
+                .format(username, idnumber)
             cur.execute(sql)
             member = cur.fetchone()
             if member:
-                if (member['wx_tel']!= telphone) or (not member['wx_tel']):
+                if (member['wx_tel'] != telphone) or (not member['wx_tel']):
                     sql_update = "UPDATE uc_memcontent SET wx_tel='{tel}' " \
-                                 "WHERE idc_name='{name}' AND RIGHT(idc_id,6)='{idc}'"\
-                                 .format(name=username,tel= telphone,idc=idnumber)
+                                 "WHERE idc_name='{name}' AND RIGHT(idc_id,6)='{idc}'" \
+                        .format(name=username, tel=telphone, idc=idnumber)
                     cur.execute(sql_update)
                     conn.commit()
                     conn.close()
@@ -96,20 +95,20 @@ class MembersBoundView(View):
                     wechat_member.telphone = telphone
                     wechat_member.save()
                 except IntegrityError:
-                    #此微信已绑定会员
+                    # 此微信已绑定会员
                     msg['status'] = 2
                     return HttpResponse(json.dumps(msg))
                 except Exception as e:
-                    #程序异常
+                    # 程序异常
                     msg['status'] = 3
                     return HttpResponse(json.dumps(msg))
                 else:
                     msg['status'] = 0
-                    caches['default'].delete('sms_'+str(telphone))
+                    caches['default'].delete('sms_' + str(telphone))
                     return HttpResponse(json.dumps(msg))
             else:
-                #用户不存在
-                msg['status'] =1
+                # 用户不存在
+                msg['status'] = 1
                 return HttpResponse(json.dumps(msg))
         else:
             msg['status'] = 1
@@ -139,19 +138,27 @@ class MembersImageView(View):
         # return HttpResponse(member_info)
 
         if not member_info:
-            return render(request, 'msg_warn.html', {'error': u'此会员未实名制'})
+            return render(request, 'msg_warn.html', {'error': u'请绑定会员后查看'})
         else:
             member_num = member_info[0]['membernumber']
+            # 查询会员积分
+            conn = db.getMsSqlConn()
+            cursor = conn.cursor()
+            point_sql = "SELECT Point FROM Guest WHERE CardNo='{member_num}'".format(member_num=member_num)
+            cursor.execute(point_sql)
+            point_rs = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            point = point_rs[0]['Point']
 
         return render(request, 'members_image.html', {
             'openid': openid,
             'access_token': access_token,
             'member_num': member_num,
+            'point': point
         })
 
 
 class SuccessView(View):
-    def get(self,request):
-        return render(request,'msg_success.html')
-
-
+    def get(self, request):
+        return render(request, 'msg_success.html')
