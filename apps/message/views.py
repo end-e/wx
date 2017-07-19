@@ -5,7 +5,7 @@ from django.db import Error
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import WechatMembers
 
-from wechatpy.replies import TextReply, create_reply
+from wechatpy.replies import TextReply
 from utils import db
 
 
@@ -18,7 +18,7 @@ def switch_type(msg):
     # 推送文字消息
     if from_type == 'text':
         if msg.content == '红包':
-            to_content = '活动已结束！'
+            to_content = '[小宽摊手]非常遗憾，活动已结束，不过没关系，人生还有诗和远方。'
         elif msg.content == '解除绑定':
             try:
                 WechatMembers.objects.filter(openid=msg.source).delete()
@@ -30,7 +30,7 @@ def switch_type(msg):
                              'membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect">' \
                              '点击这里</a>绑定会员'
         else:
-            to_content = '本公众号主要提供会员绑定、消费提醒等，如需查看门店营业时间和电话、海报信息、' \
+            to_content = '嗨，我是小宽，本公众号主要提供会员绑定、消费提醒等。如需查看门店营业时间和电话、海报信息、' \
                          '各种活动推广等请关注公众号“宽广超市”，感谢关注。'
         reply = TextReply(content=to_content, message=msg)
         xml = reply.render()
@@ -103,9 +103,10 @@ def switch_type(msg):
 
                         # 判断今天是否消费
                         if today == now:
-                            to_content = '客官，数据正在努力奔跑中...请以今天超市打印的购物小票为准，或者明天再来看看吧'
+                            to_content = '客官，数据正在努力奔跑中...请以今天超市打印的购物小票为准，或者明天再来看看吧\n' \
+                                         '哦哦，对了[憨笑]，如果您绑定了会员，会收到我发送给您的消费提醒。'
                         else:
-                            to_content = '客官最近都没来购物，小宽好想你呦~'
+                            to_content = '客官最近都没来购物，小宽好想你呦~[可怜]'
                     # 如果查询到消费明细
                     else:
                         # 存放当天消费明细 如果有多次消费 存放格式[{...}, {...}]
@@ -131,7 +132,9 @@ def switch_type(msg):
                         to_content = '日期: {sdate}\n消费次数: {records}次\n'.format(sdate=date, records=records)
                 # 未绑定
                 else:
-                    to_content = '嗨，我是小宽，你需要操作会员绑定，我才能帮你查询呐，如你已经是实名制会员，请点击会员绑定。'
+                    to_content = '嗨，我是小宽，您绑定会员后我才能帮您查询呐，不过您得是实名制会员才行。\n' \
+                                 '那么问题来了，如何成为实名制会员？[疑问]\n' \
+                                 'so easy~~[调皮]，请移步服务台咨询我们的客服人员。'
 
                 reply = TextReply(content=to_content, message=msg)
                 xml = reply.render()
