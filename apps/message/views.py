@@ -110,26 +110,21 @@ def switch_type(msg):
                     # 如果查询到消费明细
                     else:
                         # 存放当天消费明细 如果有多次消费 存放格式[{...}, {...}]
-                        temp_list = []
+                        temp_set = set()
+                        date_list = []
 
-                        # 合并同一小票号数据
+                        # 计算消费次数
                         for row in last_buy_rs:
-                            if not temp_list:
-                                temp_list.append(row)
-                            else:
-                                for d in temp_list:
-                                    if row['ListNo'] == d['ListNo']:
-                                        d['SaleValue'] += row['SaleValue']
-                                        d['DiscValue'] += row['DiscValue']
-                                    else:
-                                        temp_list.append(row)
+                            temp_set.add(row['ListNo'])
+                            if not date_list:
+                                date_list.append(row['SDate'])
 
                         # 消费次数
-                        records = len(temp_list)
+                        records = len(temp_set)
                         # 消费日期
-                        date = '{0:%Y-%m-%d}'.format(temp_list[0]['SDate'])
+                        date = '{0:%Y-%m-%d}'.format(date_list[0])
 
-                        to_content = '日期: {sdate}\n消费次数: {records}次\n'.format(sdate=date, records=records)
+                        to_content = '您最近一次在{sdate}，消费{records}次'.format(sdate=date, records=records)
                 # 未绑定
                 else:
                     to_content = '嗨，我是小宽，您绑定会员后我才能帮您查询呐，不过您得是实名制会员才行。\n' \
