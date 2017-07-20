@@ -124,7 +124,10 @@ def switch_type(msg):
                         # 消费日期
                         date = '{0:%Y-%m-%d}'.format(date_list[0])
 
-                        to_content = '您最近一次在{sdate}，消费{records}次'.format(sdate=date, records=records)
+                        to_content = '您最近一次在{sdate}，消费{records}次\n' \
+                                     '<a href="http://www.huigo.com/wechat/shoppinglist.php?memberNumber={member_number}">' \
+                                     '查看消费明细' \
+                                     '</a>'.format(sdate=date, records=records, member_number=member_number)
                 # 未绑定
                 else:
                     to_content = '嗨，我是小宽，您绑定会员后我才能帮您查询呐，不过您得是实名制会员才行。\n' \
