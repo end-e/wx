@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
 
-from django.db import Error
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import WechatMembers
 
@@ -21,9 +20,9 @@ def switch_type(msg):
             to_content = '[小宽摊手]非常遗憾，活动已结束，不过没关系，人生还有诗和远方。'
         elif msg.content == '解除绑定':
             try:
-                WechatMembers.objects.filter(openid=msg.source).delete()
+                WechatMembers.objects.get(openid=msg.source).delete()
                 to_content = '解除绑定成功。'
-            except Error:
+            except ObjectDoesNotExist:
                 to_content = '嗨，小宽发现您还未绑定会员。\n' \
                              '<a href="https://open.weixin.qq.com/connect/oauth2/authorize?' \
                              'appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/' \
