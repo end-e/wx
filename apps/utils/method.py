@@ -155,6 +155,7 @@ def send_temp(openid, data):
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
         access_token = get_access_token('ikg',app_id,secret)
+
     client = WeChatClient(app_id, secret, access_token)
     message = client.message
     # 模版id

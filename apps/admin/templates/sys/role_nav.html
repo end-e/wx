@@ -92,7 +92,7 @@
                             }else{
                                 $.each($('#nav_right option'),function () {
                                     var this_r = $(this);
-                                    if(parent_id=this_r.val()){
+                                    if(parent_id==this_r.val()){
                                         this_r.after(option)
                                     }
                                 })

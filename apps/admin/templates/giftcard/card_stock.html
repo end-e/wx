@@ -1,0 +1,88 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">礼品卡</a>
+    <a href="#" class="current">线上实例</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    礼品卡线上实例列表
+                </h2>
+            </div>
+            <div class="box-content">
+                <form action="{% url 'admin:giftcard:card_stock' %}" method="post" id="Form" style="overflow: hidden">
+                    <div class="span12 row-fluid">
+                        {% csrf_token %}
+                        <div class="input-group span3">
+                            <label>线下名称：
+                                <input type="text" name="name" id="name" class="form-control" value="{{ name }}">
+                            </label>
+                        </div>
+                        <div class="input-group span3">
+                            <label>面值：
+                                <input type="text" name="balance" id="balance" class="form-control" value="{{ balance }}">
+                            </label>
+                        </div>
+                        <div class="input-group span3">
+                            <label>所属主题：
+                                <select name="theme" id="theme">
+                                    <option value="0">请选择</option>
+                                    {% for theme in themes %}
+                                        <option value="{{ theme.id }}" {% if theme_id == theme.id %}selected{% endif %}>
+                                            {{ theme.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        <input type="hidden" name="page_num" id="page_num" value="1">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="icon-search"></i>
+                            查询
+                        </button>
+                    </div>
+                </form>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>发行数量</th>
+                        <th>现有库存</th>
+                        <th>售价</th>
+                        <th>面值</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for card in cards %}
+                        <tr>
+                            <td class="center">{{ card.title }}</td>
+                            <td class="center">{{ card.stock | default:0 }}</td>
+                            <td class="center">{{ card.stock_now | default:0 }}</td>
+                            <td class="center">{{ card.price }}</td>
+                            <td class="center">{{ card.init_balance }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">暂无数据</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+
+                <div  class="pagination" style="text-align: center;margin:20px auto;">
+                    <ul id="pagination1"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+
+{% endblock %}

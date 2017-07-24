@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 from giftcard import Event
+from admin.models import GiftOrder
 
 @csrf_exempt
 def conn(request):
@@ -29,13 +30,19 @@ def conn(request):
         if event == 'giftcard_pay_done':
             # 购买付款成功--TODO 本地存储订单
             orderId = xml.find('OrderId').text
-            res = Event.giftcard_pay_done(orderId)
-            if res['status'] == 0:
-                return_xml = '<xml>ok</xml>'
-            else:
-                return_xml = '<xml>fail</xml>'
+            order = GiftOrder.objects.filter(order_id=orderId)
             httpResponse = HttpResponse()
             httpResponse.status_code = 200
+            if order.count()==0:
+                res = Event.giftcard_pay_done(orderId)
+                if res['status'] == 0:
+                    return_xml = '<xml>ok</xml>'
+                else:
+                    httpResponse.status_code = 500
+                    return_xml = '<xml>fail</xml>'
+            else:
+                return_xml = '<xml>ok</xml>'
+
             httpResponse.content = return_xml
             return httpResponse
 

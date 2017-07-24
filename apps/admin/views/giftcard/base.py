@@ -129,7 +129,7 @@ class ThemeView(View):
 class ThemeEditView(View):
     def get(self,request,theme_id,step_id):
         pic_list = GiftImg.objects.values('title', 'url').filter(status='0')
-        card_list = GiftCard.objects.values('name', 'wx_card_id').filter(status='2')
+        card_list = GiftCard.objects.values('name', 'wx_card_id').filter(status='9')
         step_next = int(step_id)+1
         step_prev = int(step_id)-1
         th_id = theme_id

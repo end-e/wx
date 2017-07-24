@@ -12,8 +12,7 @@ from admin.utils import method
 
 class NavView(View):
     def get(self,request):
-        nav_list = Nav.objects.values('id', 'name', 'url','parent', 'sort','status','icon')\
-            .filter(status='0')
+        nav_list = Nav.objects.values('id', 'name', 'url','parent', 'sort','status','icon')
         nav_list = method.createNavList(nav_list)
 
         return render(request, 'sys/nav.html', locals())

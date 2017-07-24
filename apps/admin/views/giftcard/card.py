@@ -7,12 +7,15 @@ __author__ = ''
 __date__ = '2017/6/20 8:52'
 import json, math,time
 import requests
+from threading import Thread
+from queue import Queue
 
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic.base import View
+from django.db.models import Count
 
-from admin.models import GiftCard, GiftImg,GiftThemeItem, GiftCardCode
+from admin.models import GiftCard, GiftImg,GiftTheme,GiftThemeItem, GiftCardCode
 from admin.utils.myClass import MyView, MyException
 from admin.utils import method
 from admin.forms import GiftCardForm,GiftCardEditForm
@@ -172,6 +175,7 @@ class CardWxView(MyView):
                     cardInfoClass = CardInfoWxView()
                     cardInfo = cardInfoClass.get(card_id)
                     card_list.append(cardInfo)
+
             else:
                 LogWx.objects.create(type='98', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'])
         except requests.exceptions.ConnectionError as e :
@@ -200,9 +204,56 @@ class CardInfoWxView(MyView):
             item['quantity'] =card['general_card']['base_info']['sku']['quantity']
             item['price'] =card['general_card']['base_info']['giftcard_info']['price']
             item['init_balance'] =card['general_card']['init_balance']
-            return item
+            queue.put(item)
+            # return item
         else:
             LogWx.objects.create(type='99', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'])
+
+
+class CardStockView(View):
+    def get(self,request):
+        themes = GiftTheme.objects.values('name','id').filter(status='0')
+        return render(request,'giftcard/card_stock.html',locals())
+    def post(self,request):
+        themes = GiftTheme.objects.values('name', 'id').filter(status='0')
+        name = request.POST.get('name','')
+        balance = request.POST.get('balance','')
+        theme_id = int(request.POST.get('theme',''))
+        kwargs = {}
+        if name:
+            kwargs.setdefault('name',name)
+        if balance:
+            kwargs.setdefault('init_balance',balance)
+        card_ids = []
+        cards =[]
+        if theme_id:
+            items = GiftThemeItem.objects.values('wx_card_id').filter(theme_id=theme_id)
+            if items.count()>0:
+                card_ids = [ item['wx_card_id'] for item in items]
+                kwargs.setdefault('wx_card_id__in', card_ids)
+                cards = GiftCard.objects.filter(**kwargs).values('name', 'title', 'init_balance','price','wx_card_id')
+        else:
+            cards = GiftCard.objects.filter(**kwargs).values('name', 'title', 'init_balance','price','wx_card_id')
+            card_ids = [card['wx_card_id'] for card in cards]
+
+        stocks = GiftCardCode.objects.values('wx_card_id','status').filter(wx_card_id__in=card_ids)\
+            .annotate(stock=Count('code'))
+
+        for card in cards:
+            for stock in stocks:
+                if card['wx_card_id'] == stock['wx_card_id']:
+                    if 'stock' in card:
+                        card['stock'] += stock['stock']
+                    else:
+                        card['stock'] = stock['stock']
+
+                    if stock['status'] == '0':
+                        if 'stock_now' in card:
+                            card['stock_now'] += stock['stock']
+                        else:
+                            card['stock_now'] = stock['stock']
+        return render(request,'giftcard/card_stock.html',locals())
+
 
 class CardDelView(MyView):
     def post(self, request):
@@ -253,7 +304,7 @@ class CardDelView(MyView):
         elif action == 'local':
             try:
                 with transaction.atomic():
-                    if status == 0:
+                    if status == '0':
                         # 1更新卡状态
                         GiftCard.objects.filter(wx_card_id=wx_card_id).update(status=status)
                         #删除主题下对应的卡
@@ -269,7 +320,7 @@ class CardDelView(MyView):
                             res_mssql = method.updateCardMode(code_list, 1, 9)
                             if res_mssql['status'] != 0:
                                 raise MyException('Code状态更新失败')
-                    elif status in (1,2):
+                    elif status in ('1','2'):
                         # 1删除主题下的此卡
                         GiftCard.objects.filter(id=wx_card_id).update(status=status)
                         GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
