@@ -1,21 +1,21 @@
-import random, hashlib, datetime, json, requests, time
+import random,hashlib,datetime,json,requests,time
 
 from django.core.cache import caches
 from django.db import transaction
 from wechatpy import WeChatClient
 
+
 from user.models import WechatMembers
 from api.models import LogWx
-from utils import db, consts
-from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode
+from utils import db,consts
+from admin.models import GiftOrder,GiftOrderInfo,GiftCardCode,ShopOrder
 
-
-def createNonceStr(length=16):
+def createNonceStr(length = 16):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     str = ""
-    for i in range(0, length):
+    for i in range(0,length):
         _index = random.randint(0, len(chars) - 1)
-        str += chars[_index:_index + 1]
+        str += chars[_index:_index+1]
     return str
 
 
@@ -25,7 +25,7 @@ def getShopName(id):
     :param id:
     :return:
     """
-    shopDict = caches['default'].get('base_shopDict', '')
+    shopDict = caches['default'].get('base_shopDict','')
     if not shopDict:
         conn = db.getMysqlConnection(
             consts.DB_SERVER_18,
@@ -38,8 +38,8 @@ def getShopName(id):
         cur = conn.cursor()
         cur.execute(sql)
         shops = cur.fetchall()
-        shopDict = {shop['Shopcode']: shop['Shopnm'].strip() for shop in shops}
-        caches['default'].set('base_shopDict', shopDict, 60 * 60 * 12)
+        shopDict = {shop['Shopcode']:shop['Shopnm'].strip() for shop in shops}
+        caches['default'].set('base_shopDict', shopDict,60*60*12)
 
     return shopDict[id]
 
@@ -51,7 +51,7 @@ def get_ip(request):
     :return:
     """
     if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-        ip = request.META['HTTP_X_FORWARDED_FOR']
+        ip =  request.META['HTTP_X_FORWARDED_FOR']
     else:
         ip = request.META['REMOTE_ADDR']
     return ip
@@ -65,11 +65,11 @@ def md5(data):
     """
     md5 = hashlib.md5()
     if data:
-        md5.update(data.encode(encoding='utf-8'))
+        md5.update(data.encode(encoding = 'utf-8'))
     return md5.hexdigest()
 
 
-def get_access_token(app_name, app_id, secret):
+def get_access_token(app_name,app_id,secret):
     client = WeChatClient(app_id, secret)
     response = client.fetch_access_token()
     token = response['access_token']
@@ -114,7 +114,7 @@ def get_user_order():
 
 def get_wechat_users(orders):
     users = [order['CardNo'].strip() for order in orders]
-    wechat_users = WechatMembers.objects.values('openid', 'username', 'membernumber').filter(membernumber__in=users)
+    wechat_users = WechatMembers.objects.values('openid','username','membernumber').filter(membernumber__in=users)
 
     return wechat_users
 
@@ -123,7 +123,7 @@ def create_temp_data(order):
     data = {}
     # 模版数据字典
     data['first'] = {
-        "value": "宽广会员专享优惠券-爱宽广微信小程序",
+        "value": "宽广超市会员",
         "color": "#173177"
     }
     data['keyword1'] = {
@@ -154,7 +154,7 @@ def send_temp(openid, data):
     user_id = openid
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
-        access_token = get_access_token('ikg', app_id, secret)
+        access_token = get_access_token('ikg',app_id,secret)
 
     client = WeChatClient(app_id, secret, access_token)
     message = client.message
@@ -171,20 +171,20 @@ def send_temp(openid, data):
         # TODO:记录发送失败日志
         LogWx.objects.create(
             type='1',
-            remark='openid:' + openid,
+            remark='openid:'+openid,
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']
         )
 
 
 def gift_compare_order(offset=0):
-    res = {}
+    res ={}
     res['status'] = 0
     res_get = gift_get_Wx_order(offset)
     if res_get['status'] == 0:
-        offset = res_get['offset']
-        total_count = res_get['total_count']
-        wx_orders = res_get['wx_orders']
+        offset=res_get['offset']
+        total_count=res_get['total_count']
+        wx_orders=res_get['wx_orders']
         gift_save_local_order(wx_orders)
 
         if total_count > (offset + 1) * 100:
@@ -226,8 +226,7 @@ def gift_get_Wx_order(offset=0):
         res['wx_orders'] = wx_orders
     else:
         res['status'] = 1
-        LogWx.objects.create(type='6', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
-                             remark='cron_giftcard_wx_local')
+        LogWx.objects.create(type='6',errmsg=rep_data['errmsg'],errcode=rep_data['errcode'],remark='cron_giftcard_wx_local')
 
     return res
 
@@ -264,3 +263,15 @@ def gift_save_local_order(wx_orders):
                     errcode='6',
                     remark='wx_order_id:{order}'.format(order=order['order_id'])
                 )
+
+
+def createOrderSn():
+    today = datetime.datetime.today()
+    begin = today.strftime('%Y-%m-%d') + ' 00:00:00'
+    end = today.strftime('%Y-%m-%d') + ' 23:59:59'
+
+    count = ShopOrder.objects.filter(save_time__lte=end, save_time__gte=begin).count()
+    sn = str(count + 1).zfill(4)
+    sn = today.strftime('%Y%m%d') + sn
+
+    return sn
