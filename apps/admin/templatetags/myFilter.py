@@ -5,6 +5,8 @@ import time
 
 from django import template
 
+from admin.models import ShopGood,ShopBanner
+
 register = template.Library()
 
 @register.filter('range')
@@ -51,4 +53,24 @@ def toDate(data):
 def getListItem(str,index):
     list = str.split(':')
     return list[index]
+
+@register.filter
+def toGoodName(sn):
+    good = ShopGood.objects.values('name').get(sn=sn)
+    return good['name']
+
+@register.filter
+def toBannerName(id):
+    banner = ShopBanner.objects.get(pk=id)
+    return banner.name
+
+@register.filter
+def toBannerInfoTypeName(type):
+    if type=='0':
+        return '无跳转链接'
+    elif type == '1':
+        return '商品链接'
+    elif type == '2':
+        return '主题链接'
+    banner = ShopBanner.objects.get(pk=id)
 

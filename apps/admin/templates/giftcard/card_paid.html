@@ -102,8 +102,9 @@
         visiblePages: 10,
         currentPage: {{ page_num |safe }},
         onPageChange: function (num) {
-            switchPage(num)
-
+            if(num!={{ page_num |safe }}){
+                switchPage(num)
+            }
         }
     });
 

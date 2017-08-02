@@ -77,13 +77,13 @@ def cron_gift_change_balance():
 
             threads = []
             for o in orders:
-                thread = Thread(target=gift_change_balance,args=(o, access_token))
+                thread = Thread(target=gift_change_balance,args=(o['CardNo'].strip(),o['wx_card_id'],o['detail'],access_token))
                 threads.append(thread)
                 thread.start()
                 # gift_change_balance(o, access_token)
 
             this_last_serial = orders[-1]['PurchSerial']
-            print(this_last_serial)
+
             if prev_last_serial:
                 now = datetime.datetime.now()
                 GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial) \
@@ -93,7 +93,7 @@ def cron_gift_change_balance():
             res_msg = 'ok'
         except Exception as e:
             print(e)
-            LogWx.objects.create(type='0', errmsg=e, errcode='0')
+            LogWx.objects.create(type='2', errmsg=e, errcode='2')
             res_msg = e
     else:
         res_msg = 'no order'
@@ -101,14 +101,50 @@ def cron_gift_change_balance():
     return HttpResponse(res_msg)
 
 
-def gift_change_balance(o,access_token):
-    print('gift_change_balance')
+def cron_gift_change_balance2():
+    prev_id = caches['default'].get('wx_log_balance_id', '')
+
+    kwarg = {}
+    if prev_id:
+        kwarg.setdefault('id__gt',prev_id)
+    kwarg.setdefault('type', 2)
+    kwarg.setdefault('errcode', 40001)
+    log_list = LogWx.objects.values('id','remark').filter(**kwarg)
+    LogWx.objects.create(type='2', errmsg=len(log_list), errcode='2')
+    access_token = caches['default'].get('wx_kgcs_access_token', '')
+    if not access_token:
+        method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+    if(len(log_list)>0):
+        try:
+            threads = []
+            for log in log_list:
+                remark = log['remark']
+                info = remark.split(',')
+                info = {obj.split(':')[0]: obj.split(':')[1] for obj in info }
+
+                thread = Thread(target=gift_change_balance, args=(info['card_id'].strip(), info['code'], info['balance'], access_token))
+                threads.append(thread)
+                thread.start()
+            last_id = log_list[-1]['id']
+            caches['default'].set('wx_log_balance_id', last_id)
+            res_msg = 'ok'
+        except Exception as e:
+            print(e)
+            LogWx.objects.create(type='2', errmsg=e, errcode='2')
+            res_msg = e
+
+    else:
+        res_msg = 'no order'
+
+    return HttpResponse(res_msg)
+
+def gift_change_balance(card_id,code,balance,access_token):
     url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
         .format(token=access_token)
     data = {
-        "code": o['CardNo'].strip(),
-        "card_id": o['wx_card_id'],
-        "balance": float(o['detail']) * 100
+        "code": code,
+        "card_id": card_id,
+        "balance": float(balance) * 100
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
@@ -120,7 +156,7 @@ def gift_change_balance(o,access_token):
             type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
             remark='code:{code},balance:{balance},card_id:{card_id}'
                 .format(code=o['CardNo'].strip(), balance=str(float(o['detail'])),
-                        card_id=o['wx_card_id'])
+                        card_id=card_id)
         )
 
 
@@ -130,4 +166,6 @@ def cron_gift_compare_order():
         LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
         return HttpResponse('fail')
     return HttpResponse('ok')
+
+
 

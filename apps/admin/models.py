@@ -13,7 +13,7 @@ class Role(models.Model):
 class Nav(models.Model):
     name = models.CharField(max_length=45)
     parent = models.CharField(max_length=32)
-    url = models.CharField(max_length=120)
+    url = models.CharField(max_length=120,blank=True, null=True)
     icon = models.CharField(max_length=30, blank=True, null=True)
     sort = models.IntegerField()
     status = models.CharField(max_length=1)
@@ -163,7 +163,7 @@ class GiftOrder(models.Model):
         db_table = 'gift_order'
 
 class GiftOrderInfo(models.Model):
-    order_id = models.IntegerField(verbose_name='对应gift_order的自增长id')
+    order_id = models.IntegerField(verbose_name=u'对应gift_order的自增长id')
     card_id = models.CharField(max_length=32,verbose_name=u'卡类型ID')
     price = models.IntegerField(verbose_name=u'卡面值')
     code = models.CharField(max_length=32,verbose_name=u'code',unique=True)
@@ -173,47 +173,71 @@ class GiftOrderInfo(models.Model):
 
 
 class ShopGood(models.Model):
-    name = models.CharField(max_length=32,verbose_name='名称')
-    sn = models.CharField(max_length=32,verbose_name='编码')
-    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name='价格')
-    img = models.ImageField(upload_to='upload',verbose_name='预览图')
-    category = models.IntegerField(verbose_name='所属分类')
-    is_host = models.CharField(max_length=1,verbose_name='热卖')
-    is_new = models.CharField(max_length=1,verbose_name='新品')
-    status = models.CharField(max_length=1,verbose_name='商品状态')
+    name = models.CharField(max_length=32,verbose_name=u'名称')
+    sn = models.CharField(max_length=32,verbose_name=u'商品编码',unique=True)
+    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'价格')
+    img = models.ImageField(upload_to='shop/%Y/%m', verbose_name=u'封面图', max_length=100)
+    category = models.IntegerField(verbose_name=u'所属分类')
+    stock = models.SmallIntegerField(verbose_name=u'库存',default=0)
+    is_hot = models.CharField(max_length=1,verbose_name=u'热卖')
+    is_new = models.CharField(max_length=1,verbose_name=u'新品')
+    status = models.CharField(max_length=1,verbose_name=u'商品状态')
+    save_time = models.DateTimeField(default=datetime.now,verbose_name=u'创建日期')
 
     class Meta:
         db_table = 'shop_good'
 
 
+class ShopGoodImg(models.Model):
+    good_sn = models.CharField(max_length=32,verbose_name=u'商品编码')
+    img = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'商品编码',)
+    sort = models.CharField(max_length=2,verbose_name=u'排序')
+
+    class Meta:
+        db_table = 'shop_good_img'
+
+
+class ShopGoodProperty(models.Model):
+    good_sn = models.CharField(max_length=32, verbose_name=u'商品编码')
+    name = models.CharField(max_length=30, verbose_name=u'属性名')
+    detail = models.CharField(max_length=255, verbose_name=u'属性值')
+    sort = models.CharField(max_length=2, verbose_name=u'排序')
+
+    class Meta:
+        db_table = 'shop_good_property'
+
+
 class ShopCategory(models.Model):
-    name = models.CharField(max_length=32,verbose_name='名称')
-    parent = models.IntegerField(verbose_name='父级分类')
-    status = models.CharField(max_length=1,verbose_name='状态')
+    name = models.CharField(max_length=32,verbose_name=u'名称')
+    parent = models.IntegerField(verbose_name=u'父级分类')
+    banner = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'banner图',null=True,blank=True)
+    sort = models.CharField(max_length=2, verbose_name=u'排序', default=1)
+    status = models.CharField(max_length=1,verbose_name=u'状态')
 
     class Meta:
         db_table = 'shop_category'
 
 
 class ShopExpress(models.Model):
-    name = models.CharField(max_length=32, verbose_name='名称')
-    tel = models.CharField(max_length=11,verbose_name='电话')
-    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name='价格')
-    status = models.CharField(max_length=1, verbose_name='状态')
+    name = models.CharField(max_length=32, verbose_name=u'名称')
+    tel = models.CharField(max_length=11,verbose_name=u'电话')
+    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'价格')
+    status = models.CharField(max_length=1, verbose_name=u'状态')
 
     class Meta:
         db_table = 'shop_express'
 
 
 class ShopOrder(models.Model):
-    sn = models.CharField(max_length=16,verbose_name='编号')
-    price = models.CharField(max_length=16,verbose_name='价格')
-    express = models.IntegerField(verbose_name='快递')
-    create_time = models.DateTimeField(verbose_name='下单时间')
-    sign_time = models.DateTimeField(verbose_name='签收时间')
-    remark = models.TextField(verbose_name='备注留言')
-    customer = models.CharField(max_length=12,verbose_name='用户ID')
-    address = models.CharField(max_length=12,verbose_name='配送地址ID')
+    sn = models.CharField(max_length=16,verbose_name=u'编号',unique=True)
+    price = models.DateTimeField(max_length=16,verbose_name=u'价格')
+    express = models.IntegerField(verbose_name=u'快递',blank=True,null=True)
+    save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
+    sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
+    remark = models.TextField(verbose_name=u'备注留言',blank=True,null=True)
+    address = models.CharField(max_length=12,verbose_name=u'配送地址ID',default='')
+    customer = models.CharField(max_length=50, verbose_name=u'用户ID', default='0')
+    status = models.CharField(max_length=1, verbose_name=u'订单状态',default='0')
 
     class Meta:
         db_table = 'shop_order'
@@ -221,32 +245,23 @@ class ShopOrder(models.Model):
 
 class ShopOrderInfo(models.Model):
     order_sn = models.CharField(max_length=16, verbose_name='订单编号')
-    good_sn= models.CharField(max_length=32,verbose_name='商品ID')
+    good_sn= models.CharField(max_length=8,verbose_name='商品编码')
     good_num = models.IntegerField(verbose_name='商品数量')
 
     class Meta:
         db_table = 'shop_order_info'
 
 
-class ShopAddress(models.Model):
-    name = models.CharField(max_length=12,verbose_name='收件人')
-    tel = models.CharField(max_length=12,verbose_name='联系电话')
-    province = models.CharField(max_length=12,verbose_name='省')
-    city = models.CharField(max_length=12,verbose_name='市')
-    county = models.CharField(max_length=12,verbose_name='县区')
-    is_default = models.CharField(max_length=1,verbose_name='默认地址')
-
-    class Meta:
-        db_table = 'shop_address'
-
-
 class ShopTheme(models.Model):
-    name = models.CharField(max_length=12, verbose_name='名称')
-    desc = models.CharField(max_length=32,verbose_name='描述')
-    img = models.ImageField(upload_to='upload',verbose_name='图片')
-    create_time = models.DateTimeField(verbose_name='创建时间')
-    end_time = models.DateTimeField(verbose_name='到期时间')
-    sort = models.CharField(max_length=2,verbose_name='排序')
+    name = models.CharField(max_length=12, verbose_name=u'名称')
+    desc = models.CharField(max_length=32,verbose_name=u'描述',blank=True,null=True)
+    img = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'图片')
+    banner = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'图片',default='')
+    save_time = models.DateTimeField(default=datetime.now, verbose_name=u'更新时间')
+    begin_time = models.DateTimeField(default=datetime.now, verbose_name=u'开始日期')
+    end_time = models.DateTimeField(default=datetime.now, verbose_name=u'结束日期')
+    sort = models.CharField(max_length=2, verbose_name=u'排序', default=1)
+
 
     class Meta:
         db_table = 'shop_theme'
@@ -254,7 +269,59 @@ class ShopTheme(models.Model):
 
 class ShopThemeInfo(models.Model):
     theme_id = models.IntegerField()
-    good_sn = models.IntegerField()
+    good_sn = models.CharField(max_length=8,verbose_name='商品编码')
 
     class Meta:
         db_table = 'shop_theme_info'
+        unique_together=(('theme_id','good_sn'))
+
+
+class ShopUser(models.Model):
+    openid = models.CharField(max_length=50,verbose_name=u'',unique=True)
+    nickname = models.CharField(max_length=10,verbose_name=u'昵称')
+    extend = models.CharField(max_length=128,verbose_name=u'',default='')
+    create_time = models.DateTimeField(default=datetime.now,verbose_name=u'创建日期')
+
+    class Meta:
+        db_table = 'shop_user'
+
+
+class ShopAddress(models.Model):
+    openid = models.CharField(max_length=50,verbose_name=u'用户ID',default=0)
+    name = models.CharField(max_length=12,verbose_name=u'收件人')
+    tel = models.CharField(max_length=12,verbose_name=u'联系电话')
+    province = models.CharField(max_length=12,verbose_name=u'省')
+    city = models.CharField(max_length=12,verbose_name=u'市')
+    country = models.CharField(max_length=12,verbose_name=u'县区')
+    detail = models.CharField(max_length=50,verbose_name=u'详细地址',default='')
+    create_time = models.DateTimeField(default=datetime.now, verbose_name=u'')
+    is_default = models.CharField(max_length=1,verbose_name=u'默认地址',default='0')
+
+    class Meta:
+        db_table = 'shop_address'
+
+
+class ShopBanner(models.Model):
+    name = models.CharField(max_length=16,verbose_name=u'')
+    desc = models.CharField(max_length=32,verbose_name=u'',blank=True,null=True)
+    save_time = models.DateTimeField(default=datetime.now, verbose_name=u'更新时间')
+    status = models.CharField(max_length=1,verbose_name=u'')
+
+    class Meta:
+        db_table = 'shop_banner'
+
+
+class ShopBannerInfo(models.Model):
+    name = models.CharField(max_length=12,verbose_name=u'名称',default='')
+    banner = models.IntegerField(default=0,verbose_name=u'bannerID')
+    img = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'图片')
+    type = models.CharField(max_length=1,verbose_name=u'类型（0:无导向;1:导向商品;2:导向专题）')
+    target_id = models.IntegerField(verbose_name=u'跳转目标',blank=True,null=True)
+    save_time = models.DateTimeField(default=datetime.now, verbose_name=u'更新时间')
+    begin_time = models.DateTimeField( verbose_name=u'开始日期')
+    end_time = models.DateTimeField(verbose_name=u'结束日期')
+    sort = models.CharField(max_length=2, verbose_name=u'排序', default=1)
+
+    class Meta:
+        db_table = 'shop_banner_info'
+

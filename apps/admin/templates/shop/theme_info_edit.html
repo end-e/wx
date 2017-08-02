@@ -1,0 +1,174 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:theme' %}">主题</a>
+    <a href="#" class="current">编辑</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2><i class="icon-edit"></i>编辑主题</h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" >
+                    {% csrf_token %}
+                    <div class="row-fluid">
+                        <div class="span5">
+                            <div class="control-group pull-right span12">
+                                <div class="row-fluid span9 pull-right">
+                                    <div class="input-group span7">
+                                        <label>分类：
+                                            <select id="category" class="form-control">
+                                                <option value="0">请选择</option>
+                                                {% for category in category_list %}
+                                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="input-group span1 pull-left">
+                                        <input type="button" class="btn btn-success" value="查询" onclick="getGoods()">
+                                    </div>
+                                </div>
+                                <div class="controls span10">
+                                    <select class="span8 pull-right" id="source" multiple style="min-height: 400px"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span1">
+                            <div class="controls span12" style="margin-top: 50px">
+                                <a class="btn btn-success btn-block" onclick="addToTarget()">
+                                    <i class="icon-double-angle-right"></i>
+                                </a>
+                                <a class="btn btn-danger btn-block" onclick="removeFromTarget()">
+                                    <i class="icon-double-angle-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="span5">
+                            <div class="controls pull-left span12">
+                                <label class="control-label" style="float: none">已选商品</label>
+                                <div class="controls span10 pull-left">
+                                    <select class="span8" id="target" name="goods" multiple style="min-height: 400px">
+                                        {% for info in info_list %}
+                                            <option value="{{ info.good_sn }}">{{ info.good_sn | toGoodName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div><!--/span-->
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            weekStart: 1,
+            todayBtn: 1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            minView: 2,
+            forceParse: 0
+        });
+    </script>
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+        function getGoods() {
+            var category = $('#category').val();
+            var url = "{% url 'admin:shop:good_category' %}?id="+category;
+            $.get(url,function (res) {
+                if(res.status == 1){
+
+                } else {
+                    var source = $('#source');
+                    source.empty();
+                    var goods = res.data;
+                    $.each(goods,function (index) {
+                        source.append("<option value='"+goods[index].sn+"'>"+goods[index].name+"</option>")
+                    })
+                }
+            },'json')
+        }
+        function addToTarget() {
+            var sources = $('#source').val();
+            var source_options = $('#source option');
+             var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'sn_list': sources.join(','),
+                'action': 'add'
+            };
+            $.post("{% url 'admin:shop:theme_info_edit' t_id %}",data,function(res){
+                if (res['status'] == 0) {
+                    var add_list = res.data;
+                    $.each(source_options,function () {
+                        if(add_list.indexOf($(this).val())>-1){
+                            var option = $(this).clone();
+                            $('#target').append(option)
+                        }
+                    });
+                    noty({"text":"数据提交成功","layout":"bottom","type":"information"});
+                }else if (res['status'] == 1) {
+                    noty({"text":"数据提交失败","layout":"bottom","type":"error"});
+                }
+
+            },'json');
+        }
+
+        function removeFromTarget() {
+            var targets = $('#target').val();
+            var target_options = $('#target option');
+            data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'sn_list': targets.join(','),
+                'action': 'remove'
+            };
+            $.post("{% url 'admin:shop:theme_info_edit' t_id %}", data, function (res) {
+                if (res['status'] == 0) {
+                    var remove_list = res.data;
+                    $.each(target_options, function () {
+                        if (remove_list.indexOf($(this).val()) > -1) {
+                            $(this).remove();
+                        }
+                    });
+                    noty({"text":"数据提交成功","layout":"bottom","type":"information"});
+                } else if (res['status'] == 1) {
+                    noty({"text": "数据提交失败", "layout": "bottom", "type": "error"});
+                }
+            }, 'json');
+        }
+
+
+
+        function createSelect() {
+            var category_list = $(".category_title");
+            $('.theme_category_index').empty();
+            category_list.each(function (index) {
+                var title = $(this).val();
+                if(title){
+                    var option = $("<option></option>").text(title).val(index);
+                    $('.theme_category_index').append(option);
+                }
+            })
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 0) {
+            alert("数据提交成");
+            window.location.href = "{% url 'admin:shop:theme' %}"
+        } else if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href = "{% url 'admin:shop:theme_edit' t_id %}"
+        }
+
+
+    </script>
+{% endblock %}

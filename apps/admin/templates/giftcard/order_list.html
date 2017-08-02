@@ -158,7 +158,7 @@
         onPageChange: function (num) {
             var begin = $('#begin').val();
             var end = $('#end').val();
-            if(begin&&end){
+            if(begin&&end && num!={{ page_num |safe }}){
                 switchPage(num)
             }
         }

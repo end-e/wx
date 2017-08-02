@@ -1,0 +1,68 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:banner' %}">Banner</a>
+    <a href="#" class="current">编辑</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑Banner
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:shop:banner_edit' b_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">名称</label>
+                        <div class="controls">
+                            <input type="text" name="name" value="{{ banner.name }}" required>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">描述</label>
+                        <div class="controls">
+                            <textarea name="desc" id="" cols="30" rows="5">{{ banner.desc }}</textarea>
+                            {% if form.errors.name %}<span class="help-inline">此字段最长32个字符</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.status %}error{% endif %}">
+                        <label class="control-label">状态</label>
+                        <div class="controls">
+                            <select name="status" id="">
+                                <option value="0" {% if banner.status == '0' %}selected{% endif %}>启用</option>
+                                <option value="1" {% if banner.status == '1' %}selected{% endif %}>禁用</option>
+                            </select>
+                            {% if form.errors.status %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm()">保存</button>
+                        <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href="{% url 'admin:shop:banner_edit' b_id %}";
+        }else if(res_status === 0){
+            alert("数据提交成功");
+            window.location.href="{% url 'admin:shop:banner' %}";
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:goods' %}">商品</a>
+    <a href="#" class="current">图片</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>商品图片编辑
+                </h2>
+            </div>
+            <div class="box-content">
+                <form action="{% url 'admin:shop:good_img_edit' good_sn %}" method="post" class="form-horizontal" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="list">
+                        {% for img in img_list %}
+                            <div class="row-fluid">
+                                <input type="hidden" name="id[]" value="{{ img.id }}">
+                                <div class="control-group span2">
+                                    <label class="control-label">详情图片:</label>
+                                    <div class="controls">
+                                        <input name="img[]" type="file" value="{{ img.img }}">
+                                    </div>
+                                </div>
+                                <div class="control-group span2">
+                                    <div class="controls pull-left">
+                                        <img src="/media/{{ img.img }}" alt="" height="40" width="40">
+                                    </div>
+                                </div>
+                                <div class="control-group span3">
+                                    <label class="control-label">排序:</label>
+                                    <div class="controls">
+                                        <input name="sort[]" type="text" value="{{ img.sort }}">
+                                    </div>
+
+                                </div>
+                                <div class="control-group span2 list-item-btn">
+                                    <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                        添加 <i class="icon-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                        删除 <i class="icon-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="row-fluid">
+                                <div class="control-group span3">
+                                    <label class="control-label">详情图片:</label>
+                                    <div class="controls">
+                                        <input name="img[]" type="file">
+                                    </div>
+
+                                </div>
+                                <div class="control-group span3">
+                                    <label class="control-label">排序:</label>
+                                    <div class="controls">
+                                        <input name="sort[]" type="text">
+                                    </div>
+                                </div>
+                                <div class="control-group span2 list-item-btn">
+                                    <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                        添加 <i class="icon-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                        删除 <i class="icon-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm(action) {
+            $('#action').val(action);
+            $('#Form').submit();
+
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href="{% url 'admin:shop:good_img_edit' good_sn %}";
+        }else if(res_status === 0){
+            alert("数据提交成功");
+            window.location.href="{% url 'admin:shop:goods' %}";
+        }
+    </script>
+{% endblock %}

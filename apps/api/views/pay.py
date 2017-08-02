@@ -9,62 +9,26 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from utils import consts, wxPay
+from admin.models import ShopOrder
 
 
-# @csrf_exempt
 # @signature
 def getPay(req):
     openid = req.GET.get('openId','')
     order_sn = req.GET.get('orderSn','')
     total_fee = req.GET.get('totalFee','')
 
-    body = 'test'
-    trade_type = 'JSAPI'
-    # spbill_create_ip = method.getIP()
-
     # url = r'https://api.mch.weixin.qq.com/pay/unifiedorder'
     arr = {
-        'out_trade_no': 'S201606080001',
-        'body': body,
-        'total_fee': '1',
-        'trade_type': trade_type,
-        'openid': 'oDZT50EikQkzMTZ28DzHx_eD4bVg'
+        'out_trade_no': order_sn,
+        'body': 'pay',
+        'total_fee': float(total_fee)*100,
+        'trade_type': 'JSAPI',
+        'openid': openid
     }
     unifiedOrder = wxPay.UnifiedOrder_pub()
     unifiedOrder.parameters= arr
     prepay_id = unifiedOrder.getPrepayId()
-
-
-    # headers = {'Content-Type': 'text/xml', 'Connection': 'Keep-Alive'}
-    # data = """
-    # <xml>
-    #     <appid>{appid}</appid>
-    #     <device_info>{device_info}</device_info>
-    #     <body>{body}</body>
-    #     <mch_id>{mch_id}</mch_id>
-    #     <nonce_str>{nonce_str}</nonce_str>
-    #     <notify_url>{notify_url}</notify_url>
-    #     <openid>{openid}</openid>
-    #     <out_trade_no>{out_trade_no}</out_trade_no>
-    #     <spbill_create_ip>{spbill_create_ip}</spbill_create_ip>
-    #     <total_fee>{total_fee}</total_fee>
-    #     <trade_type>{trade_type}</trade_type>
-    #     <sign>{sign}</sign>
-    # </xml>
-    # """.format(appid=appid,device_info=device_info,body=body,mch_id=mch_id,nonce_str=nonce_str,
-    #            notify_url=notify_url,out_trade_no=order_sn,total_fee=total_fee,
-    #            trade_type=trade_type,spbill_create_ip=spbill_create_ip,sign=sign,openid=openid)
-    #
-    # resp = request.Request(url=url,headers=headers,data=data.encode('utf-8'))
-    # page = request.urlopen(resp).read()
-    # page = page.decode('utf-8')
-    # page = xmlToArray(page)
-
-    # res = {}
-    # data = {}
-    # data['timeStamp'] = timeStamp
-    # data['nonceStr'] = nonceStr
-    # res['data'] = data
 
     return HttpResponse(prepay_id)
 
@@ -94,9 +58,8 @@ def payNotify(request):
     return_xml = ''
     if return_code == 'SUCCESS':
         try:
-            openid = xml_recv.find("openid").text
             out_trade_no = xml_recv.find("out_trade_no").text
-            #TODO 这里可以做成功之后的操作
+            ShopOrder.objects.filter(sn=out_trade_no).update(status='1')
 
             return_xml = '''
                 <xml>
@@ -104,6 +67,7 @@ def payNotify(request):
                     <return_msg><![CDATA[OK]]></return_msg>
                 </xml>'''
         except Exception as e:
+            print(e)
             return_xml = '''
                 <xml>
                     <return_code><![CDATA[FAIL]]></return_code>

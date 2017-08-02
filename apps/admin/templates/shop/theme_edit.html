@@ -1,0 +1,115 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:theme' %}">主题</a>
+    <a href="#" class="current">编辑</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2><i class="icon-edit"></i>编辑主题</h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:shop:theme_edit' t_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="control-group">
+                        <label class="control-label">标题名称:</label>
+                        <div class="controls">
+                            <input type="text" name="name" value="{{ theme.name }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">标题名称:</label>
+                        <div class="controls">
+                            <textarea name="desc" id="" cols="60" rows="3">{{ theme.desc }}</textarea>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">主题图片:</label>
+                        <div class="controls">
+                            <input type="file" name="img" value="{{ theme.img }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <img src="/media/{{ theme.img }}" alt="" height="150" width="150">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">主题Banner:</label>
+                        <div class="controls">
+                            <input type="file" name="banner" value="{{ theme.banner }}">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <img src="/media/{{ theme.banner }}" alt="" height="150" width="150">
+                        </div>
+                    </div>
+
+                    <div data-date-format="yyyy-mm-dd" class="input-group date form_date" style="margin-bottom: 20px">
+                        <label class="control-label">开始日期:</label>
+                        <div class="controls">
+                            <input type="text" name="begin_time" class="form-control" required readonly value="{{ theme.begin_time | date:'Y-m-d' }}">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                        </div>
+                    </div>
+                    <div data-date-format="yyyy-mm-dd" class="input-group date form_date" style="margin-bottom: 20px">
+                        <label class="control-label">结束日期:</label>
+                        <div class="controls">
+                            <input type="text" name="end_time" class="form-control" required readonly value="{{ theme.end_time | date:'Y-m-d'  }}">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">排序:</label>
+                        <div class="controls">
+                            <input type="text" name="sort" value="{{ theme.sort }}">
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm()">保存修改</button>
+                    </div>
+                </form>
+            </div>
+
+        </div><!--/span-->
+
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            weekStart: 1,
+            todayBtn: 1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            minView: 2,
+            forceParse: 0
+        });
+    </script>
+    <script>
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 0) {
+            alert("数据提交成");
+            window.location.href = "{% url 'admin:shop:theme' %}"
+        } else if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href = "{% url 'admin:shop:theme_edit' t_id %}"
+        }
+
+
+    </script>
+{% endblock %}

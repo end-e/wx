@@ -1,12 +1,12 @@
 from PIL import Image, ImageDraw, ImageFont
 import random,hashlib,time,json,requests
+import datetime
 
 from django.db import connection
 from django.conf import settings
-from django.db import transaction
 
 from admin.utils import constants
-from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard
+from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard,ShopOrder
 from api.models import LogWx
 from utils import db,consts
 
@@ -511,3 +511,6 @@ def checkCardCodeOnWx(access_token,data):
         res["status"] = 1
 
     return res
+
+
+

@@ -1,0 +1,134 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:banner' %}">Banner</a>
+    <a href="{% url 'admin:shop:banner_info' b_id %}" class="current">Banner子节点</a>
+    <a href="#" class="current">编辑</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>编辑Banner子节点
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:shop:banner_info_edit' b_id i_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">名称</label>
+                        <div class="controls">
+                            <input type="text" name="name" value="{{ banner_info.name }}" required>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">描述</label>
+                        <div class="controls">
+                            <select name="banner" id="">
+                                <option value="">请选择</option>
+                                {% for banner in banner_list %}
+                                    <option value="{{ banner.id }}" {% if banner.id == banner_info.banner %}selected{% endif %}>
+                                        {{ banner.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.img %}error{% endif %}">
+                        <label class="control-label">展示图片</label>
+                        <div class="controls">
+                            <input type="file" name="img" value="{{ banner_info.img }}" >
+                            {% if form.errors.img %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    {% if banner_info.img  %}
+                    <div class="control-group">
+                        <div class="controls">
+                            <img src="/media/{{ banner_info.img }}" width="150" height="150" >
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">类型</label>
+                        <div class="controls">
+                            <select name="type" id="type">
+                                <option value="0" {% if banner_info.type == '0' %}selected{% endif %}>无链接</option>
+                                <option value="1" {% if banner_info.type == '1' %}selected{% endif %}>链接商品</option>
+                                <option value="2" {% if banner_info.type == '2' %}selected{% endif %}>链接专题</option>
+                            </select>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">链接目标</label>
+                        <div class="controls">
+                            <input type="text" name="target_id" value="{{ banner_info.target_id }}">
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div data-date-format="yyyy-mm-dd" class="input-group date form_date" style="margin-bottom: 20px">
+                        <label class="control-label">开始日期:</label>
+                        <div class="controls">
+                            <input type="text" name="begin_time" class="form-control" required readonly value="{{ banner_info.begin_time | date:'Y-m-d' }}">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                        </div>
+                    </div>
+                    <div data-date-format="yyyy-mm-dd" class="input-group date form_date" style="margin-bottom: 20px">
+                        <label class="control-label">结束日期:</label>
+                        <div class="controls">
+                            <input type="text" name="end_time" class="form-control" required readonly value="{{ banner_info.end_time | date:'Y-m-d'  }}">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">排序</label>
+                        <div class="controls">
+                            <input type="text" name="sort" value="{{ banner_info.sort }}" required>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm()">保存</button>
+                        <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+
+    <script>
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            weekStart: 1,
+            todayBtn: 1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            minView: 2,
+            forceParse: 0
+        });
+
+        function submitForm() {
+            $('#Form').submit();
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href="{% url 'admin:shop:banner_info_edit' b_id i_id %}";
+        }else if(res_status === 0){
+            alert("数据提交成功");
+            window.location.href="{% url 'admin:shop:banner_info' b_id %}";
+        }
+
+
+    </script>
+{% endblock %}

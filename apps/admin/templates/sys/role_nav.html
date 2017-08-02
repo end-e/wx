@@ -75,7 +75,7 @@
 
         function addMenu() {
             var menu_list = $('#nav_left').val();
-            data = {
+            var data = {
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
                 'menu_list': menu_list.join(','),
                 'action': 'put'

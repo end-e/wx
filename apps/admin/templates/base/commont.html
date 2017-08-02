@@ -75,7 +75,9 @@
             var formLine = $(obj).parent().parent().clone();
             formBox.append(formLine);
             formLine.find('input').val('');
+            formLine.find('img').attr('src','');
         }
+
         function delFormRow(obj) {
             $(obj).parent().parent().remove();
         }

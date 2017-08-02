@@ -1,0 +1,137 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="{% url 'admin:shop:goods' %}">商品</a>
+    <a href="#" class="current">编辑</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>商品编辑
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:shop:good_edit' good_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="control-group {% if form.errors.name %}error{% endif %}">
+                        <label class="control-label">商品名称</label>
+                        <div class="controls">
+                            <input type="text" name="name" value="{{ good.name }}" required>
+                            {% if form.errors.name %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.sn %}error{% endif %}">
+                        <label class="control-label">商品编码</label>
+                        <div class="controls">
+                            <input type="text" name="sn" value="{{ good.sn }}" required>
+                            {% if form.errors.sn %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.price %}error{% endif %}">
+                        <label class="control-label">商品价格</label>
+                        <div class="controls">
+                            <input type="text" name="price" value="{{ good.price }}" required>
+                            {% if form.errors.price %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.img %}error{% endif %}">
+                        <label class="control-label">展示图片</label>
+                        <div class="controls">
+                            <input type="file" name="img" value="{{ good.img }}">
+                            {% if form.errors.img %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    {% if good.img  %}
+                    <div class="control-group">
+                        <div class="controls">
+                            <img src="/media/{{ good.img }}" width="150" height="150" >
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="control-group {% if form.errors.category %}error{% endif %}">
+                        <label class="control-label">所属分类</label>
+                        <div class="controls">
+                            <select name="category" required>
+                                <option>请选择</option>
+                                {% for category in category_list %}
+                                    <option value="{{ category.id }}" {% if category.id == good.category %} selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.errors.category %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.stock %}error{% endif %}">
+                        <label class="control-label">商品库存</label>
+                        <div class="controls">
+                            <input type="text" name="stock" value="{{ good.stock }}" required>
+                            {% if form.errors.stock %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.is_new %}error{% endif %}">
+                        <label class="control-label">是否新品</label>
+                        <div class="controls">
+                            <label class="radio inline">
+                                <input type="radio" name="is_new" id="" value="1" checked=""/>是
+                            </label>
+                            <label class="radio inline">
+                                <input type="radio" name="is_new" id="" value="0"/>否
+                            </label>
+                            {% if form.errors.is_new %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group {% if form.errors.is_hot %}error{% endif %}">
+                        <label class="control-label">是否热销</label>
+                        <div class="controls">
+                            <label class="radio inline">
+                                <input type="radio" name="is_hot" id="" value="1" checked=""/>是
+                            </label>
+                            <label class="radio inline">
+                                <input type="radio" name="is_hot" id="" value="0"/>否
+                            </label>
+                            {% if form.errors.is_hot %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">状态</label>
+                        <div class="controls">
+                            <select name="status" id="">
+                                <option value="0">上架</option>
+                                <option value="1">下架</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitForm('local')">保存</button>
+                        <button type="reset" class="btn" onclick="window.history.back()">取消</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        function submitForm(action) {
+            $('#action').val(action);
+            $('#Form').submit();
+
+        }
+
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 1) {
+            alert("数据提交失败");
+            window.location.href="{% url 'admin:shop:good_edit' good_id %}";
+        }else if(res_status === 0){
+            alert("数据提交成功");
+            window.location.href="{% url 'admin:shop:goods' %}";
+        }
+
+
+    </script>
+{% endblock %}

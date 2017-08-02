@@ -1,0 +1,79 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="#" class="current">商品分类</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    分类列表
+                </h2>
+            </div>
+            <div class="box-content">
+                <div class="span12">
+                    <a class="btn btn-primary" href="{% url 'admin:shop:category_edit' 0 %}">
+                        <i class="icon-plus"></i>
+                        添加分类
+                    </a>
+                </div>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>父级ID</th>
+                        <th>排序</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for category in category_list %}
+                        <tr>
+                            <td class="center">{{ category.name }}</td>
+                            <td class="center">{{ category.parent }}</td>
+                            <td class="center">{{ category.sort }}</td>
+                            <td class="center">{{ category.status }}</td>
+                            <td>
+                                <a class="btn btn-primary" title="编辑" href="{% url 'admin:shop:category_edit' category.id %}" >
+                                    <i class="icon-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination pagination-centered">
+                    <ul>
+                        {% if img_list.has_previous %}
+                            <li><a title='上一页' href="{% url 'admin:giftcard:imgs' img_list.previous_page_number %}">上一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='上一页' href="#">上一页</a></li>
+                        {% endif %}
+                        {% for page in img_list.paginator.page_range_ext %}
+                            {% if page == img_list.number %}
+                                <li class="active"><a>{{ page }}</a>
+                            </li>
+                             {% else %}
+                                <li><a href="{% url 'admin:giftcard:imgs' page %}">{{ page }}</a>
+                             {% endif %}
+                        {% endfor %}
+                        {% if img_list.has_next %}
+                            <li><a title='下一页' href="{% url 'admin:giftcard:imgs' img_list.next_page_number %}">下一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a title='下一页' href="#">下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+
+    </script>
+{% endblock %}

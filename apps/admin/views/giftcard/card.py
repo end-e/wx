@@ -5,10 +5,7 @@ from api.models import LogWx
 
 __author__ = ''
 __date__ = '2017/6/20 8:52'
-import json, math,time
-import requests
-from threading import Thread
-from queue import Queue
+import json, math,time,requests
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -459,13 +456,13 @@ class CardModifyStockView(MyView):
 
 
 class CheckCodeInfo(MyView):
-    def get(self,request):
+    def get(self,request,card_id,code):
         access_token = MyView().token
         url = 'https://api.weixin.qq.com/card/code/get?access_token={token}' \
             .format(token=access_token)
         data = {
-               "card_id" : "pBmiRsxMamH_k8xr27jseXOK99E4",
-               "code" : "9023182240",
+               "card_id" : card_id,
+               "code" : code,
                "check_consume" : True
             }
 
@@ -481,4 +478,24 @@ class CheckCodeInfo(MyView):
         rep = requests.post(url, data=data)
         rep_data = json.loads(rep.text)
         return HttpResponse(json.dumps(rep_data))
+
+
+class ChangBalanceView(MyView):
+    def get(self, request,card_id,code,balance):
+        access_token = MyView().token
+        url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
+            .format(token=access_token)
+        data = {
+            "code": code,
+            "card_id": card_id,
+            "balance": float(balance) * 100
+        }
+
+        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        rep = requests.post(url, data=data, headers={'Connection': 'close'})
+        rep_data = json.loads(rep.text)
+        if rep_data['errcode'] != 0:
+            return HttpResponse('ok')
+        else:
+            return HttpResponse(rep_data['errmsg'])
 

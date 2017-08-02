@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^nav/add/', NavAddView.as_view(), name='nav_add'),
 
     url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard')),
+    url(r'^shop/',include('admin.views.shop.urls',namespace='shop')),
 
 ]
