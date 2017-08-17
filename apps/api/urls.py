@@ -36,11 +36,14 @@ urlpatterns = [
     url(r'^shop/category/all/$',shop.getCategories),
     url(r'^shop/category/info/(?P<c_id>[0-9]+)/$',shop.getCategoryInfo),
 
+    url(r'^shop/user/info/(?P<openid>[\S]+)$',shop.userInfo),
     url(r'^shop/user/save/$',shop.userSave),
     url(r'^shop/user/addresses/(?P<openid>[\S]+)$',shop.getUserAddresses),
     url(r'^shop/user/address/edit/(?P<openid>[\S]+)$',shop.userAddressEdit),
+
     url(r'^shop/user/orders/(?P<openid>[\S]+)/(?P<page>[0-9]+)$',shop.getUserOrders),
-    url(r'^shop/user/order/save/$',shop.userOrderEdit),
+    url(r'^shop/user/order/save/$',shop.userOrderSave),
+    url(r'^shop/user/order/resave/$',shop.userOrderSave),
     url(r'^shop/order/(?P<sn>[0-9]+)/$',shop.getOrder),
 
     #微信支付

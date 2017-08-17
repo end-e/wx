@@ -201,8 +201,8 @@ class CardInfoWxView(MyView):
             item['quantity'] =card['general_card']['base_info']['sku']['quantity']
             item['price'] =card['general_card']['base_info']['giftcard_info']['price']
             item['init_balance'] =card['general_card']['init_balance']
-            queue.put(item)
-            # return item
+            # queue.put(item)
+            return item
         else:
             LogWx.objects.create(type='99', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'])
 
@@ -252,7 +252,9 @@ class CardStockView(View):
         return render(request,'giftcard/card_stock.html',locals())
 
 
+
 class CardDelView(MyView):
+    @transaction.atomic
     def post(self, request):
         res = {}
         action = request.POST.get('action')
@@ -344,10 +346,12 @@ class CardUpCodeAutoView(MyView):
             print(e)
 
 
+
 class CardUpCodeManualView(MyView):
     def get(self, request, wx_card_id):
         return render(request,'giftcard/card_code_up.html',locals())
 
+    @transaction.atomic
     def post(self,request, wx_card_id):
         action = request.POST.get('action','')
         qs_card = GiftCard.objects.values('id','init_balance','quantity').filter(wx_card_id=wx_card_id).first()

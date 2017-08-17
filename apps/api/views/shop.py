@@ -6,10 +6,12 @@ import json
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from django.db.models import F
 
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
     ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrder,ShopOrderInfo
 from utils import method
+from utils.myClass import MyException
 
 
 def getBanner(request,b_id):
@@ -111,6 +113,18 @@ def getOrderByUser(request):
     return HttpResponse(json.dumps(res))
 
 
+def userInfo(request,openid):
+    user = ShopUser.objects.filter(openid=openid)
+    res = {}
+    if user.count()>0:
+        res['status'] = 0
+        res['data'] = user.values('nickname','kg_money','openid').first()
+    else:
+        res['status'] = 1
+
+    return HttpResponse(json.dumps(res))
+
+
 @csrf_exempt
 def userSave(request):
     nickname = request.POST.get('nickname','')
@@ -173,6 +187,7 @@ def getUserOrders(request,openid,page):
     try:
         orders = ShopOrder.objects.values('sn','price','status').filter(customer=openid)
         for order in orders:
+            order['price'] = float(order['price'])
             count = ShopOrderInfo.objects.filter(order_sn=order['sn']).count()
             order['count'] = count
         res['data'] = list(orders)
@@ -184,28 +199,76 @@ def getUserOrders(request,openid,page):
 
 
 @csrf_exempt
-def userOrderEdit(request):
+@transaction.atomic
+def userOrderSave(request):
     openid = request.POST.get('openid','')
     goods = request.POST.get('goods','')
     goods = json.loads(goods)
     price = request.POST.get('totalPrice','')
+
+    res = {}
+    user= ShopUser.objects.values('kg_money').get(openid=openid)
+    kg_money = user['kg_money']
+    if kg_money<int(price):
+        res['status'] = 2
+        return HttpResponse(json.dumps(res))
+    try:
+        with transaction.atomic():
+            #1、订单信息 更新商品库存
+            sn = method.createOrderSn()
+
+            info_list = []
+            for good in goods:
+                qs_good_list = ShopGood.objects.select_for_update().filter(sn=good['sn'])
+                qs_good = qs_good_list.values('stock','name').first()
+                stock = qs_good['stock']
+                name = qs_good['name']
+                if stock>int(good['counts']):
+                    info = ShopOrderInfo()
+                    info.order_sn = sn
+                    info.good_sn = good['sn']
+                    info.good_num = good['counts']
+                    info_list.append(info)
+
+                    qs_good_list.update(good_num=F('stock') - int(good['counts']))
+                else:
+                    raise MyException('2:'+name)
+
+
+            ShopOrderInfo.objects.bulk_create(info_list)
+            ShopOrder.objects.create(
+                customer=openid, sn=sn, price=price, status='2'
+            )
+            #2、更新用户余额
+            ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') - int(price))
+            res['status'] = 0
+            res['order_sn'] = sn
+    except Exception as e:
+        print(e)
+        res['status'] = 1
+        if hasattr(e,'value'):
+            err = e.value.split(':')
+            res['status'] = err[0]
+            res['msg'] = err[1]
+
+
+    return HttpResponse(json.dumps(res))
+
+
+@csrf_exempt
+@transaction.atomic
+def userOrderReSave(request):
+    openid = request.POST.get('openid','')
+    sn = request.POST.get('sn','')
+    price = request.POST.get('totalPrice', '')
     res ={}
     try:
         with transaction.atomic():
-            sn = method.createOrderSn()
-            ShopOrder.objects.create(
-                customer = openid,sn=sn,price=price
-            )
-            info_list = []
-            for good in goods:
-                info = ShopOrderInfo()
-                info.order_sn = sn
-                info.good_sn = good['sn']
-                info.good_num = good['counts']
-                info_list.append(info)
-            ShopOrderInfo.objects.bulk_create(info_list)
+            ShopOrder.objects.filter(sn=sn).update()
             res['status'] = 0
             res['order_sn'] = sn
+
+            ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')-int(price))
     except Exception as e:
         print(e)
         res['status'] = 1
@@ -217,6 +280,8 @@ def getUserOrder(request,openid,sn):
     res = {}
     try:
         orders = ShopOrder.objects.values('sn','price','save_time').filter(customer=openid)
+        for order in orders :
+            order['price'] = float(order['price'])
         res['data'] = list(orders)
     except Exception as e:
         print(e)

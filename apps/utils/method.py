@@ -1,4 +1,4 @@
-import random,hashlib,datetime,json,requests,time
+import random,hashlib,datetime,json,requests,time,threading
 
 from django.core.cache import caches
 from django.db import transaction
@@ -7,7 +7,7 @@ from wechatpy import WeChatClient
 from user.models import WechatMembers
 from api.models import LogWx
 from utils import db,consts
-from admin.models import GiftOrder,GiftOrderInfo,GiftCardCode,ShopOrder
+from admin.models import GiftOrder,GiftOrderInfo,GiftCardCode,ShopOrder,GiftBalanceChangeLog
 
 def createNonceStr(length = 16):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -37,10 +37,26 @@ def getShopName(id):
         cur = conn.cursor()
         cur.execute(sql)
         shops = cur.fetchall()
+
+        conn2 = db.getMysqlConnection(
+            consts.DB_SERVER_18,
+            consts.DB_PORT_18,
+            consts.DB_USER_18,
+            consts.DB_PASSWORD_18,
+            'kgscm_ts'
+        )
+        sql2 = "SELECT Shopcode,Shopnm FROM bas_shop WHERE enable = 1"
+        cur2 = conn2.cursor()
+        cur2.execute(sql2)
+        shops2 = cur.fetchall()
+
+        shops = shops + shops2
+
         shopDict = {shop['Shopcode']: shop['Shopnm'].strip() for shop in shops}
         caches['default'].set('base_shopDict', shopDict, 60 * 60 * 12)
 
-    return shopDict[id]
+    return shopDict.get(id,id)
+
 
 
 def get_ip(request):
@@ -102,11 +118,6 @@ def get_user_order():
     cur = conn.cursor()
     cur.execute(sql)
     orders = cur.fetchall()
-    if len(orders) > 0:
-        last_one = orders[-1]['PurchSerial']
-        caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
-    cur.close()
-    conn.close()
 
     return orders
 
@@ -145,21 +156,21 @@ def create_temp_data(order):
     return data
 
 
-def send_temp(openid, data):
-    app_id = consts.APPID
-    secret = consts.APPSECRET
-
+def send_temp(msg):
+    # L = threading.Lock()
+    # L.acquire()
     # 用户openid
-    user_id = openid
-    access_token = caches['default'].get('wx_ikg_access_token', '')
-    if not access_token:
-        access_token = get_access_token('ikg', app_id, secret)
+    user_id = msg['openid']
+    app_id = msg['app_id']
+    secret = msg['secret']
+    access_token = msg['access_token']
+    data = msg['data']
 
     client = WeChatClient(app_id, secret, access_token)
     message = client.message
     # 模版id
     template_id = 'eddBYOpWHXKIiZ0IW74uUrDGUyBwjgjwSq1C5s-j_uo'
-    data = data
+
     mini_program = {
         'appid': consts.WX_APP_ID,
         'pagepath': 'pages/index/index'
@@ -167,13 +178,13 @@ def send_temp(openid, data):
     res_send = message.send_template(user_id, template_id, data, None, mini_program)
 
     if res_send['errmsg'] != 'ok':
-        # TODO:记录发送失败日志
         LogWx.objects.create(
             type='1',
-            remark='openid:' + openid,
+            remark='openid:' + user_id,
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']
         )
+    # L.release()
 
 
 def gift_compare_order(offset=0):
@@ -231,6 +242,7 @@ def gift_get_Wx_order(offset=0):
     return res
 
 
+@transaction.atomic
 def gift_save_local_order(wx_orders):
     for order in wx_orders:
         order_qs = GiftOrder.objects.filter(order_id=order['order_id'])
@@ -240,7 +252,7 @@ def gift_save_local_order(wx_orders):
                     order_save = GiftOrder.objects.create(
                         order_id=order['order_id'], trans_id=order['trans_id'],
                         create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
-                        total_price=order['total_price'], open_id=order['pay_finish_time']
+                        total_price=order['total_price'], open_id=order['open_id']
                     )
                     orderID = order_save.id
                     info_list = []
@@ -275,3 +287,28 @@ def createOrderSn():
     sn = today.strftime('%Y%m%d') + sn
 
     return sn
+
+
+def getGiftBalance():
+    conn_226 = db.getMsSqlConn()
+    start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
+    start = start.strftime('%Y-%m-%d %H:%M:%S')
+    balanceChangeLog = GiftBalanceChangeLog.objects.values('last_serial').first()
+    prev_last_serial = ''
+    if balanceChangeLog:
+        prev_last_serial = balanceChangeLog['last_serial']
+        whereStr = "a.PurchSerial> '{last_serial}'".format(last_serial=prev_last_serial)
+    else:
+        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
+
+    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
+                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
+    cur_226 = conn_226.cursor()
+    cur_226.execute(sql_order)
+    orders = cur_226.fetchall()
+
+    return prev_last_serial,orders
+
+
+def http_post(data):
+    session = requests.session

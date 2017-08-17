@@ -230,7 +230,7 @@ class ShopExpress(models.Model):
 
 class ShopOrder(models.Model):
     sn = models.CharField(max_length=16,verbose_name=u'编号',unique=True)
-    price = models.DateTimeField(max_length=16,verbose_name=u'价格')
+    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'价格')
     express = models.IntegerField(verbose_name=u'快递',blank=True,null=True)
     save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
     sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
@@ -280,6 +280,7 @@ class ShopUser(models.Model):
     openid = models.CharField(max_length=50,verbose_name=u'',unique=True)
     nickname = models.CharField(max_length=10,verbose_name=u'昵称')
     extend = models.CharField(max_length=128,verbose_name=u'',default='')
+    kg_money = models.IntegerField(default=0,verbose_name=u'宽广豆')
     create_time = models.DateTimeField(default=datetime.now,verbose_name=u'创建日期')
 
     class Meta:

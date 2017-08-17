@@ -10,6 +10,8 @@ from api.models import LogWx
 from django.core.cache import caches
 from utils import method,consts
 
+
+@transaction.atomic
 def giftcard_pay_done(order_id):
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:
@@ -32,7 +34,7 @@ def giftcard_pay_done(order_id):
                 order = GiftOrder.objects.create(
                     order_id=order['order_id'], trans_id=order['trans_id'],
                     create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
-                    total_price=order['total_price'], open_id=order['pay_finish_time']
+                    total_price=order['total_price'], open_id=order['open_id']
                 )
                 orderID = order.id
                 info_list = []

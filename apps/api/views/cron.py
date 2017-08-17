@@ -3,6 +3,7 @@
 # __date__ = '2017/4/19 14:04'
 import datetime, time,requests,json
 from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 from django.core.cache import caches
 from django.http import HttpResponse
@@ -12,14 +13,15 @@ from api.models import LogWx
 from utils import db, consts, method
 
 
-def cron_get_ikg_token(req):
+def cron_get_ikg_token():
     '''
     获取并缓存 爱宽广access_token
     :return: access_token
     '''
     app_id = consts.APPID
     secret = consts.APPSECRET
-    method.get_access_token('ikg', app_id, secret, )
+    token = method.get_access_token('ikg', app_id, secret, )
+    return HttpResponse(token)
 
 
 def cron_get_kgcs_token():
@@ -29,41 +31,56 @@ def cron_get_kgcs_token():
     """
     app_id = consts.KG_APPID
     secret = consts.KG_APPSECRET
-    method.get_access_token('kgcs', app_id, secret)
+    token = method.get_access_token('kgcs', app_id, secret)
+    return HttpResponse(token)
 
 
 def cron_send_temp():
+    app_id = consts.APPID
+    secret = consts.APPSECRET
+    access_token = caches['default'].get('wx_ikg_access_token', '')
+    if not access_token:
+        access_token = method.get_access_token('ikg', app_id, secret)
+
     orders = method.get_user_order()
     if len(orders)>0:
         wechat_users = method.get_wechat_users(orders)
-        for wechat_user in wechat_users:
-            userId = wechat_user['membernumber']
-            for order in orders:
-                if order['CardNo'].strip() == userId:
-                    openid = wechat_user['openid']
-                    data = method.create_temp_data(order)
-                    t = Thread(target=method.send_temp,args=(openid, data))
-                    t.start()
+        try:
+            threads = []
+            msg_list = []
+
+            for wechat_user in wechat_users:
+                userId = wechat_user['membernumber']
+                for order in orders:
+                    if order['CardNo'].strip() == userId:
+                        openid = wechat_user['openid']
+                        data = method.create_temp_data(order)
+                        msg ={
+                            'openid':openid,
+                            'data':data,
+                            'app_id':app_id,
+                            'secret':secret,
+                            'access_token':access_token
+                        }
+                        # msg_list.append(msg)
+                        thread = Thread(target=method.send_temp,args=(msg,))
+                        threads.append(thread)
+                        thread.start()
+            for t in threads:
+                t.join()
+            # if len(msg_list)>0:
+            #     pool = ThreadPoolExecutor(len(msg_list)+1)
+            #     for msg in msg_list:
+            #         pool.submit(method.send_temp,msg)
+        finally:
+            last_one = orders[-1]['PurchSerial']
+            caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
 
 
 def cron_gift_change_balance():
     # 1、查询消费记录
-    conn_226 = db.getMsSqlConn()
-    start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
-    start = start.strftime('%Y-%m-%d %H:%M:%S')
-    balanceChangeLog = GiftBalanceChangeLog.objects.values('last_serial').first()
-    prev_last_serial = ''
-    if balanceChangeLog:
-        prev_last_serial = balanceChangeLog['last_serial']
-        whereStr = "a.PurchSerial> '{last_serial}'".format(last_serial=prev_last_serial)
-    else:
-        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
-                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
-    cur_226 = conn_226.cursor()
-    cur_226.execute(sql_order)
-    orders = cur_226.fetchall()
+    prev_last_serial, orders = method.getGiftBalance()
     if len(orders) > 0:
         try:
             # 2、拼接wx_card_id
@@ -77,10 +94,11 @@ def cron_gift_change_balance():
 
             threads = []
             for o in orders:
-                thread = Thread(target=gift_change_balance,args=(o['CardNo'].strip(),o['wx_card_id'],o['detail'],access_token))
+                thread = Thread(target=gift_change_balance,args=(o['wx_card_id'],o['CardNo'].strip(),o['detail'],access_token,))
                 threads.append(thread)
                 thread.start()
-                # gift_change_balance(o, access_token)
+            for t in threads:
+                t.join()
 
             this_last_serial = orders[-1]['PurchSerial']
 
@@ -122,7 +140,9 @@ def cron_gift_change_balance2():
                 info = remark.split(',')
                 info = {obj.split(':')[0]: obj.split(':')[1] for obj in info }
 
-                thread = Thread(target=gift_change_balance, args=(info['card_id'].strip(), info['code'], info['balance'], access_token))
+                thread = Thread(target=gift_change_balance,
+                                args=(info['card_id'].strip(), info['code'], info['balance'], access_token,)
+                                )
                 threads.append(thread)
                 thread.start()
             last_id = log_list[-1]['id']
@@ -150,14 +170,20 @@ def gift_change_balance(card_id,code,balance,access_token):
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
     rep = requests.post(url, data=data, headers={'Connection': 'close'})
     rep_data = json.loads(rep.text)
+    res = {'status':0}
+    LogWx.objects.create(
+        type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
+        remark='code:{code},balance:{balance},card_id:{card_id}'
+            .format(code=code, balance=str(float(balance)), card_id=card_id)
+    )
     if rep_data['errcode'] != 0:
         # TODO 记录错误日志
         LogWx.objects.create(
             type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
             remark='code:{code},balance:{balance},card_id:{card_id}'
-                .format(code=o['CardNo'].strip(), balance=str(float(o['detail'])),
-                        card_id=card_id)
+            .format(code=code, balance=str(float(balance)),card_id=card_id)
         )
+        res['status'] = 1
 
 
 def cron_gift_compare_order():

@@ -168,7 +168,6 @@ CRONJOBS = [
     ('* 6-23 * * *', 'api.views.cron.cron_send_temp'),
     ('* 6-23 * * *', 'api.views.cron.cron_gift_change_balance'),
     ('30 23 * * *', 'api.views.cron.cron_gift_compare_order'),
-    ('0 23 * * *', 'api.views.cron.cron_gift_change_balance2'),
 ]
 
 
