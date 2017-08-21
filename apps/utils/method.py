@@ -242,7 +242,6 @@ def gift_get_Wx_order(offset=0):
     return res
 
 
-@transaction.atomic
 def gift_save_local_order(wx_orders):
     for order in wx_orders:
         order_qs = GiftOrder.objects.filter(order_id=order['order_id'])
@@ -277,12 +276,12 @@ def gift_save_local_order(wx_orders):
                 )
 
 
-def createOrderSn():
+def createOrderSn(objModel):
     today = datetime.datetime.today()
     begin = today.strftime('%Y-%m-%d') + ' 00:00:00'
     end = today.strftime('%Y-%m-%d') + ' 23:59:59'
 
-    count = ShopOrder.objects.filter(save_time__lte=end, save_time__gte=begin).count()
+    count = objModel.objects.filter(save_time__lte=end, save_time__gte=begin).count()
     sn = str(count + 1).zfill(4)
     sn = today.strftime('%Y%m%d') + sn
 
@@ -301,8 +300,13 @@ def getGiftBalance():
     else:
         whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
-                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
+    # sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
+    #             "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
+
+    sql_order = " SELECT a.detail, a.CardNo,a.PurchSerial" \
+                " FROM GuestPurch0 as a LEFT JOIN guest AS b ON a.CardNo=b.CardNo" \
+                " WHERE " + whereStr + " AND b.cardtype = 12" \
+                " ORDER BY a.PurchSerial"
     cur_226 = conn_226.cursor()
     cur_226.execute(sql_order)
     orders = cur_226.fetchall()
@@ -310,5 +314,31 @@ def getGiftBalance():
     return prev_last_serial,orders
 
 
-def http_post(data):
-    session = requests.session
+def getGuestPoint(member_id):
+    conn = db.getMsSqlConn()
+    sql = "SELECT Point FROM guest as a,cardType as b WHERE cardNO='{cardNO}' AND b.flag='0'".format(cardNO=member_id)
+    cur = conn.cursor()
+    cur.execute(sql)
+    guest = cur.fetchone()
+    point = 0
+    if guest:
+        point = float(guest['Point'])
+    return point
+
+
+def updateGuestPoint(member_id,total_pay):
+    conn = db.getMsSqlConn()
+    cur = conn.cursor()
+    res = True
+    try:
+        conn.atuocommit(False)
+        sql =  "UPDATE guest SET Point = Point-{total_pay} WHERE cardNO='{cardNO}' AND cardType='0'"\
+            .format(cardNO=member_id,total_pay=total_pay)
+        cur.execute(sql)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        conn.rollback()
+        res = False
+
+    return res

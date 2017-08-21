@@ -11,7 +11,6 @@ from django.core.cache import caches
 from utils import method,consts
 
 
-@transaction.atomic
 def giftcard_pay_done(order_id):
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:

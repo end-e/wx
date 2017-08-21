@@ -252,6 +252,18 @@ class ShopOrderInfo(models.Model):
         db_table = 'shop_order_info'
 
 
+class ShopKgMoneyOrder(models.Model):
+    sn = models.CharField(max_length=16,verbose_name=u'编号',unique=True)
+    kg_money = models.IntegerField(verbose_name=u'宽广豆数量')
+    pay_type = models.CharField(max_length=1,verbose_name=u'支付类型')
+    total_pay = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'支付合计')
+    customer = models.CharField(max_length=50, verbose_name=u'用户openID', default='0')
+    status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
+    save_time = models.DateTimeField(default=datetime.now, verbose_name=u'下单时间')
+    class Meta:
+        db_table = 'shop_kgmoney_order'
+
+
 class ShopTheme(models.Model):
     name = models.CharField(max_length=12, verbose_name=u'名称')
     desc = models.CharField(max_length=32,verbose_name=u'描述',blank=True,null=True)
@@ -281,6 +293,7 @@ class ShopUser(models.Model):
     nickname = models.CharField(max_length=10,verbose_name=u'昵称')
     extend = models.CharField(max_length=128,verbose_name=u'',default='')
     kg_money = models.IntegerField(default=0,verbose_name=u'宽广豆')
+    cardNo = models.CharField(default='',max_length=10,verbose_name=u'会员卡号')
     create_time = models.DateTimeField(default=datetime.now,verbose_name=u'创建日期')
 
     class Meta:

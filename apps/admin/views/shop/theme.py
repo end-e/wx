@@ -53,7 +53,6 @@ class ThemeInfoEditView(View):
         info_list = ShopThemeInfo.objects.values('good_sn').filter(theme_id=t_id)
         return render(request,'shop/theme_info_edit.html',locals())
 
-    @transaction.atomic
     def post(self,request,t_id):
         sources = request.POST.get('sn_list','')
         sn_list = sources.split(',')

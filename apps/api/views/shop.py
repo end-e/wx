@@ -9,9 +9,10 @@ from django.db import transaction
 from django.db.models import F
 
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
-    ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrder,ShopOrderInfo
+    ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrderInfo,ShopKgMoneyOrder
 from utils import method
 from utils.myClass import MyException
+from user.models import WechatMembers
 
 
 def getBanner(request,b_id):
@@ -198,9 +199,37 @@ def getUserOrders(request,openid,page):
     return HttpResponse(json.dumps(res))
 
 
+def getUserKgMoney(request):
+    openid = request.GET.get('openid','')
+    res = {}
+    try:
+        user = ShopUser.objects.values('kg_money').get(openid=openid)
+        kg_money = user['kg_money']
+        res['status'] = 0
+        res['kg_money'] = kg_money
+    except Exception as e:
+        print(e)
+        res['status'] = 1
+    return HttpResponse(json.dumps(res))
+
+
+def getUserPoint(request):
+    openid = request.GET.get('openid','')
+    res = {}
+    try:
+        member = WechatMembers.objects.values('membernumber').get(openid=openid)
+        member_id = member['membernumber']
+        res['member_id'] = member_id
+        point = method.getGuestPoint(member_id)
+        res['status'] = 0
+        res['point'] = point
+    except Exception as e:
+        print(e)
+        res['status'] = 1
+    return HttpResponse(json.dumps(res))
+
 @csrf_exempt
-@transaction.atomic
-def userOrderSave(request):
+def orderGoodsSave(request):
     openid = request.POST.get('openid','')
     goods = request.POST.get('goods','')
     goods = json.loads(goods)
@@ -214,9 +243,9 @@ def userOrderSave(request):
         return HttpResponse(json.dumps(res))
     try:
         with transaction.atomic():
-            #1、订单信息 更新商品库存
-            sn = method.createOrderSn()
-
+            # 0、获取订单编号
+            sn = method.createOrderSn(ShopOrder)
+            # 1、订单信息 更新商品库存
             info_list = []
             for good in goods:
                 qs_good_list = ShopGood.objects.select_for_update().filter(sn=good['sn'])
@@ -256,7 +285,58 @@ def userOrderSave(request):
 
 
 @csrf_exempt
-@transaction.atomic
+def orderKgMoneySave(request):
+    openid = request.POST.get('openid', '')
+    kg_money = request.POST.get('kgMoney', 0)
+    pay_type = request.POST.get('payType', '0')
+    total_pay = request.POST.get('totalPay', 0)
+
+    res = {}
+    try:
+        with transaction.atomic():
+            if pay_type not in ('0','1'):
+                raise MyException('支付类型错误')
+            # 0、获取订单编号并新建订单
+            sn = method.createOrderSn(ShopKgMoneyOrder)
+            ShopKgMoneyOrder.objects.create(
+                sn = sn, kg_money = kg_money, pay_type = pay_type, total_pay = total_pay, customer = openid
+            )
+
+            #guest中查询会员积分数量
+            member = WechatMembers.objects.filter(openid=openid).first()
+            if member:
+                if pay_type == '0':
+                    member_id = member['membernumber']
+                    res['member_id'] = member_id
+                    point = method.getGuestPoint(member_id)
+                    res['point'] = point
+                    if point< total_pay:
+                        res['status'] = 1
+                        res['msg'] = '积分余额不足'
+                        return HttpResponse(json.dumps(res))
+                    else:
+                        # 消减会员积分
+                        res = method.updateGuestPoint(member_id,total_pay)
+                        if not res :
+                            raise MyException('会员积分消减失败')
+                        #增加会员宽广豆数量
+                        ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')+int(kg_money))
+            else:
+                raise MyException('微查询到此openid对应的会员')
+            res['status'] = 0
+            res['order_sn'] = sn
+    except Exception as e:
+        print(e)
+        res["status"] = 1
+        if hasattr(e, 'value'):
+            res['msg'] = e.value
+        else:
+            res['msg'] = e
+    finally:
+        return HttpResponse(json.dumps(res))
+
+
+@csrf_exempt
 def userOrderReSave(request):
     openid = request.POST.get('openid','')
     sn = request.POST.get('sn','')
