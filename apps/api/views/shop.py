@@ -1,12 +1,13 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/7/28 16:56'
-import json
+import json,datetime
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
+from django.core.paginator import Paginator
 
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
     ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrderInfo,ShopKgMoneyOrder
@@ -186,11 +187,22 @@ def userAddressEdit(request,openid):
 def getUserOrders(request,openid,page):
     res = {}
     try:
-        orders = ShopOrder.objects.values('sn','price','status').filter(customer=openid)
+        good_orders = ShopOrder.objects.extra(
+            select={
+                'count':'SELECT COUNT(*) FROM shop_order_info WHERE shop_order_info.order_sn=shop_order.sn',
+                'type':'0'
+            }
+        ).values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
+
+        money_orders = ShopKgMoneyOrder.objects.extra(select={'type':'1'}) \
+            .values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
+        orders = list(good_orders) + list(money_orders)
+        orders = sorted(orders, key=lambda order: order['save_time'], reverse=True)
+        paginator = Paginator(orders, 6)
+        orders = paginator.page(page)
         for order in orders:
             order['price'] = float(order['price'])
-            count = ShopOrderInfo.objects.filter(order_sn=order['sn']).count()
-            order['count'] = count
+            order['save_time'] = datetime.datetime.strftime(order['save_time'],'%Y-%m-%d %H:%M:%S')
         res['data'] = list(orders)
     except Exception as e:
         print(e)
@@ -234,6 +246,9 @@ def orderGoodsSave(request):
     goods = request.POST.get('goods','')
     goods = json.loads(goods)
     price = request.POST.get('totalPrice','')
+    address = request.POST.get('address','')
+    user_name = request.POST.get('user','')
+    tel = request.POST.get('tel','')
 
     res = {}
     user= ShopUser.objects.values('kg_money').get(openid=openid)
@@ -245,29 +260,41 @@ def orderGoodsSave(request):
         with transaction.atomic():
             # 0、获取订单编号
             sn = method.createOrderSn(ShopOrder)
-            # 1、订单信息 更新商品库存
+            # 1、保存订单信息 更新商品库存
             info_list = []
+            snap_name = []
+            snap_img = []
             for good in goods:
                 qs_good_list = ShopGood.objects.select_for_update().filter(sn=good['sn'])
-                qs_good = qs_good_list.values('stock','name').first()
+                qs_good = qs_good_list.values('stock','name','img').first()
                 stock = qs_good['stock']
-                name = qs_good['name']
+                good_name = qs_good['name']
+                #判断库存
                 if stock>int(good['counts']):
+                    #拼装订单快照信息
+                    snap_name.append(good_name)
+                    snap_img.append(qs_good['img'])
+                    #组合订单商品信息
                     info = ShopOrderInfo()
                     info.order_sn = sn
                     info.good_sn = good['sn']
                     info.good_num = good['counts']
                     info_list.append(info)
-
-                    qs_good_list.update(good_num=F('stock') - int(good['counts']))
+                    #消减库存
+                    qs_good_list.update(stock=F('stock') - int(good['counts']))
                 else:
-                    raise MyException('2:'+name)
+                    raise MyException('2:'+good_name)
 
+            snap_name = '|'.join(snap_name)[0:63]
+            snap_img = snap_img[0]
 
-            ShopOrderInfo.objects.bulk_create(info_list)
+            #创建主表信息
             ShopOrder.objects.create(
-                customer=openid, sn=sn, price=price, status='2'
+                customer=openid, sn=sn, price=price, status='9',snap_img=snap_img,snap_name=snap_name,
+                name=user_name, tel=tel, snap_address=address
             )
+            # 创建商品信息
+            ShopOrderInfo.objects.bulk_create(info_list)
             #2、更新用户余额
             ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') - int(price))
             res['status'] = 0
@@ -299,25 +326,23 @@ def orderKgMoneySave(request):
             # 0、获取订单编号并新建订单
             sn = method.createOrderSn(ShopKgMoneyOrder)
             ShopKgMoneyOrder.objects.create(
-                sn = sn, kg_money = kg_money, pay_type = pay_type, total_pay = total_pay, customer = openid
+                sn = sn, count = kg_money, pay_type = pay_type, price = total_pay, customer = openid
             )
 
             #guest中查询会员积分数量
-            member = WechatMembers.objects.filter(openid=openid).first()
+            member = WechatMembers.objects.values('membernumber').filter(openid=openid).first()
             if member:
                 if pay_type == '0':
                     member_id = member['membernumber']
-                    res['member_id'] = member_id
                     point = method.getGuestPoint(member_id)
-                    res['point'] = point
-                    if point< total_pay:
+                    if float(point)< float(total_pay):
                         res['status'] = 1
                         res['msg'] = '积分余额不足'
                         return HttpResponse(json.dumps(res))
                     else:
                         # 消减会员积分
-                        res = method.updateGuestPoint(member_id,total_pay)
-                        if not res :
+                        res_update = method.updateGuestPoint(member_id,total_pay)
+                        if not res_update :
                             raise MyException('会员积分消减失败')
                         #增加会员宽广豆数量
                         ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')+int(kg_money))
@@ -332,8 +357,8 @@ def orderKgMoneySave(request):
             res['msg'] = e.value
         else:
             res['msg'] = e
-    finally:
-        return HttpResponse(json.dumps(res))
+
+    return HttpResponse(json.dumps(res))
 
 
 @csrf_exempt
@@ -356,33 +381,39 @@ def userOrderReSave(request):
     return HttpResponse(json.dumps(res))
 
 
-def getUserOrder(request,openid,sn):
+def getOrderBySn(request):
+    """
+    获取用户订单
+    :param sn:订单编号
+    :param order_type:订单类型（0：商品订单；1：宽广豆订单 ）
+    :return:
+    """
+    sn = request.GET.get('sn','')
+    order_type = request.GET.get('type','')
     res = {}
     try:
-        orders = ShopOrder.objects.values('sn','price','save_time').filter(customer=openid)
-        for order in orders :
-            order['price'] = float(order['price'])
-        res['data'] = list(orders)
-    except Exception as e:
-        print(e)
-        res['status'] = 1
-
-    return HttpResponse(json.dumps(res))
-
-
-def getOrder(request,sn):
-    res = {}
-    try:
-        order = ShopOrder.objects.values('sn','price').get(sn=sn)
-        info_list = ShopOrderInfo.objects.values('good_sn','good_num')
-        goods = []
-        for info in info_list:
-            good =ShopGood.objects.values('img','price','name').get(sn=info['good_sn'])
-            good['price'] = float(good['price'])
-            good['count'] = info['good_num']
+        if order_type == '0':
+            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address')\
+                .get(sn=sn)
+            info_list = ShopOrderInfo.objects.values('good_sn','good_num').filter(order_sn=sn)
+            goods = []
+            for info in info_list:
+                good =ShopGood.objects.values('img','price','name').get(sn=info['good_sn'])
+                good['price'] = float(good['price'])
+                good['count'] = info['good_num']
+                goods.append(good)
+        else:
+            order = ShopKgMoneyOrder.objects.values('sn','price','count','status','save_time').get(sn=sn)
+            goods = []
+            good ={'img':'','price':float(order['price']),'name':'宽广豆','count':order['count']}
             goods.append(good)
 
-        data = {'sn':order['sn'],'account':float(order['price']),'goods':goods}
+        data = {'sn':order['sn'],'account':float(order['price']),'status':order['status'],
+                'goods':goods,'save_time':datetime.datetime.strftime(order['save_time'],'%Y-%m-%d %H:%M:%S')}
+
+        if order_type == '0':
+            address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
+            data['address'] = address
         res['status'] = 0
         res['data'] = data
     except Exception as e:

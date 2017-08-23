@@ -157,8 +157,6 @@ def create_temp_data(order):
 
 
 def send_temp(msg):
-    # L = threading.Lock()
-    # L.acquire()
     # 用户openid
     user_id = msg['openid']
     app_id = msg['app_id']
@@ -184,7 +182,7 @@ def send_temp(msg):
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']
         )
-    # L.release()
+
 
 
 def gift_compare_order(offset=0):
@@ -311,6 +309,23 @@ def getGiftBalance():
     cur_226.execute(sql_order)
     orders = cur_226.fetchall()
 
+    cardNo_list = [int(order['CardNo']) for order in orders]
+
+    log_list = LogWx.objects.values('id','remark','repeat_status').filter(type='2',errcode__in=['40001','40073','-1'],repeat_status='0')
+
+    for log in log_list:
+        item = {}
+        remark_list = log['remark'].split(',')
+        for remark in remark_list:
+            r = remark.split(':')
+            item[r[0]] = r[1]
+        if int(item['CardNo']) not in cardNo_list:
+            item['id'] = log['id']
+            item['repeat_status'] = log['repeat_status']
+            orders.append(item)
+
+    orders = sorted(orders,key= lambda order:int(order['PurchSerial']))
+
     return prev_last_serial,orders
 
 
@@ -331,11 +346,14 @@ def updateGuestPoint(member_id,total_pay):
     cur = conn.cursor()
     res = True
     try:
-        conn.atuocommit(False)
-        sql =  "UPDATE guest SET Point = Point-{total_pay} WHERE cardNO='{cardNO}' AND cardType='0'"\
+        conn.autocommit(False)
+        sql =  "UPDATE guest SET Point = Point-{total_pay} WHERE cardNO='{cardNO}'"\
             .format(cardNO=member_id,total_pay=total_pay)
         cur.execute(sql)
-        conn.commit()
+        if cur.rowcount == 1:
+            conn.commit()
+        else:
+            res = False
     except Exception as e:
         print(e)
         conn.rollback()

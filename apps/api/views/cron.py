@@ -48,7 +48,6 @@ def cron_send_temp():
         try:
             threads = []
             msg_list = []
-
             for wechat_user in wechat_users:
                 userId = wechat_user['membernumber']
                 for order in orders:
@@ -79,7 +78,6 @@ def cron_send_temp():
 
 def cron_gift_change_balance():
     # 1、查询消费记录
-
     prev_last_serial, orders = method.getGiftBalance()
     if len(orders) > 0:
         try:
@@ -94,7 +92,7 @@ def cron_gift_change_balance():
 
             threads = []
             for o in orders:
-                thread = Thread(target=gift_change_balance,args=(o['wx_card_id'],o['CardNo'].strip(),o['detail'],access_token,))
+                thread = Thread(target=gift_change_balance,args=(o,access_token,))
                 threads.append(thread)
                 thread.start()
             for t in threads:
@@ -158,32 +156,35 @@ def cron_gift_change_balance2():
 
     return HttpResponse(res_msg)
 
-def gift_change_balance(card_id,code,balance,access_token):
+def gift_change_balance(order,access_token):
+    code = order['CardNo'].strip()
+    card_id = order['wx_card_id']
+    balance= order['detail'] * 100
+    serial= order['PurchSerial']
     url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
         .format(token=access_token)
     data = {
         "code": code,
         "card_id": card_id,
-        "balance": float(balance) * 100
+        "balance": balance
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
     rep = requests.post(url, data=data, headers={'Connection': 'close'})
     rep_data = json.loads(rep.text)
-    res = {'status':0}
-    LogWx.objects.create(
-        type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
-        remark='code:{code},balance:{balance},card_id:{card_id}'
-            .format(code=code, balance=str(float(balance)), card_id=card_id)
-    )
+    if 'repeat_status' in order and rep_data['errcode'] == 0 :
+        LogWx.objects.filter(id=order['id']).update(repeat_status='1')
+
+    log = LogWx()
+    log.type = 2
+    log.errmsg = rep_data['errmsg']
+    log.errcode = rep_data['errcode']
+    log.remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}'\
+        .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
     if rep_data['errcode'] != 0:
-        # TODO 记录错误日志
-        LogWx.objects.create(
-            type='2', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'],
-            remark='code:{code},balance:{balance},card_id:{card_id}'
-            .format(code=code, balance=str(float(balance)),card_id=card_id)
-        )
-        res['status'] = 1
+        log.repeat_status = '0'
+    log.save()
+
 
 
 def cron_gift_compare_order():

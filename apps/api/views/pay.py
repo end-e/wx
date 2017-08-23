@@ -9,8 +9,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from utils import consts, wxPay
-from admin.models import ShopOrder
-
+from admin.models import ShopKgMoneyOrder
+from api.models import LogWx
 
 # @signature
 def getPay(req):
@@ -34,6 +34,7 @@ def getPay(req):
 
 @csrf_exempt
 def payNotify(request):
+    LogWx.objects.create(type='0', errmsg='payNotify', errcode='0')
     recv_xml = request.body
     xml_recv = ET.fromstring(recv_xml)
     # {
@@ -55,11 +56,11 @@ def payNotify(request):
     # "time_end": "20170609093241"
     # }
     return_code = xml_recv.find("return_code").text
-    return_xml = ''
+    LogWx.objects.create(type='0', errmsg='payNotify', errcode='0',remark=return_code)
     if return_code == 'SUCCESS':
         try:
             out_trade_no = xml_recv.find("out_trade_no").text
-            ShopOrder.objects.filter(sn=out_trade_no).update(status='1')
+            ShopKgMoneyOrder.objects.filter(sn=out_trade_no).update(status='9')
 
             return_xml = '''
                 <xml>

@@ -176,7 +176,7 @@ class ShopGood(models.Model):
     name = models.CharField(max_length=32,verbose_name=u'名称')
     sn = models.CharField(max_length=32,verbose_name=u'商品编码',unique=True)
     price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'价格')
-    img = models.ImageField(upload_to='shop/%Y/%m', verbose_name=u'封面图', max_length=100)
+    img = models.ImageField(upload_to='shop/%Y/%m', verbose_name=u'封面图', max_length=64)
     category = models.IntegerField(verbose_name=u'所属分类')
     stock = models.SmallIntegerField(verbose_name=u'库存',default=0)
     is_hot = models.CharField(max_length=1,verbose_name=u'热卖')
@@ -230,14 +230,18 @@ class ShopExpress(models.Model):
 
 class ShopOrder(models.Model):
     sn = models.CharField(max_length=16,verbose_name=u'编号',unique=True)
+    customer = models.CharField(max_length=50, verbose_name=u'用户ID', default='0')
+    name = models.CharField(max_length=12, verbose_name=u'收件人',default='')
+    tel = models.CharField(max_length=12, verbose_name=u'联系电话',default='')
     price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'价格')
+    snap_img = models.CharField(max_length=64,verbose_name=u'订单快照图片',default='')
+    snap_name = models.CharField(max_length=64,verbose_name=u'订单快照名称',default='')
+    snap_address = models.CharField(max_length=100, verbose_name=u'配送地址ID', default='')
+    status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
     express = models.IntegerField(verbose_name=u'快递',blank=True,null=True)
     save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
     sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
     remark = models.TextField(verbose_name=u'备注留言',blank=True,null=True)
-    address = models.CharField(max_length=12,verbose_name=u'配送地址ID',default='')
-    customer = models.CharField(max_length=50, verbose_name=u'用户ID', default='0')
-    status = models.CharField(max_length=1, verbose_name=u'订单状态',default='0')
 
     class Meta:
         db_table = 'shop_order'
@@ -254,9 +258,9 @@ class ShopOrderInfo(models.Model):
 
 class ShopKgMoneyOrder(models.Model):
     sn = models.CharField(max_length=16,verbose_name=u'编号',unique=True)
-    kg_money = models.IntegerField(verbose_name=u'宽广豆数量')
+    count = models.IntegerField(verbose_name=u'宽广豆数量')
     pay_type = models.CharField(max_length=1,verbose_name=u'支付类型')
-    total_pay = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'支付合计')
+    price = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'支付合计')
     customer = models.CharField(max_length=50, verbose_name=u'用户openID', default='0')
     status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
     save_time = models.DateTimeField(default=datetime.now, verbose_name=u'下单时间')

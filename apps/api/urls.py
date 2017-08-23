@@ -47,7 +47,7 @@ urlpatterns = [
     url(r'^shop/order/goods/save/$',shop.orderGoodsSave),
     url(r'^shop/order/kgmoney/save/$',shop.orderKgMoneySave),
 
-    url(r'^shop/order/(?P<sn>[0-9]+)/$',shop.getOrder),
+    url(r'^shop/order/$',shop.getOrderBySn),
 
     #微信支付
     url(r'^wx/pay/prepay/$', pay.getPay),

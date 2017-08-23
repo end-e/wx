@@ -24,6 +24,7 @@ class LogWx(models.Model):
                             )
     remark = models.CharField(max_length=256, verbose_name='备注', blank=True, null=True)
     add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
+    repeat_status = models.CharField(blank=True,null=True,max_length=1,verbose_name=u'重发状态')
 
     class Meta:
         db_table='log_wx'

@@ -1,0 +1,32 @@
+#content-header {
+    padding-right: 53px;
+    margin-left: -25px;
+    margin-bottom: 20px;
+    width: 100%;
+    z-index: 20;
+    background-color: #fff;
+    border-bottom: 1px solid #e3ebed;
+
+}
+
+#breadcrumb {
+
+}
+
+#breadcrumb a {
+    padding: 11px 20px 12px 10px;
+    display: inline-block;
+    background-image: url('../img/breadcrumb.png');
+    background-position: center right;
+    background-repeat: no-repeat;
+    font-size: 1em;
+    color: #666666;
+    text-decoration: none;
+}
+
+.container-fluid-full #content {
+    padding-top: 0
+}
+.list,.list-item{overflow: hidden;}
+.list-item-btn{margin-left: 0;}
+.list-item .control-group{margin-left: 0}
