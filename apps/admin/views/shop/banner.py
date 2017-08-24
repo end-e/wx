@@ -3,12 +3,11 @@ __author__ = ''
 __date__ = '2017/7/24 15:29'
 import json,math
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views.generic.base import View
-from django.http import HttpResponse
-from django.core.urlresolvers import reverse
 
-from admin.models import ShopBanner,ShopBannerInfo,ShopGood,ShopTheme
+
+from admin.models import ShopBanner,ShopBannerInfo
 from admin.forms import ShopBannerForm,ShopBannerInfoForm
 from admin.utils.paginator import MyPaginator
 

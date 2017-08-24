@@ -10,7 +10,7 @@ from django.http import HttpResponse
 
 from admin.models import GiftCardCode, GiftBalanceChangeLog
 from api.models import LogWx
-from utils import db, consts, method
+from utils import consts, method,wx,giftcard,data
 
 
 def cron_get_ikg_token():
@@ -20,7 +20,7 @@ def cron_get_ikg_token():
     '''
     app_id = consts.APPID
     secret = consts.APPSECRET
-    token = method.get_access_token('ikg', app_id, secret, )
+    token = wx.get_access_token('ikg', app_id, secret, )
     return HttpResponse(token)
 
 
@@ -31,7 +31,7 @@ def cron_get_kgcs_token():
     """
     app_id = consts.KG_APPID
     secret = consts.KG_APPSECRET
-    token = method.get_access_token('kgcs', app_id, secret)
+    token = wx.get_access_token('kgcs', app_id, secret)
     return HttpResponse(token)
 
 
@@ -40,11 +40,11 @@ def cron_send_temp():
     secret = consts.APPSECRET
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
-        access_token = method.get_access_token('ikg', app_id, secret)
+        access_token = wx.get_access_token('ikg', app_id, secret)
 
-    orders = method.get_user_order()
+    orders = data.get_user_order()
     if len(orders)>0:
-        wechat_users = method.get_wechat_users(orders)
+        wechat_users = data.get_wechat_users(orders)
         try:
             threads = []
             msg_list = []
@@ -53,16 +53,16 @@ def cron_send_temp():
                 for order in orders:
                     if order['CardNo'].strip() == userId:
                         openid = wechat_user['openid']
-                        data = method.create_temp_data(order)
+                        temp_data = method.create_temp_data(order)
                         msg ={
                             'openid':openid,
-                            'data':data,
+                            'data':temp_data,
                             'app_id':app_id,
                             'secret':secret,
                             'access_token':access_token
                         }
                         # msg_list.append(msg)
-                        thread = Thread(target=method.send_temp,args=(msg,))
+                        thread = Thread(target=wx.send_temp,args=(msg,))
                         threads.append(thread)
                         thread.start()
             for t in threads:
@@ -78,7 +78,7 @@ def cron_send_temp():
 
 def cron_gift_change_balance():
     # 1、查询消费记录
-    prev_last_serial, orders = method.getGiftBalance()
+    prev_last_serial, orders = data.getGiftBalance()
     if len(orders) > 0:
         try:
             # 2、拼接wx_card_id
@@ -88,7 +88,7 @@ def cron_gift_change_balance():
 
             access_token = caches['default'].get('wx_kgcs_access_token', '')
             if not access_token:
-                method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+                wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
             threads = []
             for o in orders:
@@ -129,7 +129,7 @@ def cron_gift_change_balance2():
     LogWx.objects.create(type='2', errmsg=len(log_list), errcode='2')
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:
-        method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+        wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
     if(len(log_list)>0):
         try:
             threads = []
@@ -157,42 +157,73 @@ def cron_gift_change_balance2():
     return HttpResponse(res_msg)
 
 def gift_change_balance(order,access_token):
-    code = order['CardNo'].strip()
-    card_id = order['wx_card_id']
-    balance= order['detail'] * 100
-    serial= order['PurchSerial']
-    url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
-        .format(token=access_token)
-    data = {
-        "code": code,
-        "card_id": card_id,
-        "balance": balance
-    }
+    try:
+        code = order['CardNo'].strip()
+        card_id = order['wx_card_id']
+        balance= float(order['detail']) * 100
+        serial= order['PurchSerial']
+        url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
+            .format(token=access_token)
+        data = {
+            "code": code,
+            "card_id": card_id,
+            "balance": balance
+        }
 
-    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data, headers={'Connection': 'close'})
-    rep_data = json.loads(rep.text)
-    if 'repeat_status' in order and rep_data['errcode'] == 0 :
-        LogWx.objects.filter(id=order['id']).update(repeat_status='1')
+        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        rep = requests.post(url, data=data, headers={'Connection': 'close'})
+        rep_data = json.loads(rep.text)
+        if 'repeat_status' in order and rep_data['errcode'] == 0 :
+            LogWx.objects.filter(id=order['id']).update(repeat_status='1')
 
-    log = LogWx()
-    log.type = 2
-    log.errmsg = rep_data['errmsg']
-    log.errcode = rep_data['errcode']
-    log.remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}'\
-        .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
-    if rep_data['errcode'] != 0:
-        log.repeat_status = '0'
-    log.save()
+        log = LogWx()
+        log.type = 2
+        log.errmsg = rep_data['errmsg']
+        log.errcode = rep_data['errcode']
+        log.remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}'\
+            .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
+        if rep_data['errcode'] != 0:
+            log.repeat_status = '0'
+        log.save()
+    except Exception as e:
+        print(e)
+        LogWx.objects.create(type='2', errmsg=e, errcode='2')
 
 
 
 def cron_gift_compare_order():
-    res = method.gift_compare_order()
-    if res['status'] == 1:
+    res = {}
+    res['status'] = 0
+    res_get = giftcard.get_Wx_order()
+    if res_get['status'] == 0:
+        offset = res_get['offset']
+        total_count = res_get['total_count']
+        wx_orders = res_get['wx_orders']
+        data.local_save_gift_order(wx_orders)
+
+        if total_count > (offset + 1) * 100:
+            gift_compare_order(offset + 1)
+
+    else:
         LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
         return HttpResponse('fail')
     return HttpResponse('ok')
 
 
 
+def gift_compare_order(offset=0):
+    res = {}
+    res['status'] = 0
+    res_get = giftcard.get_Wx_order(offset)
+    if res_get['status'] == 0:
+        offset = res_get['offset']
+        total_count = res_get['total_count']
+        wx_orders = res_get['wx_orders']
+        data.local_save_gift_order(wx_orders)
+        if total_count > (offset + 1) * 100:
+            gift_compare_order(offset + 1)
+
+    else:
+        res['status'] = 1
+
+    return res

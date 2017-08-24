@@ -150,6 +150,10 @@ def getNextPageNum2(current,total):
 
 
 def getPrePageNum(data):
+    """
+    :param data: query_set结果集
+    :return: 前一页页码
+    """
     num = ''
     if data.number > 1:
         num = data.paginator.previous_page_num
@@ -157,6 +161,10 @@ def getPrePageNum(data):
 
 
 def getPrePageNum2(current):
+    """
+    :param current: 当前页码
+    :return: 前一页页码
+    """
     current = int(current)
     num = ''
     if current > 0:

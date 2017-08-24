@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
     ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrderInfo,ShopKgMoneyOrder
-from utils import method
+from utils import method,shop
 from utils.myClass import MyException
 from user.models import WechatMembers
 
@@ -232,7 +232,7 @@ def getUserPoint(request):
         member = WechatMembers.objects.values('membernumber').get(openid=openid)
         member_id = member['membernumber']
         res['member_id'] = member_id
-        point = method.getGuestPoint(member_id)
+        point = shop.getGuestPoint(member_id)
         res['status'] = 0
         res['point'] = point
     except Exception as e:
@@ -259,7 +259,7 @@ def orderGoodsSave(request):
     try:
         with transaction.atomic():
             # 0、获取订单编号
-            sn = method.createOrderSn(ShopOrder)
+            sn = shop.createOrderSn(ShopOrder)
             # 1、保存订单信息 更新商品库存
             info_list = []
             snap_name = []
@@ -324,7 +324,7 @@ def orderKgMoneySave(request):
             if pay_type not in ('0','1'):
                 raise MyException('支付类型错误')
             # 0、获取订单编号并新建订单
-            sn = method.createOrderSn(ShopKgMoneyOrder)
+            sn = shop.createOrderSn(ShopKgMoneyOrder)
             ShopKgMoneyOrder.objects.create(
                 sn = sn, count = kg_money, pay_type = pay_type, price = total_pay, customer = openid
             )
@@ -334,14 +334,14 @@ def orderKgMoneySave(request):
             if member:
                 if pay_type == '0':
                     member_id = member['membernumber']
-                    point = method.getGuestPoint(member_id)
+                    point = shop.getGuestPoint(member_id)
                     if float(point)< float(total_pay):
                         res['status'] = 1
                         res['msg'] = '积分余额不足'
                         return HttpResponse(json.dumps(res))
                     else:
                         # 消减会员积分
-                        res_update = method.updateGuestPoint(member_id,total_pay)
+                        res_update = shop.updateGuestPoint(member_id,total_pay)
                         if not res_update :
                             raise MyException('会员积分消减失败')
                         #增加会员宽广豆数量

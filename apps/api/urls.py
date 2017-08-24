@@ -3,7 +3,7 @@
 # __date__ = '2017/4/18 15:02'
 from django.conf.urls import url,include
 
-from api.views import views, cron, sms,pay,shop
+from api.views import views, cron, sms,pay,shop,token
 
 urlpatterns = [
     # 微信后台配置的url
@@ -53,5 +53,6 @@ urlpatterns = [
     url(r'^wx/pay/prepay/$', pay.getPay),
     url(r'^wx/pay/notify/$', pay.payNotify),
 
+    url(r'^shop/user/token',token.getToken)
 
 ]

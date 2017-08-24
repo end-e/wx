@@ -252,7 +252,6 @@ class CardStockView(View):
         return render(request,'giftcard/card_stock.html',locals())
 
 
-
 class CardDelView(MyView):
     def post(self, request):
         res = {}
@@ -327,23 +326,6 @@ class CardDelView(MyView):
                 print(e)
                 res["status"] = 1
         return HttpResponse(json.dumps(res))
-
-
-class CardUpCodeAutoView(MyView):
-    def get(self, request, wx_card_id):
-        access_token = MyView().token
-        try:
-            qs_card = GiftCard.objects.values('init_balance').filter(wx_card_id=wx_card_id).first()
-            value = qs_card['init_balance']
-            codes = method.getCardCode(value)
-            data = {
-                "card_id": wx_card_id,
-                "code": codes
-            }
-            res = method.upCardCode(access_token,wx_card_id,data)
-        except Exception as e :
-            print(e)
-
 
 
 class CardUpCodeManualView(MyView):

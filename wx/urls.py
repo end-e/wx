@@ -55,5 +55,4 @@ urlpatterns = [
     # 微信礼品卡
     url(r'^giftcard/$', include('giftcard.urls', namespace='giftcard')),
 
-
 ]
