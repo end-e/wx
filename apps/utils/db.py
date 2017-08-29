@@ -3,6 +3,7 @@
 # __date__ = '2017/4/21 13:43'
 import pymssql
 import pymysql
+import _mssql
 
 from utils import consts
 
@@ -18,6 +19,7 @@ def getMsSqlConn(as_dict=True):
         as_dict=as_dict
     )
     return conn
+
 
 def getMsSqlConn22(as_dict=True):
     conn = pymssql.connect(
@@ -70,6 +72,7 @@ def getMysqlConnection(host, port, user, password, db):
     )
     return conn
 
+
 def getMsSqlConnection(host, port, user, password, db,as_dict=True):
     conn = pymssql.connect(
         host=host,
@@ -79,5 +82,17 @@ def getMsSqlConnection(host, port, user, password, db,as_dict=True):
         database=db,
         charset='utf8',
         as_dict=as_dict
+    )
+    return conn
+
+
+def get_MssqlConnection(host, port, user, password, db):
+    conn = _mssql.connect(
+        server=host,
+        port=port,
+        user=user,
+        password=password,
+        database=db,
+        charset='utf8'
     )
     return conn

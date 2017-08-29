@@ -29,6 +29,7 @@
                         <th>面值</th>
                         <th>售价</th>
                         <th>初始库存</th>
+                        <th>现有库存</th>
                         <th>操作</th>
                     </tr>
                     </thead>
@@ -41,6 +42,7 @@
                             <td class="center">{{ card.init_balance }}</td>
                             <td class="center">{{ card.price }}</td>
                             <td class="center">{{ card.quantity }}</td>
+                            <td class="center">{{ card.stock }}</td>
                             <td class="center">
                                 {% if card.status != '0' %}
                                     <a class="btn btn-info" href="{% url 'admin:giftcard:card_edit' card.id %}" title="编辑">

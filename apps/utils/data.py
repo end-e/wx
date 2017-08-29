@@ -63,7 +63,8 @@ def getGiftBalance():
 
     cardNo_list = [int(order['CardNo']) for order in orders]
 
-    log_list = LogWx.objects.values('id','remark','repeat_status').filter(type='2',errcode__in=['40001','40073','-1'],repeat_status='0')
+    log_list = LogWx.objects.values('id','remark','repeat_status')\
+        .filter(type='2',errcode__in=['40001','40073','-1'],repeat_status='0')
 
     for log in log_list:
         item = {}
@@ -113,5 +114,21 @@ def local_save_gift_order(wx_orders):
                     errcode='6',
                     remark='wx_order_id:{order}'.format(order=order['order_id'])
                 )
+
+
+def getCodeBySheetID(sheetid,price,count=100):
+    num_new = 100 if int(count) > 100 else int(count)
+    conn = db.getMsSqlConn()
+    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
+          "WHERE cardType='12' AND sheetid='{sheetid}' AND New_amount={value} " \
+          "ORDER BY cardNo" \
+        .format(sheetid=sheetid, value=price, num=num_new)
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return data
+
 
 

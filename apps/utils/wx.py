@@ -24,7 +24,7 @@ def getOpenIdByCode(code):
 
     rep_data = json.loads(rep.text)
 
-    return rep_data
+    return rep_data['openid']
 
 def get_access_token(app_name, app_id, secret):
     client = WeChatClient(app_id, secret)

@@ -4,15 +4,15 @@ __date__ = '2017/6/15 10:06'
 from django.views.generic.base import View
 from django.core.cache import caches
 
-from utils import method,consts
+from utils import wx,consts
 
 class MyView(View):
     def __init__(self,**kwargs):
         super(MyView,self).__init__(**kwargs)
         access_token = caches['default'].get('wx_kgcs_access_token', '')
         if not access_token:
-            method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
-        self.token = access_token
+            wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+        self.token = '132132'
 
 
 class MyException(Exception):

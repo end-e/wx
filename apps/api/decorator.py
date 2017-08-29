@@ -1,9 +1,10 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/6/1 8:08'
-from django.http import HttpResponse
-
 import json, datetime, time
+
+from django.http import HttpResponse
+from django.core.cache import caches
 
 from utils.method import md5
 
@@ -35,3 +36,25 @@ def signature(func):
 
     return wrapper
 
+
+
+def signature2(func):
+    def wrapper(request, *args, **kwargs):
+        flag = True
+        token = request.META.get('HTTP_TOKEN','')
+        if token:
+            wxUser = caches['default'].get(token, '')
+            print(wxUser,token)
+            if not wxUser:
+                flag = False
+        else:
+            flag = False
+
+        if not flag:
+            response = HttpResponse(json.dumps({'status': 1}))
+            response.status_code = 500
+            return response
+        else:
+            return func(request, *args, **kwargs)
+
+    return wrapper

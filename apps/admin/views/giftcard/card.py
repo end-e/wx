@@ -10,11 +10,12 @@ import json, math,time,requests
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic.base import View
-from django.db.models import Count
+from django.db.models import Count,F
 
 from admin.models import GiftCard, GiftImg,GiftTheme,GiftThemeItem, GiftCardCode
 from admin.utils.myClass import MyView, MyException
 from admin.utils import method
+from utils import data
 from admin.forms import GiftCardForm,GiftCardEditForm
 
 
@@ -24,8 +25,9 @@ class CardView(View):
             .order_by('-status','-id')
 
         for card in card_list:
-            qs_code = GiftCardCode.objects.filter(wx_card_id=card['wx_card_id'],status='1')
-            if qs_code:
+            qs_code = GiftCardCode.objects.filter(wx_card_id=card['wx_card_id'])
+            card['stock'] = qs_code.filter(status='0').count()
+            if qs_code.filter(status='1'):
                 card['die'] = 1
 
         return render(request, 'giftcard/card_list.html', locals())
@@ -196,6 +198,7 @@ class CardInfoWxView(MyView):
         if rep_data['errmsg'] == 'ok':
             card = rep_data['card']
             item ={}
+            item['wx_card_id'] = wx_card_id
             item['title'] =card['general_card']['base_info']['title']
             item['total_quantity'] =card['general_card']['base_info']['sku']['total_quantity']
             item['quantity'] =card['general_card']['base_info']['sku']['quantity']
@@ -226,7 +229,7 @@ class CardStockView(View):
         if theme_id:
             items = GiftThemeItem.objects.values('wx_card_id').filter(theme_id=theme_id)
             if items.count()>0:
-                card_ids = [ item['wx_card_id'] for item in items]
+                card_ids = [item['wx_card_id'] for item in items]
                 kwargs.setdefault('wx_card_id__in', card_ids)
                 cards = GiftCard.objects.filter(**kwargs).values('name', 'title', 'init_balance','price','wx_card_id')
         else:
@@ -330,6 +333,8 @@ class CardDelView(MyView):
 
 class CardUpCodeManualView(MyView):
     def get(self, request, wx_card_id):
+        card = GiftCard.objects.values('price','name').get(wx_card_id=wx_card_id)
+        price = card['price']
         return render(request,'giftcard/card_code_up.html',locals())
 
     def post(self,request, wx_card_id):
@@ -339,28 +344,43 @@ class CardUpCodeManualView(MyView):
         quantity = int(qs_card['quantity'])
         card_id = qs_card['id']
         if action == 'query':
-            starts = request.POST.getlist('start[]')
-            ends = request.POST.getlist('end[]')
-            card_code_list = []
-            card_code_list_old = []
+            sheetid = request.POST.get('sheetid','')
+            count = request.POST.get('count','')
+            price = request.POST.get('price','')
+            card_list = data.getCodeBySheetID(sheetid,price,count)
+            codes_correct = []
+            codes_error = []
+            for card in card_list:
+                if card['Mode']=='9':
+                    codes_correct.append(card['cardNo'].strip())
+                else:
+                    codes_error.append(card['cardNo'].strip())
 
-            for i in range(0,len(starts)):
-                for code in range(int(starts[i]),int(ends[i])+1):
-                    card_code_list_old.append(str(code))
-                start = starts[i].strip()
-                end = ends[i].strip()
-                card_codes = method.getCardCode2(start,end,value,quantity)
-                card_code_list.extend(card_codes)
+            codes_correct_num = len(codes_correct)
+            codes_error_num = len(codes_error)
 
-            new= set(card_code_list)
-            if new:
-                codes_correct = json.dumps(card_code_list)
-                codes_correct_num = len(card_code_list)
-            old= set(card_code_list_old)
-            code_err_list = [code for code in old if code not in new]
-            if code_err_list:
-                codes_error = json.dumps(code_err_list)
-                codes_error_num = len(code_err_list)
+            # starts = request.POST.getlist('start[]')
+            # ends = request.POST.getlist('end[]')
+            # card_code_list = []
+            # card_code_list_old = []
+            #
+            # for i in range(0,len(starts)):
+            #     for code in range(int(starts[i]),int(ends[i])+1):
+            #         card_code_list_old.append(str(code))
+            #     start = starts[i].strip()
+            #     end = ends[i].strip()
+            #     card_codes = method.getCardCode2(start,end,value,quantity)
+            #     card_code_list.extend(card_codes)
+            #
+            # new= set(card_code_list)
+            # if new:
+            #     codes_correct = json.dumps(card_code_list)
+            #     codes_correct_num = len(card_code_list)
+            # old= set(card_code_list_old)
+            # code_err_list = [code for code in old if code not in new]
+            # if code_err_list:
+            #     codes_error = json.dumps(code_err_list)
+            #     codes_error_num = len(code_err_list)
 
             return render(request, 'giftcard/card_code_up.html', locals())
         elif action == 'upload' :
@@ -371,12 +391,13 @@ class CardUpCodeManualView(MyView):
                 res['status'] = 5
                 res['msg'] = 'Code上传数量大于100'
                 return HttpResponse(json.dumps(res))
-            data = {
+            data_post = {
                 "card_id": wx_card_id,
                 "code": codes
             }
             #上传code
-            res_upload = method.upLoadCardCode(access_token, wx_card_id, data)
+            res_upload = method.upLoadCardCode(access_token, wx_card_id, data_post)
+
             code_success = []
             code_fail = []
             if res_upload['status'] == 0:
@@ -395,6 +416,7 @@ class CardUpCodeManualView(MyView):
             res['code_success_num'] = len(code_success)
             res['code_fail'] = ','.join(code_fail)
             res['code_fail_num'] = len(code_fail)
+            LogWx.objects.create(type='5', errmsg='res_upload status:' + res_upload['status'], errcode='', )
             try:
                 with transaction.atomic():
                     #存储wx_card_id与code的对应关系
@@ -426,6 +448,24 @@ class CardUpCodeManualView(MyView):
                     res['msg'] = e.value
 
             return HttpResponse(json.dumps(res))
+
+
+class CardCodeOnLine(MyView):
+    """
+    查询线上卡实例下属code数量
+    """
+    def get(self,request,wx_card_id):
+        access_token = MyView().token
+        url = 'https://api.weixin.qq.com/card/code/getdepositcount?access_token={token}' \
+            .format(token=access_token)
+        data = {
+            "card_id": wx_card_id,
+        }
+        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+
+        rep = requests.post(url, data=data)
+        rep_data = json.loads(rep.text)
+        return HttpResponse(json.dumps(rep_data))
 
 
 class CardModifyStockView(MyView):

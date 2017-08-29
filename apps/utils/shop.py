@@ -4,8 +4,7 @@ __date__ = '2017/8/24 14:22'
 import datetime
 
 from utils import db
-from admin.models import GiftBalanceChangeLog
-from api.models import LogWx
+from django.core.cache import caches
 
 def createOrderSn(objModel):
     today = datetime.datetime.today()
@@ -30,23 +29,29 @@ def getGuestPoint(member_id):
         point = float(guest['Point'])
     return point
 
-
+from utils import consts
 def updateGuestPoint(member_id,total_pay):
-    conn = db.getMsSqlConn()
+    conn = db.getMsSqlConnection(
+        consts.DB_SERVER_226,consts.DB_PORT_226,consts.DB_USER_226,
+        consts.DB_PASSWORD_226,consts.DB_DATABASE_226,None
+    )
+    conn.autocommit(False)
+    sql = "declare @retcode int " \
+          "declare @retmsg varchar(255) " \
+          "declare @l_point dec(8,2) " \
+          "exec WR_Pointcut '{member_id}',{point},@retcode output,@retmsg output,@l_point output " \
+          "select @retcode,@retmsg,@l_point"\
+        .format(member_id=member_id,point=total_pay)
     cur = conn.cursor()
-    res = True
-    try:
-        conn.autocommit(False)
-        sql =  "UPDATE guest SET Point = Point-{total_pay} WHERE cardNO='{cardNO}'"\
-            .format(cardNO=member_id,total_pay=total_pay)
-        cur.execute(sql)
-        if cur.rowcount == 1:
-            conn.commit()
-        else:
-            res = False
-    except Exception as e:
-        print(e)
-        conn.rollback()
-        res = False
+    cur.execute(sql)
+    res = cur.fetchone()
+    conn.commit()
 
     return res
+
+
+def getOpenID(request):
+    token = request.META.get('HTTP_TOKEN', '')
+    openid = caches['default'].get(token, '')
+
+    return openid

@@ -92,7 +92,7 @@ def cron_gift_change_balance():
 
             threads = []
             for o in orders:
-                thread = Thread(target=gift_change_balance,args=(o,access_token,))
+                thread = Thread(target=giftcard.change_balance,args=(o,access_token,))
                 threads.append(thread)
                 thread.start()
             for t in threads:
@@ -155,40 +155,6 @@ def cron_gift_change_balance2():
         res_msg = 'no order'
 
     return HttpResponse(res_msg)
-
-def gift_change_balance(order,access_token):
-    try:
-        code = order['CardNo'].strip()
-        card_id = order['wx_card_id']
-        balance= float(order['detail']) * 100
-        serial= order['PurchSerial']
-        url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \
-            .format(token=access_token)
-        data = {
-            "code": code,
-            "card_id": card_id,
-            "balance": balance
-        }
-
-        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-        rep = requests.post(url, data=data, headers={'Connection': 'close'})
-        rep_data = json.loads(rep.text)
-        if 'repeat_status' in order and rep_data['errcode'] == 0 :
-            LogWx.objects.filter(id=order['id']).update(repeat_status='1')
-
-        log = LogWx()
-        log.type = 2
-        log.errmsg = rep_data['errmsg']
-        log.errcode = rep_data['errcode']
-        log.remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}'\
-            .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
-        if rep_data['errcode'] != 0:
-            log.repeat_status = '0'
-        log.save()
-    except Exception as e:
-        print(e)
-        LogWx.objects.create(type='2', errmsg=e, errcode='2')
-
 
 
 def cron_gift_compare_order():

@@ -1,0 +1,156 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">积分商城</a>
+    <a href="#" class="current">订单</a>
+{% endblock %}
+{% block content_r %}
+    <style>.card_list{background-color: #eee}</style>
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    订单查询
+                </h2>
+            </div>
+            <div class="box-content">
+                <form action="{% url 'admin:giftcard:orders' %}" method="post" id="Form" style="overflow: hidden">
+                    <div class="span12 row-fluid">
+                        {% csrf_token %}
+                        <div data-date-format="yyyy-mm-dd" class="input-group date form_date span3">
+                            <label>开始日期：
+                                <input type="text" name="begin" id="begin" class="form-control" required readonly value="{{ begin|default:today }}">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                            </label>
+                        </div>
+                        <div data-date-format="yyyy-mm-dd" class="input-group date form_date span3">
+                            <label>截止日期：
+                                <input type="text" name="end" id="end" class="form-control" required readonly value="{{ end |default:today }}">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                            </label>
+                        </div>
+                        <div class="input-group span3">
+                            <label>每页条数：
+                                <input type="text" name="count" class="form-control" required value="{{ count | default:10 }}">
+                            </label>
+                        </div>
+                        <input type="hidden" name="page_num" id="page_num" value="1">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="icon-search"></i>
+                            查询
+                        </button>
+                    </div>
+                </form>
+                <div class="alert alert-success">
+                    <span>合计单数：</span> {{ total_count | default:0 }}单；
+                </div>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>宽豆(个)</th>
+                        <th>用户</th>
+                        <th>状态</th>
+                        <th>下单时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.sn }}</td>
+                            <td>{{ order.price }}</td>
+                            <td>{{ order.customer }}</td>
+                            <td>{{ order.status }}</td>
+                            <td>{{ order.save_time }}</td>
+                            <td class="center  sorting_1">
+                                <a class="btn btn-info btn-toggle" title="详情">
+                                    <i class="icon-double-angle-down"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr class="card_list" style="display: none">
+                            <td colspan="9">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>名称</th>
+                                            <th>数量</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.items %}
+                                            <tr>
+                                                <td>{{ item.good_name }}</td>
+                                                <td>{{ item.good_num }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9">暂无数据</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div  class="pagination" style="text-align: center;margin:20px auto;">
+                    <ul id="pagination1"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+<script type="text/javascript">
+    $('.form_date').datetimepicker({
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        minView: 2,
+        forceParse: 0
+    });
+
+    $.jqPaginator('#pagination1', {
+        totalPages: {{ total_page | safe | default:1 }},
+        visiblePages: 10,
+        currentPage: {{ page_num |safe }},
+        onPageChange: function (num) {
+            var begin = $('#begin').val();
+            var end = $('#end').val();
+            if(begin&&end && num!={{ page_num |safe }}){
+                switchPage(num)
+            }
+        }
+    });
+
+</script>
+<script type="text/javascript">
+    $('.btn-toggle').click(function () {
+        var icon = $(this).find('i').attr('class');
+        if(icon =='icon-double-angle-down'){
+            $(this).parents('tr').next('tr').css('display','table-row');
+            $(this).find('i').attr('class','icon-double-angle-up');
+        }else {
+            $(this).parents('tr').next('tr').css('display','none');
+            $(this).find('i').attr('class','icon-double-angle-down');
+        }
+    });
+
+    function switchPage(page_num) {
+        $('#page_num').val(page_num);
+        $('#Form').submit();
+    }
+
+</script>
+{% endblock %}

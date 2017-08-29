@@ -19,6 +19,7 @@
                     <thead>
                     <tr>
                         <th>名称</th>
+                        <th>ID</th>
                         <th>发行数量</th>
                         <th>现有库存</th>
                         <th>售价</th>
@@ -30,6 +31,7 @@
                     {% for card in card_list %}
                         <tr>
                             <td class="center">{{ card.title }}</td>
+                            <td class="center">{{ card.wx_card_id }}</td>
                             <td class="center">{{ card.total_quantity }}</td>
                             <td class="center">{{ card.quantity }}</td>
                             <td class="center">{{ card.price | divide:100  }}</td>

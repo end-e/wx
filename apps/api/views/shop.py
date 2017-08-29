@@ -9,22 +9,22 @@ from django.db import transaction
 from django.db.models import F
 from django.core.paginator import Paginator
 
+
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
     ShopOrder,ShopUser,ShopCategory,ShopAddress,ShopOrderInfo,ShopKgMoneyOrder
 from utils import method,shop
 from utils.myClass import MyException
 from user.models import WechatMembers
+from api.decorator import signature2
 
 
 def getBanner(request,b_id):
-    res = {}
     try:
         banner = ShopBannerInfo.objects.values('img','target_id','type').filter(banner=b_id)
-        res['status'] = 0
-        res['items'] = list(banner)
+        res = method.createResult(0,'ok',{'banners':list(banner)})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
@@ -32,14 +32,12 @@ def getBanner(request,b_id):
 def getThemes(request):
     theme_ids = request.GET.get('ids','')
     theme_ids = theme_ids.split(',')
-    res = {}
     try:
         themes = ShopTheme.objects.values('img','id','name').filter(id__in=theme_ids)
-        res['status'] = 0
-        res['items'] = list(themes)
+        res = method.createResult(0, 'ok', {'themes': list(themes)})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
@@ -69,23 +67,47 @@ def getTheme(request,t_id):
     return HttpResponse(json.dumps(res))
 
 
+def getCategories(request):
+    try:
+        categories = ShopCategory.objects.values('id','name','banner').filter(status='0').order_by('sort')
+        res = method.createResult(0, 'ok', {'categories': list(categories)})
+    except Exception as e:
+        print(e)
+        res = method.createResult(1, e)
+    return HttpResponse(json.dumps(res))
+
+
+def getCategoryInfo(request,c_id):
+    try:
+        category = ShopCategory.objects.values('banner').get(pk=c_id)
+        goods = ShopGood.objects.values('id','sn','name','price','img').filter(category=c_id)
+        for good in goods:
+            good['price'] = float(good['price'])
+        data = {}
+        data['banner'] = category['banner']
+        data['items'] = list(goods)
+        res = method.createResult(0, 'ok', {'category': data})
+    except Exception as e:
+        print(e)
+        res = method.createResult(1, e)
+    return HttpResponse(json.dumps(res))
+
+
 def getGoodNew(request):
     res = {}
     try:
         goods = ShopGood.objects.values('id','sn','name','price','img').filter(is_new=1)
-        res['status'] = 0
         for good in goods:
             good['price'] = float(good['price'])
-        res['items'] = list(goods)
+        res = method.createResult(0, 'ok', {'goods': list(goods)})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
 
 def getGood(request,g_sn):
-    res = {}
     try:
         good = ShopGood.objects.values('id','sn','name','price','img','stock').get(sn=g_sn)
         good['price'] = float(good['price'])
@@ -95,34 +117,21 @@ def getGood(request,g_sn):
         data['good'] = good
         data['imgs'] = list(imgs)
         data['properties'] = list(propertys)
-        res['data']=data
+        res = method.createResult(0, 'ok', {'good': data})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
 
-def getOrderByUser(request):
-    u_id = request.GET.get('u_id','')
-    res = {}
+def getuserInfo(request):
+    openid = shop.getOpenID(request)
     try:
-        orders = ShopOrder.objects.values().filter(user=u_id)
+        user = ShopUser.objects.values('nickname','kg_money','openid').get(openid=openid)
+        res = method.createResult(0, 'ok', {'user': user})
     except Exception as e:
-        print(e)
-        res['status'] = 1
-
-    return HttpResponse(json.dumps(res))
-
-
-def userInfo(request,openid):
-    user = ShopUser.objects.filter(openid=openid)
-    res = {}
-    if user.count()>0:
-        res['status'] = 0
-        res['data'] = user.values('nickname','kg_money','openid').first()
-    else:
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
@@ -131,7 +140,7 @@ def userInfo(request,openid):
 def userSave(request):
     nickname = request.POST.get('nickname','')
     extend = request.POST.get('extend','')
-    openid = request.POST.get('openid','')
+    openid= shop.getOpenID(request)
     res = {}
     try:
         user = ShopUser.objects.filter(openid=openid)
@@ -139,28 +148,28 @@ def userSave(request):
             user.update(nickname=nickname,extend=extend)
         else:
             ShopUser.objects.create(openid=openid,nickname=nickname,extend=extend)
-        res['status'] = 0
+            res = method.createResult(0, 'ok')
     except Exception as e:
-        res['status'] = 0
-        print(e)
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
 
-def getUserAddresses(request,openid):
-    res = {}
+def getUserAddresses(request):
+    openid = shop.getOpenID(request)
     try:
         addresses = ShopAddress.objects.values('name','tel','province','city','country','detail','is_default')\
             .filter(openid=openid)
-        res['data'] = list(addresses)
+        res = method.createResult(0, 'ok',{'addresses':list(addresses)})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
     return HttpResponse(json.dumps(res))
 
 
 @csrf_exempt
-def userAddressEdit(request,openid):
+def userAddressEdit(request):
+    openid = shop.getOpenID(request)
     name = request.POST.get('name','')
     province = request.POST.get('province','')
     city = request.POST.get('city','')
@@ -176,16 +185,16 @@ def userAddressEdit(request,openid):
             ShopAddress.objects.create(
                 openid=openid,name=name,tel=mobile,province=province,city=city,country=country,detail=detail
             )
-        res['status'] = 0
+        res = method.createResult(0, 'ok')
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
 
-def getUserOrders(request,openid,page):
-    res = {}
+def getUserOrders(request,page):
+    openid = shop.getOpenID(request)
     try:
         good_orders = ShopOrder.objects.extra(
             select={
@@ -203,46 +212,85 @@ def getUserOrders(request,openid,page):
         for order in orders:
             order['price'] = float(order['price'])
             order['save_time'] = datetime.datetime.strftime(order['save_time'],'%Y-%m-%d %H:%M:%S')
-        res['data'] = list(orders)
+
+        res = method.createResult(0, 'ok', {'orders': list(orders),'openid':openid})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
+    return HttpResponse(json.dumps(res))
+
+
+def getOrderBySn(request):
+    """
+    获取用户订单
+    :param sn:订单编号
+    :param order_type:订单类型（0：商品订单；1：宽广豆订单 ）
+    :return:
+    """
+    openid = shop.getOpenID(request)
+    sn = request.GET.get('sn','')
+    order_type = request.GET.get('type','')
+    try:
+        if order_type == '0':
+            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address')\
+                .get(sn=sn)
+            info_list = ShopOrderInfo.objects.values('good_sn','good_num').filter(order_sn=sn)
+            goods = []
+            for info in info_list:
+                good =ShopGood.objects.values('img','price','name').get(sn=info['good_sn'])
+                good['price'] = float(good['price'])
+                good['count'] = info['good_num']
+                goods.append(good)
+        else:
+            order = ShopKgMoneyOrder.objects.values('sn','price','count','status','save_time').get(sn=sn)
+            goods = []
+            good ={'img':'','price':float(order['price']),'name':'宽广豆','count':order['count']}
+            goods.append(good)
+
+        data = {'sn':order['sn'],'account':float(order['price']),'status':order['status'],
+                'goods':goods,'save_time':datetime.datetime.strftime(order['save_time'],'%Y-%m-%d %H:%M:%S')}
+
+        if order_type == '0':
+            address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
+            data['address'] = address
+
+        res = method.createResult(0, 'ok', {'order': data,'openid':openid})
+    except Exception as e:
+        print(e)
+        res = method.createResult(1, e)
     return HttpResponse(json.dumps(res))
 
 
 def getUserKgMoney(request):
-    openid = request.GET.get('openid','')
-    res = {}
+    openid = shop.getOpenID(request)
     try:
         user = ShopUser.objects.values('kg_money').get(openid=openid)
         kg_money = user['kg_money']
-        res['status'] = 0
-        res['kg_money'] = kg_money
+        res = method.createResult(0, 'ok', {'kg_money': kg_money,'openid':openid})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
     return HttpResponse(json.dumps(res))
 
 
 def getUserPoint(request):
-    openid = request.GET.get('openid','')
+    openid = shop.getOpenID(request)
     res = {}
     try:
         member = WechatMembers.objects.values('membernumber').get(openid=openid)
         member_id = member['membernumber']
         res['member_id'] = member_id
         point = shop.getGuestPoint(member_id)
-        res['status'] = 0
-        res['point'] = point
+        res = method.createResult(0, 'ok', {'point': point, 'openid': openid})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
     return HttpResponse(json.dumps(res))
 
 @csrf_exempt
 def orderGoodsSave(request):
-    openid = request.POST.get('openid','')
+    openid = shop.getOpenID(request)
     goods = request.POST.get('goods','')
     goods = json.loads(goods)
     price = request.POST.get('totalPrice','')
@@ -254,7 +302,7 @@ def orderGoodsSave(request):
     user= ShopUser.objects.values('kg_money').get(openid=openid)
     kg_money = user['kg_money']
     if kg_money<int(price):
-        res['status'] = 2
+        res = method.createResult(3, '宽豆余额不足')
         return HttpResponse(json.dumps(res))
     try:
         with transaction.atomic():
@@ -297,15 +345,14 @@ def orderGoodsSave(request):
             ShopOrderInfo.objects.bulk_create(info_list)
             #2、更新用户余额
             ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') - int(price))
-            res['status'] = 0
-            res['order_sn'] = sn
+
+            res = method.createResult(0,'ok', {'order_sn':sn})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
         if hasattr(e,'value'):
             err = e.value.split(':')
-            res['status'] = err[0]
-            res['msg'] = err[1]
+            res = method.createResult(err[0],err[1])
 
 
     return HttpResponse(json.dumps(res))
@@ -313,7 +360,7 @@ def orderGoodsSave(request):
 
 @csrf_exempt
 def orderKgMoneySave(request):
-    openid = request.POST.get('openid', '')
+    openid = shop.getOpenID(request)
     kg_money = request.POST.get('kgMoney', 0)
     pay_type = request.POST.get('payType', '0')
     total_pay = request.POST.get('totalPay', 0)
@@ -331,123 +378,50 @@ def orderKgMoneySave(request):
 
             #guest中查询会员积分数量
             member = WechatMembers.objects.values('membernumber').filter(openid=openid).first()
+            point_now = 0
             if member:
                 if pay_type == '0':
                     member_id = member['membernumber']
-                    point = shop.getGuestPoint(member_id)
-                    if float(point)< float(total_pay):
-                        res['status'] = 1
-                        res['msg'] = '积分余额不足'
-                        return HttpResponse(json.dumps(res))
+                    res_update = shop.updateGuestPoint(member_id,total_pay)
+                    if res_update[0] == 0 :
+                        point_now = res_update[3]
                     else:
-                        # 消减会员积分
-                        res_update = shop.updateGuestPoint(member_id,total_pay)
-                        if not res_update :
-                            raise MyException('会员积分消减失败')
-                        #增加会员宽广豆数量
-                        ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')+int(kg_money))
+                        raise MyException(res_update[1])
+
+                    #增加会员宽广豆数量
+                    ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')+int(kg_money))
             else:
                 raise MyException('微查询到此openid对应的会员')
-            res['status'] = 0
-            res['order_sn'] = sn
+            res = method.createResult(0, 'ok',{'order_sn':sn,'point':point_now})
     except Exception as e:
         print(e)
-        res["status"] = 1
         if hasattr(e, 'value'):
-            res['msg'] = e.value
+            errmsg = e.value
         else:
-            res['msg'] = e
+            errmsg = e
+        res = method.createResult(1, errmsg)
 
     return HttpResponse(json.dumps(res))
 
 
 @csrf_exempt
 def userOrderReSave(request):
-    openid = request.POST.get('openid','')
+    openid = shop.getOpenID(request)
     sn = request.POST.get('sn','')
     price = request.POST.get('totalPrice', '')
     res ={}
     try:
         with transaction.atomic():
             ShopOrder.objects.filter(sn=sn).update()
-            res['status'] = 0
-            res['order_sn'] = sn
-
             ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')-int(price))
+            res = method.createResult(0, 'ok', {'order_sn': sn})
     except Exception as e:
         print(e)
-        res['status'] = 1
+        res = method.createResult(1, e)
 
     return HttpResponse(json.dumps(res))
 
 
-def getOrderBySn(request):
-    """
-    获取用户订单
-    :param sn:订单编号
-    :param order_type:订单类型（0：商品订单；1：宽广豆订单 ）
-    :return:
-    """
-    sn = request.GET.get('sn','')
-    order_type = request.GET.get('type','')
-    res = {}
-    try:
-        if order_type == '0':
-            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address')\
-                .get(sn=sn)
-            info_list = ShopOrderInfo.objects.values('good_sn','good_num').filter(order_sn=sn)
-            goods = []
-            for info in info_list:
-                good =ShopGood.objects.values('img','price','name').get(sn=info['good_sn'])
-                good['price'] = float(good['price'])
-                good['count'] = info['good_num']
-                goods.append(good)
-        else:
-            order = ShopKgMoneyOrder.objects.values('sn','price','count','status','save_time').get(sn=sn)
-            goods = []
-            good ={'img':'','price':float(order['price']),'name':'宽广豆','count':order['count']}
-            goods.append(good)
-
-        data = {'sn':order['sn'],'account':float(order['price']),'status':order['status'],
-                'goods':goods,'save_time':datetime.datetime.strftime(order['save_time'],'%Y-%m-%d %H:%M:%S')}
-
-        if order_type == '0':
-            address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
-            data['address'] = address
-        res['status'] = 0
-        res['data'] = data
-    except Exception as e:
-        print(e)
-        res['status'] = 1
-    return HttpResponse(json.dumps(res))
-
-
-def getCategories(request):
-    res = {}
-    try:
-        categories = ShopCategory.objects.values('id','name','banner').filter(status='0').order_by('sort')
-        res['data'] = list(categories)
-    except Exception as e:
-        print(e)
-        res['status'] = 1
-    return HttpResponse(json.dumps(res))
-
-
-def getCategoryInfo(request,c_id):
-    res = {}
-    try:
-        category = ShopCategory.objects.values('banner').get(pk=c_id)
-        goods = ShopGood.objects.values('id','sn','name','price','img').filter(category=c_id)
-        for good in goods:
-            good['price'] = float(good['price'])
-        data = {}
-        data['banner'] = category['banner']
-        data['items'] = list(goods)
-        res['data'] = data
-    except Exception as e:
-        print(e)
-        res['status'] = 1
-    return HttpResponse(json.dumps(res))
 
 
 

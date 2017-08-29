@@ -8,13 +8,13 @@ from django.db import transaction
 from admin.models import GiftCardCode,GiftOrder,GiftOrderInfo
 from api.models import LogWx
 from django.core.cache import caches
-from utils import method,consts
+from utils import consts,wx
 
 
 def giftcard_pay_done(order_id):
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:
-        method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+        wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
     url = 'https://api.weixin.qq.com/card/giftcard/order/get?access_token={token}' \
         .format(token=access_token)
@@ -73,7 +73,7 @@ def giftcard_pay_done(order_id):
 def user_gifting_card(wx_card_id):
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:
-        method.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
+        wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
     url = 'https://api.weixin.qq.com/card/code/update?access_token={token}' \
         .format(token=access_token)

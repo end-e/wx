@@ -378,6 +378,7 @@ def getCardCode(value):
 
 
 def getCardCode2(start,end,value,count=100):
+    print('getCardCode2')
     conn = db.getMsSqlConn()
     num_new =100 if int(count)>100 else int(count)
 
@@ -385,7 +386,7 @@ def getCardCode2(start,end,value,count=100):
           "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value} " \
           "ORDER BY cardNo"\
         .format(start=start,end=end,value=value,num=num_new)
-
+    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     cards = cur.fetchall()
@@ -499,8 +500,7 @@ def updateCardMode(codes,old,new):
         print(e)
         res['status'] = 1
         conn.rollback()
-    finally:
-        cur.close()
+
 
     return res
 
