@@ -4,7 +4,7 @@ import time
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import WechatMembers
 
-from wechatpy.replies import TextReply, EmptyReply
+from wechatpy.replies import TextReply
 from utils import db
 
 
@@ -138,10 +138,9 @@ def switch_type(msg):
                 return xml
         # 模板消息发送任务完成事件
         elif msg.event == 'templatesendjobfinish':
-            # TODO
-            # 模板消息发送成功后的逻辑处理
-            # if msg.status == '<![CDATA[failed: system failed]]>':
+            # TODO: 模板消息发送成功后的逻辑处理
+            # TODO: if msg.status == '<![CDATA[failed: system failed]]>', 用户接收消息失败
             # 暂时回复空串，不做任何处理
-            return EmptyReply()
+            return 'success'
     else:
         return 'success'
