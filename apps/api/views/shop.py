@@ -297,6 +297,7 @@ def orderGoodsSave(request):
     address = request.POST.get('address','')
     user_name = request.POST.get('user','')
     tel = request.POST.get('tel','')
+    express = request.POST.get('express','')
 
     res = {}
     user= ShopUser.objects.values('kg_money').get(openid=openid)
@@ -339,7 +340,7 @@ def orderGoodsSave(request):
             #创建主表信息
             ShopOrder.objects.create(
                 customer=openid, sn=sn, price=price, status='9',snap_img=snap_img,snap_name=snap_name,
-                name=user_name, tel=tel, snap_address=address
+                name=user_name, tel=tel, snap_address=address,express=express
             )
             # 创建商品信息
             ShopOrderInfo.objects.bulk_create(info_list)

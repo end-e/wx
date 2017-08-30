@@ -54,6 +54,7 @@
                         <th>订单号</th>
                         <th>宽豆(个)</th>
                         <th>用户</th>
+                        <th>地址</th>
                         <th>状态</th>
                         <th>下单时间</th>
                         <th>操作</th>
@@ -65,11 +66,18 @@
                             <td>{{ order.sn }}</td>
                             <td>{{ order.price }}</td>
                             <td>{{ order.customer }}</td>
+                            <td>{{ order.snap_address }}</td>
                             <td>{{ order.status }}</td>
                             <td>{{ order.save_time }}</td>
                             <td class="center  sorting_1">
                                 <a class="btn btn-info btn-toggle" title="详情">
                                     <i class="icon-double-angle-down"></i>
+                                </a>
+                                <a class="btn btn-warning btn-express" data-sn="{{ order.sn }}" title="确认发货">
+                                    <i class=" icon-truck"></i>
+                                </a>
+                                <a class="btn btn-danger btn-sign" data-sn="{{ order.sn }}" title="确认签收">
+                                    <i class="icon-retweet"></i>
                                 </a>
                             </td>
                         </tr>
@@ -105,6 +113,36 @@
                     <ul id="pagination1"></ul>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal hide fade" id="signModal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>系统提示：</h3>
+        </div>
+        <div class="modal-body">
+            <p>确认订单到货签收？？？</p>
+            <input type="hidden" id="order_sn">
+        </div>
+        <div class="modal-footer">
+            <button href="#" class="btn" data-dismiss="modal">取消</button>
+            <button href="#" class="btn btn-primary" onclick="">确定</button>
+        </div>
+    </div>
+
+    <div class="modal hide fade" id="expressModal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>系统提示：</h3>
+        </div>
+        <div class="modal-body">
+            <p><label>请填写物流单号：</label><input type="text" id="express_sn"></p>
+            <input type="hidden" id="order_sn">
+        </div>
+        <div class="modal-footer">
+            <button href="#" class="btn" data-dismiss="modal">取消</button>
+            <button href="#" class="btn btn-primary" onclick="">确定</button>
         </div>
     </div>
 {% endblock %}
@@ -152,5 +190,17 @@
         $('#Form').submit();
     }
 
+    $(".btn-sign").click(function(b){
+        b.preventDefault();
+        $("#signModal").modal("show");
+        var order_sn = $(this).attr('data-sn');
+        $("#myModal #order_sn").val(order_sn);
+    });
+    $(".btn-express").click(function(b){
+        b.preventDefault();
+        $("#expressModal").modal("show");
+        var order_sn = $(this).attr('data-sn');
+        $("#myModal #order_sn").val(order_sn);
+    });
 </script>
 {% endblock %}

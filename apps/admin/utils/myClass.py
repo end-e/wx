@@ -12,7 +12,7 @@ class MyView(View):
         access_token = caches['default'].get('wx_kgcs_access_token', '')
         if not access_token:
             wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
-        self.token = '132132'
+        self.token = access_token
 
 
 class MyException(Exception):

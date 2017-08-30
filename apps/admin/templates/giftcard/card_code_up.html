@@ -32,24 +32,29 @@
                     <div class="list">
                         <div class="row-fluid">
                             <div class="control-group span3">
-                                <label class="control-label">充值单号:</label>
+                                <label class="control-label">起始Code:</label>
                                 <div class="controls">
-                                    <input name="sheetid" type="text" value="{{ sheetid }}">
+                                    <input name="start[]" type="text">
                                 </div>
                             </div>
                             <div class="control-group span3">
-                                <label class="control-label">充值数量:</label>
+                                <label class="control-label">截至Code:</label>
                                 <div class="controls">
-                                    <input name="count" type="text" value="{{ count | default:100 }}">
+                                    <input name="end[]" type="text">
                                 </div>
                             </div>
-                            <div class="control-group span3">
-                                <input type="text" name="price" readonly="readonly" value="{{ price | floatformat:2 }}">
-                            </div>
-                            <div class="control-group span3">
-                                <button class="btn btn-primary">查询</button>
+                            <div class="control-group span2 list-item-btn">
+                                <button type="button" class="btn btn-small btn-success" onclick="addFormRow(this)">
+                                    添加 <i class="icon-plus"></i>
+                                </button>
+                                <button type="button" class="btn btn-small btn-danger" onclick="delFormRow(this)">
+                                    删除 <i class="icon-minus"></i>
+                                </button>
                             </div>
                         </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary">查询</button>
                     </div>
                 </form>
 
@@ -68,10 +73,6 @@
                         <div class="row-fluid">
                             <button type="button" class="btn btn-primary pull-right" onclick="uploadeCode()">上传</button>
                         </div>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        <strong>暂无正常Code!</strong>
                     </div>
                 {% endif %}
             </div>

@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic.base import View
 
 from admin.utils.paginator import MyPaginator
-from admin.models import ShopOrder,ShopOrderInfo,ShopKgMoneyOrder
+from admin.models import ShopOrder,ShopOrderInfo
 
 
 class OrderView(View):
@@ -17,7 +17,7 @@ class OrderView(View):
         try:
             orders = ShopOrder.objects.extra(select={
                 'customer':'SELECT name FROM shop_address WHERE shop_address.openid=shop_order.customer'
-            }).values('sn', 'price', 'save_time', 'status','customer')\
+            }).values('sn', 'price', 'save_time', 'status','customer','snap_address')\
                 .order_by('-save_time')
             paginator = MyPaginator(orders, 6)
             page = int(page) if int(page) else 1
