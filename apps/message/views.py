@@ -38,8 +38,7 @@ def switch_type(msg):
     elif from_type == 'event':
         # 关注事件
         if msg.event == 'subscribe':
-            to_content = '嗨，欢迎关注，我是小宽。宽广超市全新礼品卡上线了，送朋友传心意，好玩有趣，还能发图片录视频嘞。' \
-                         '点击菜单\"礼品卡\"传心意吧~'
+            to_content = '嗨，欢迎关注，我是小宽。宽广超市全新电子礼品卡上线了，送朋友传心意，好玩有趣，还能发图片录视频嘞。'
             reply = TextReply(content=to_content, message=msg)
             xml = reply.render()
             return xml
@@ -136,5 +135,11 @@ def switch_type(msg):
                 reply = TextReply(content=to_content, message=msg)
                 xml = reply.render()
                 return xml
+        # 模板消息发送任务完成事件
+        elif msg.event == 'templatesendjobfinish':
+            # TODO: 模板消息发送成功后的逻辑处理
+            # TODO: if msg.status == '<![CDATA[failed: system failed]]>', 用户接收消息失败需要处理
+            # 暂时回复空串，不做任何处理
+            return 'success'
     else:
         return 'success'
