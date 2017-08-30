@@ -74,7 +74,7 @@ def create_nav(request):
         "button": [
             {
                 "type": "view",
-                "name": "礼品卡",
+                "name": "电子礼品卡",
                 "url": "https://mp.weixin.qq.com/bizmall/giftcard?action=homepage&page_id=sO898gip2rDKIDXgaMcqTXSy64LOxmDMrEGdoxmrGeA%3d#wechat_redirect"
             },
             {
