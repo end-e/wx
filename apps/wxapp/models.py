@@ -45,6 +45,12 @@ class Shops(models.Model):
     shop_code = models.CharField(max_length=16, default='', verbose_name=u'编号')
     shop_name = models.CharField(max_length=32, default='', verbose_name=u'名称')
     telphone = models.CharField(max_length=20, default='', verbose_name=u'电话')
+    poi_id = models.CharField(max_length=10, null=True, verbose_name=u'微信门店poi_id')
+
+    class Meta:
+        verbose_name = u'券验证码'
+        verbose_name_plural = verbose_name
+        db_table = 'wxapp_shops'
 
 
 class DisCode(models.Model):
