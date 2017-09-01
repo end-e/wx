@@ -1,6 +1,5 @@
 # -*-  coding:utf-8 -*-
 # __author__ = ''
-# __date__ = '2017/6/15 10:06'
 from django.views.generic.base import View
 from django.core.cache import caches
 
