@@ -32,4 +32,7 @@ urlpatterns = [
     url(r'^giftcard/',include('admin.views.giftcard.urls',namespace='giftcard')),
     url(r'^shop/',include('admin.views.shop.urls',namespace='shop')),
 
+    # 代金券模块
+    url(r'^cash_coupons/', include('admin.views.cash_coupons.urls', namespace='cash_coupons'))
+
 ]
