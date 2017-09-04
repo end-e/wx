@@ -15,6 +15,7 @@ class WechatMembers(models.Model):
     attentiontime = models.DateTimeField(default=datetime.now, verbose_name=u'绑定时间')
     username = models.CharField(max_length=45, verbose_name=u'会员姓名')
     membernumber = models.CharField(max_length=45, verbose_name=u'会员卡号')
+    unionid = models.CharField(max_length=100, verbose_name=u'unionid', null=True)
 
     class Meta:
         verbose_name = u'微信会员绑定'
