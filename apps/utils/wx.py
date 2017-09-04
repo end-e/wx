@@ -4,6 +4,7 @@ __date__ = '2017/8/24 13:53'
 import requests,json
 
 from django.core.cache import caches
+from django.http import HttpResponse
 from wechatpy import WeChatClient
 
 from utils import consts
@@ -12,7 +13,7 @@ from api.models import LogWx
 appId = consts.WX_APP_ID
 appSecret = consts.WX_APP_SECRET
 
-def getOpenIdByCode(code):
+def getWxUserInfo(code):
     url = 'https://api.weixin.qq.com/sns/jscode2session'
     params = {
         'appid': appId,
@@ -24,7 +25,7 @@ def getOpenIdByCode(code):
 
     rep_data = json.loads(rep.text)
 
-    return rep_data['openid']
+    return rep_data
 
 def get_access_token(app_name, app_id, secret):
     client = WeChatClient(app_id, secret)
@@ -62,3 +63,15 @@ def send_temp(msg):
             errmsg=res_send['errmsg'],
             errcode=res_send['errcode']
         )
+
+
+def respondToWx(flag):
+    httpResponse = HttpResponse()
+    if flag:
+        httpResponse.status_code = 200
+        content = '<xml>ok</xml>'
+    else:
+        httpResponse.status_code = 500
+        content = '<xml>fail</xml>'
+    httpResponse.content = content
+    return httpResponse

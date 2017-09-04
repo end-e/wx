@@ -130,5 +130,3 @@ def getCodeBySheetID(sheetid,price,count=100):
 
     return data
 
-
-
