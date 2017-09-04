@@ -1,14 +1,15 @@
 from PIL import Image, ImageDraw, ImageFont
-import random,hashlib,time,json,requests
+import random, hashlib, time, json, requests
 import datetime
 
 from django.db import connection
 from django.conf import settings
 
 from admin.utils import constants
-from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard,ShopOrder
+from admin.models import GiftCardCode, GiftTheme, GiftThemeItem, GiftThemePicItem, GiftCard, ShopOrder
 from api.models import LogWx
-from utils import db,consts
+from utils import db, consts
+
 
 def md5(data):
     md5 = hashlib.md5()
@@ -39,7 +40,7 @@ def getUserNav(role_id=None):
     #     .filter(**kwargs).order_by('nav__sort')
 
     sql = "select DISTINCT rn.role_id,rn.nav_id,n.name,n.parent,n.url,n.sort,n.icon " \
-          "from admin_rolenav as rn,admin_nav as n "\
+          "from admin_rolenav as rn,admin_nav as n " \
           "where rn.nav_id=n.id and n.status=0 "
     if role_id:
         role_id = str(role_id)
@@ -136,16 +137,16 @@ def verifycode(request, key):
 
 def getNextPageNum(data):
     num = ''
-    if data.number < data.paginator.num_pages :
+    if data.number < data.paginator.num_pages:
         num = data.paginator.next_page_num
     return num
 
 
-def getNextPageNum2(current,total):
+def getNextPageNum2(current, total):
     current = int(current)
     num = 0
     if current < total:
-        num = current+1
+        num = current + 1
     return num
 
 
@@ -168,20 +169,21 @@ def getPrePageNum2(current):
     current = int(current)
     num = ''
     if current > 0:
-        num = current-1
+        num = current - 1
     return num
 
 
-def createThemeList(themes,theme_categories):
+def createThemeList(themes, theme_categories):
     """
     礼品卡-货架-拼接theme_list
     :param themes: theme_id列表
     :return:
     """
     theme_list = []
-    for i in range(0,len(themes)):
+    for i in range(0, len(themes)):
         # theme
-        t = GiftTheme.objects.values('id', 'title', 'theme_pic', 'title_color', 'sku_title_first','is_banner').get(id=themes[i])
+        t = GiftTheme.objects.values('id', 'title', 'theme_pic', 'title_color', 'sku_title_first', 'is_banner').get(
+            id=themes[i])
 
         d = {
             "theme_pic_url": t['theme_pic'],  # 主题的封面图片
@@ -312,7 +314,7 @@ def createCardData(form):
                 "supply_balance": True,
                 "prerogative": "礼品卡享受更多优惠",
                 "auto_activate": True,
-                "init_balance": float(init_balance)* 100,
+                "init_balance": float(init_balance) * 100,
                 # "custom_field1": {
                 #     "name": "优惠券",
                 #     "url": "http://mp.weixin.qq.com/s?__biz=MjM5Mzc0OTEwMA==&mid=402699549&idx=1&sn=1fe0eb3fb0041e3f10b755c5470c7db3#rd"
@@ -366,25 +368,25 @@ def getCardCode(value):
     conn = db.getMsSqlConn()
 
     sql = "SELECT TOP 100 cardNo FROM guest " \
-          "WHERE cardType='12' AND Mode = '9' AND New_amount={value}"\
+          "WHERE cardType='12' AND Mode = '9' AND New_amount={value}" \
         .format(value=value)
     cur = conn.cursor()
     cur.execute(sql)
     cards = cur.fetchall()
-    
-    card_codes = [ card['cardNo'].strip() for card in cards]
-    
+
+    card_codes = [card['cardNo'].strip() for card in cards]
+
     return card_codes
 
 
-def getCardCode2(start,end,value,count=100):
+def getCardCode2(start, end, value, count=100):
     conn = db.getMsSqlConn()
-    num_new =100 if int(count)>100 else int(count)
+    num_new = 100 if int(count) > 100 else int(count)
 
     sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
           "WHERE cardType='12' AND Mode = '9' AND cardNo>='{start}' AND cardNo<='{end}' AND New_amount={value} " \
-          "ORDER BY cardNo"\
-        .format(start=start,end=end,value=value,num=num_new)
+          "ORDER BY cardNo" \
+        .format(start=start, end=end, value=value, num=num_new)
     print(sql)
     cur = conn.cursor()
     cur.execute(sql)
@@ -395,7 +397,7 @@ def getCardCode2(start,end,value,count=100):
     return card_codes
 
 
-def upLoadCardCode(access_token,wx_card_id,data):
+def upLoadCardCode(access_token, wx_card_id, data):
     """
     上传自定义code
     :param access_token:
@@ -412,7 +414,7 @@ def upLoadCardCode(access_token,wx_card_id,data):
         rep_data = json.loads(rep.text)
 
         if rep_data['errcode'] == 0:
-            if len(rep_data['fail_code']) == 0 :
+            if len(rep_data['fail_code']) == 0:
                 # 全部上传成功
                 res['status'] = 0
             else:
@@ -426,13 +428,13 @@ def upLoadCardCode(access_token,wx_card_id,data):
 
     except requests.exceptions.ConnectionError as e:
         print(e)
-        LogWx.objects.create(type='5', errmsg='ConnectionError', errcode='',remark=e)
+        LogWx.objects.create(type='5', errmsg='ConnectionError', errcode='', remark=e)
         time.sleep(5)
         upLoadCardCode(access_token, wx_card_id, data)
     return res
 
 
-def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
+def modifyCardStock(access_token, wx_card_id, increase=0, reduce=0):
     url = 'https://api.weixin.qq.com/card/modifystock?access_token={access_token}' \
         .format(access_token=access_token)
 
@@ -459,7 +461,7 @@ def modifyCardStock(access_token,wx_card_id,increase=0,reduce=0):
     return res
 
 
-def updateCardMode(codes,old,new):
+def updateCardMode(codes, old, new):
     codes_str = "'" + "','".join(codes) + "'"
     res = {}
     conn = db.getMsSqlConn()
@@ -467,7 +469,7 @@ def updateCardMode(codes,old,new):
     try:
         conn.autocommit(False)
         sql = "UPDATE Guest Set Mode='{new}' WHERE CardNo in ({codes_str}) AND Mode='{old}'" \
-            .format(codes_str=codes_str,new=new,old=old)
+            .format(codes_str=codes_str, new=new, old=old)
 
         cur.execute(sql)
         num_update = cur.rowcount
@@ -482,11 +484,10 @@ def updateCardMode(codes,old,new):
         res['status'] = 1
         conn.rollback()
 
-
     return res
 
 
-def checkCardCodeOnWx(access_token,data):
+def checkCardCodeOnWx(access_token, data):
     res = {}
     url = 'http://api.weixin.qq.com/card/code/checkcode?access_token={access_token}' \
         .format(access_token=access_token)
@@ -502,5 +503,12 @@ def checkCardCodeOnWx(access_token,data):
     return res
 
 
-
-
+def group_list(l, block):
+    """
+    把list中元素按照一定数量进行分组，组成新的list
+    :param l:
+    :param block:
+    :return: list
+    """
+    size = len(l)
+    return [l[i:i + block] for i in range(0, size, block)]
