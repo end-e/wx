@@ -17,7 +17,7 @@ class OrderView(View):
         try:
             orders = ShopOrder.objects.extra(select={
                 'customer':'SELECT name FROM shop_address WHERE shop_address.openid=shop_order.customer'
-            }).values('sn', 'price', 'save_time', 'status','customer','snap_address')\
+            }).values('sn', 'price', 'save_time', 'status','customer','snap_address','tel')\
                 .order_by('-save_time')
             paginator = MyPaginator(orders, 6)
             page = int(page) if int(page) else 1

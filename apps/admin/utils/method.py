@@ -378,7 +378,6 @@ def getCardCode(value):
 
 
 def getCardCode2(start,end,value,count=100):
-    print('getCardCode2')
     conn = db.getMsSqlConn()
     num_new =100 if int(count)>100 else int(count)
 
@@ -396,27 +395,9 @@ def getCardCode2(start,end,value,count=100):
     return card_codes
 
 
-def getCardCode3(sheet_id,value,count=100):
-    conn = db.getMsSqlConn()
-    num_new =100 if int(count)>100 else int(count)
-
-    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
-          "WHERE cardType='12' AND Mode = '9' AND sheetID='{sheet_id}' AND New_amount={value} " \
-        .format(sheet_id=sheet_id,value=value,num=num_new)
-
-    cur = conn.cursor()
-    cur.execute(sql)
-    cards = cur.fetchall()
-
-    card_codes = [card['cardNo'].strip() for card in cards]
-
-    return card_codes
-
-
 def upLoadCardCode(access_token,wx_card_id,data):
     """
-    步骤二：待卡券通过审核后，调用导入code接口并核查code；
-    步骤三：调用修改库存接口，。
+    上传自定义code
     :param access_token:
     :param wx_card_id:
     :param data:

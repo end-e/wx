@@ -50,8 +50,17 @@ def updateGuestPoint(member_id,total_pay):
     return res
 
 
-def getOpenID(request):
+def getWxUser(request):
     token = request.META.get('HTTP_TOKEN', '')
-    openid = caches['default'].get(token, '')
+    userInfo = caches['default'].get(token, '')
+
+    return userInfo
+
+def getWxUserOpenID(request):
+    token = request.META.get('HTTP_TOKEN', '')
+    userInfo = caches['default'].get(token, '')
+    openid = userInfo.get('openid','')
 
     return openid
+
+

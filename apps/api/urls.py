@@ -3,7 +3,7 @@
 # __date__ = '2017/4/18 15:02'
 from django.conf.urls import url,include
 
-from api.views import views, cron, sms,pay,shop,token
+from api.views import views, cron, sms
 
 urlpatterns = [
     # 微信后台配置的url
@@ -21,39 +21,8 @@ urlpatterns = [
     url(r'^sms/$', sms.main, name='sms'),
     # 微信小程序获取用户openid，session_key接口
     url(r'xcx/getopenid', views.get_session_key, name='getopenid'),
+
     url(r'^wxapp/',include('api.views.wxapp.urls',namespace='jf')),
 
-    #########################################积分商城  start #########################################
-    url(r'^shop/banner/(?P<b_id>[0-9]+)/$',shop.getBanner),
-    url(r'^shop/themes/$',shop.getThemes),
-    url(r'^shop/theme/(?P<t_id>[0-9]+)/$',shop.getTheme),
-    #主题相关接口
-    url(r'^shop/good/new/$',shop.getGoodNew),
-    url(r'^shop/good/(?P<g_sn>[0-9]+)/$',shop.getGood),
-    #分类相关接口
-    url(r'^shop/category/all/$',shop.getCategories),
-    url(r'^shop/category/info/(?P<c_id>[0-9]+)/$',shop.getCategoryInfo),
-    #用户相关接口
-    url(r'^shop/user/info/$',shop.getuserInfo),
-    url(r'^shop/user/save/$',shop.userSave),
-    url(r'^shop/user/addresses/$',shop.getUserAddresses),
-    url(r'^shop/user/address/edit/$',shop.userAddressEdit),
-    url(r'^shop/user/orders/(?P<page>[0-9]+)$',shop.getUserOrders),
-    url(r'^shop/user/kgmoney/$',shop.getUserKgMoney),
-    url(r'^shop/user/point/$',shop.getUserPoint),
-    #订单相关接口
-    url(r'^shop/order/goods/save/$',shop.orderGoodsSave),
-    url(r'^shop/order/kgmoney/save/$',shop.orderKgMoneySave),
-    url(r'^shop/order/$',shop.getOrderBySn),
-    #微信支付相关接口
-    url(r'^wx/pay/prepay/$', pay.getPay),
-    url(r'^wx/pay/notify/$', pay.payNotify),
-    #令牌相关接口
-    url(r'^shop/token/user/$',token.getToken),
-    url(r'^shop/token/verify/$',token.verify),
-
-    url(r'^shop/user/point/(?P<member_id>[0-9]+)/(?P<total_pay>[0-9]+)','utils.shop.updateGuestPoint')
-
-    #########################################积分商城  end  #########################################
-
+    url(r'^shop/', include('api.views.shop.urls', namespace='shop')),
 ]

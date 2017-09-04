@@ -294,7 +294,8 @@ class ShopThemeInfo(models.Model):
 
 class ShopUser(models.Model):
     openid = models.CharField(max_length=50,verbose_name=u'',unique=True)
-    nickname = models.CharField(max_length=10,verbose_name=u'昵称')
+    unionid = models.CharField(max_length=50,verbose_name=u'',unique=True,default='')
+    nickname = models.CharField(max_length=20,verbose_name=u'昵称')
     extend = models.CharField(max_length=128,verbose_name=u'',default='')
     kg_money = models.IntegerField(default=0,verbose_name=u'宽广豆')
     cardNo = models.CharField(default='',max_length=10,verbose_name=u'会员卡号')

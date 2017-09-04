@@ -13,17 +13,17 @@ from utils import wx,method
 @csrf_exempt
 def getToken(request):
     code = request.POST.get('code','')
-    openid = wx.getOpenIdByCode(code)
+    userInfo = wx.getWxUserInfo(code)
     key = method.createNonceStr(32)
     tamp = int(time.time())
     key = key+code+str(tamp)
     key = hashlib.md5(key.encode(encoding='utf-8')).hexdigest()
-    flag = caches['default'].set(key,openid,7200)
+    flag = caches['default'].set(key,userInfo,7200)
 
     if flag:
         res = method.createResult(0,'ok',{'token':key})
     else:
-        res = method.createResult(1, 'openid cache failed')
+        res = method.createResult(1, 'userInfo cache failed')
 
     return HttpResponse(json.dumps(res))
 

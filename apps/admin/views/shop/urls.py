@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'^banner/info/(?P<b_id>[0-9]+)/$',BannerInfoView.as_view(),name='banner_info'),
     url(r'^banner/info/edit/(?P<b_id>[0-9]+)/(?P<i_id>[0-9]+)$',BannerInfoEditView.as_view(),name='banner_info_edit'),
 
-    url(r'^order/(?P<page>[0-9]+)$',OrderView.as_view(),name='orders'),
+    url(r'^order/(?P<page>[0-9]+)/$',OrderView.as_view(),name='orders'),
 ]
 
 
