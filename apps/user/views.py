@@ -186,7 +186,7 @@ class MembersUnionid(View):
             data['user_list'] = user_list
             data = json.dumps(data, ensure_ascii=False).encode('utf-8')
             response = requests.post(url, data=data)
-            response.encoding = 'uft-8'
+            response.encoding = 'utf-8'
             res = json.loads(response.text)
 
             if 'user_info_list' in res:
