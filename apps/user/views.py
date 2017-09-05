@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 from urllib import parse
-import json, time
+import json
+import time
+import requests
 
 from django.shortcuts import render, redirect
 from django.views.generic import View
@@ -13,6 +15,8 @@ from utils import db
 from .models import WechatMembers
 from .form import BoundForm
 from utils import consts, method
+from apps.admin.utils.myClass import MyViewIkg
+from apps.admin.utils.method import group_list
 
 
 class MembersBoundView(View):
@@ -162,3 +166,49 @@ class MembersImageView(View):
 class SuccessView(View):
     def get(self, request):
         return render(request, 'msg_success.html')
+
+
+class MembersUnionid(View):
+    def get(self, reuqest):
+        all_members = WechatMembers.objects.values_list('openid', flat=True)
+        all_openid = group_list(all_members, 50)
+
+        access_token = MyViewIkg().token
+        url = 'https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token={access_token}'.format(
+            access_token=access_token)
+
+        for items in all_openid:
+            user_list = []
+            data = {}
+            for openid in items:
+                payload = {'openid': openid, 'lang': 'zh_CN'}
+                user_list.append(payload)
+            data['user_list'] = user_list
+            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            response = requests.post(url, data=data)
+            response.encoding = 'uft-8'
+            res = json.loads(response.text)
+
+            if 'user_info_list' in res:
+                for k, v in res.items():
+                    for member in v:
+                        if member['subscribe'] == 1:
+                            try:
+                                WechatMembers.objects.filter(openid__exact=member['openid']).update(
+                                    nikename=member['nickname'],
+                                    sex=member['sex'],
+                                    city=member['city'],
+                                    country=member['country'],
+                                    province=member['province'],
+                                    unionid=member['unionid']
+                                )
+                            except Exception as e:
+                                return HttpResponse(e)
+                        else:
+                            try:
+                                WechatMembers.objects.filter(openid__exact=member['openid']).update(
+                                    unionid=member['unionid'])
+                            except Exception as e:
+                                return HttpResponse(e)
+
+        return HttpResponse('执行完成')
