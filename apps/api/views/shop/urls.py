@@ -5,6 +5,7 @@ from django.conf.urls import url
 
 from api.views.shop import order,pay,token,user,base
 urlpatterns =[
+    url(r'^shopname/$',base.getShopList),
     #banner
     url(r'^banner/(?P<b_id>[0-9]+)/$',base.getBannerById),
 

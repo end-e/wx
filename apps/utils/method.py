@@ -21,6 +21,24 @@ def getShopName(id):
     """
     shopDict = caches['default'].get('base_shopDict', '')
     if not shopDict:
+        shops = getAllShops()
+
+        shopDict = {shop['Shopcode']: shop['Shopnm'].strip() for shop in shops}
+        caches['default'].set('base_shopDict', shopDict, 60 * 60 * 12)
+
+    return shopDict.get(id,id)
+
+
+def getAllShops():
+    shops1 = getCityShops('C')
+    shops2 = getCityShops('T')
+    shops = shops1 + shops2
+
+    return shops
+
+def getCityShops(city):
+    shops = []
+    if city == 'C':
         conn = db.getMysqlConnection(
             consts.DB_SERVER_18,
             consts.DB_PORT_18,
@@ -28,30 +46,25 @@ def getShopName(id):
             consts.DB_PASSWORD_18,
             consts.DB_DATABASE_18
         )
-        sql = "SELECT Shopcode,Shopnm FROM bas_shop WHERE enable = 1"
+        sql = "SELECT Shopcode,Shopnm FROM bas_shop WHERE enable = 1 GROUP BY Shopcode"
+
         cur = conn.cursor()
         cur.execute(sql)
         shops = cur.fetchall()
-
-        conn2 = db.getMysqlConnection(
+    elif city == 'T':
+        conn = db.getMysqlConnection(
             consts.DB_SERVER_18,
             consts.DB_PORT_18,
             consts.DB_USER_18,
             consts.DB_PASSWORD_18,
             'kgscm_ts'
         )
-        sql2 = "SELECT Shopcode,Shopnm FROM bas_shop WHERE enable = 1"
-        cur2 = conn2.cursor()
-        cur2.execute(sql2)
-        shops2 = cur.fetchall()
+        sql = "SELECT Shopcode,Shopnm FROM bas_shop WHERE enable = 1 GROUP BY Shopcode"
+        cur = conn.cursor()
+        cur.execute(sql)
+        shops = cur.fetchall()
 
-        shops = shops + shops2
-
-        shopDict = {shop['Shopcode']: shop['Shopnm'].strip() for shop in shops}
-        caches['default'].set('base_shopDict', shopDict, 60 * 60 * 12)
-
-    return shopDict.get(id,id)
-
+    return shops
 
 def get_ip(request):
     """

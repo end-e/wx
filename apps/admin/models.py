@@ -238,6 +238,7 @@ class ShopOrder(models.Model):
     snap_name = models.CharField(max_length=64,verbose_name=u'订单快照名称',default='')
     snap_address = models.CharField(max_length=100, verbose_name=u'配送地址ID', default='')
     status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
+    shop = models.CharField(max_length=12, verbose_name=u'配送门店', blank=True,null=True)
     express = models.IntegerField(verbose_name=u'快递',default='0')
     save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
     sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
