@@ -20,18 +20,17 @@ from api.decorator import signature2
 @csrf_exempt
 def orderGoodsSave(request):
     openid = shop.getWxUserOpenID(request)
-    goods = request.POST.get('goods','')
-    goods = json.loads(goods)
-    price = request.POST.get('totalPrice','')
-    address = request.POST.get('address','')
-    user_name = request.POST.get('user','')
-    tel = request.POST.get('tel','')
-    express = request.POST.get('express','')
+    order = request.POST.get('order',{})
+    order = json.loads(order)
+    orderInfo = request.POST.get('orderInfo',[])
+    orderInfo = json.loads(orderInfo)
+    if order['express'] == 0 and order['express'] == '':
+        res = method.createResult(3, '请选择取货门店')
+        return HttpResponse(json.dumps(res))
 
-    res = {}
     user= ShopUser.objects.values('kg_money').get(openid=openid)
     kg_money = user['kg_money']
-    if kg_money<int(price):
+    if kg_money<int(order['account']):
         res = method.createResult(3, '宽豆余额不足')
         return HttpResponse(json.dumps(res))
     try:
@@ -42,7 +41,7 @@ def orderGoodsSave(request):
             info_list = []
             snap_name = []
             snap_img = []
-            for good in goods:
+            for good in orderInfo:
                 qs_good_list = ShopGood.objects.select_for_update().filter(sn=good['sn'])
                 qs_good = qs_good_list.values('stock','name','img').first()
                 stock = qs_good['stock']
@@ -68,13 +67,14 @@ def orderGoodsSave(request):
 
             #创建主表信息
             ShopOrder.objects.create(
-                customer=openid, sn=sn, price=price, status='9',snap_img=snap_img,snap_name=snap_name,
-                name=user_name, tel=tel, snap_address=address,express=express
+                customer=openid, sn=sn, price=order['account'], status='9',snap_img=snap_img,snap_name=snap_name,
+                name=order['user'], tel=order['tel'], snap_address=order['address'],express=order['express'],
+                shop=order['shop']
             )
             # 创建商品信息
             ShopOrderInfo.objects.bulk_create(info_list)
             #2、更新用户余额
-            ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') - int(price))
+            ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') - int(order['account']))
 
             res = method.createResult(0,'ok', {'order_sn':sn})
     except Exception as e:
@@ -174,7 +174,7 @@ def getOrderBySn(request):
     order_type = request.GET.get('type','')
     try:
         if order_type == '0':
-            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address')\
+            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address','shop')\
                 .get(sn=sn)
             info_list = ShopOrderInfo.objects.values('good_sn','good_num').filter(order_sn=sn)
             goods = []
@@ -195,6 +195,7 @@ def getOrderBySn(request):
         if order_type == '0':
             address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
             data['address'] = address
+            data['shop'] = order['shop']
 
         res = method.createResult(0, 'ok', {'order': data,'openid':openid})
     except Exception as e:

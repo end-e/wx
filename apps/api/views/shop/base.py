@@ -4,6 +4,7 @@ __date__ = '2017/7/28 16:56'
 import json
 
 from django.http import HttpResponse
+from django.core.cache import caches
 
 from admin.models import ShopBannerInfo,ShopTheme,ShopThemeInfo,ShopGood,ShopGoodImg,ShopGoodProperty,\
     ShopCategory
@@ -113,4 +114,18 @@ def getGoodBySn(request,g_sn):
         print(e)
         res = method.createResult(1, str(e))
 
+    return HttpResponse(json.dumps(res))
+
+
+def getShopList(request):
+    shops = caches['default'].get('base_shopDict','')
+    print(shops)
+    if shops:
+        shop_name_list = []
+        for code,name in shops.items():
+            if code[0:1] in ('C','T') and code not in ('C00L','CM01'):
+                shop_name_list.append(name)
+        res = method.createResult(0, 'ok', {'shop_list': shop_name_list})
+    else:
+        res = method.createResult(1, 'base_shopDict in cache is empty')
     return HttpResponse(json.dumps(res))
