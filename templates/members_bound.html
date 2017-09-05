@@ -8,10 +8,6 @@
     <title>WeUI</title>
     <!-- 引入 WeUI -->
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.css">
-    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.1/weui.min.js"></script>
-    <script type="text/javascript">
-        weui.alert('alert');
-    </script>
     <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
     <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.1/weui.min.js"></script>
     <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
@@ -63,6 +59,12 @@
 </div>
 <input id="openid" type="hidden" value="{{ openid }}">
 <input id="access_token" type="hidden" value="{{ access_token }}">
+<input id="user_unionid" type="hidden" value="{{ user_unionid }}">
+<input id="user_nickname" type="hidden" value="{{ user_nickname }}">
+<input id="user_sex" type="hidden" value="{{ user_sex }}">
+<input id="user_province" type="hidden" value="{{ user_province }}">
+<input id="user_city" type="hidden" value="{{ user_city }}">
+<input id="user_country" type="hidden" value="{{ user_country }}">
 {% csrf_token %}
 <div class="weui-footer" style="padding-top: 40px; padding-bottom: 10px;">
     <p class="weui-footer__text">技术支持:宽广控股集团-信息中心</p>
@@ -81,7 +83,7 @@
 
         appId: '{{ app_id }}', // 必填，公众号的唯一标识
 
-        timestamp: {{ timestamp }} , // 必填，生成签名的时间戳
+        timestamp: {{ timestamp }}, // 必填，生成签名的时间戳
 
         nonceStr: '{{ noncestr }}', // 必填，生成签名的随机串
 
@@ -90,27 +92,27 @@
         jsApiList: ['hideMenuItems'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
 
     });
-    wx.ready(function(){
+    wx.ready(function () {
         // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
     });
-    wx.error(function(res){
+    wx.error(function (res) {
         console.log(res);
         // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
 
     });
-{#    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {#}
-{#        WeixinJSBridge.call('hideToolbar');#}
-{#        WeixinJSBridge.call('hideOptionMenu');#}
-{#    });#}
+    {#    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {#}
+    {#        WeixinJSBridge.call('hideToolbar');#}
+    {#        WeixinJSBridge.call('hideOptionMenu');#}
+    {#    });#}
     wx.hideMenuItems({
-        menuList: [ "menuItem:refresh","menuItem:share:timeline"] // 要隐藏的菜单项，只能隐藏“传播类”和“保护类”按钮，所有menu项见附录3
+        menuList: ["menuItem:refresh", "menuItem:share:timeline"] // 要隐藏的菜单项，只能隐藏“传播类”和“保护类”按钮，所有menu项见附录3
     });
 
 </script>
 <script>
     function getCode() {
         var phone = $('#telphone').val();
-        $('.weui-vcode-btn').addClass('weui-btn_disabled').attr('disabled','true');
+        $('.weui-vcode-btn').addClass('weui-btn_disabled').attr('disabled', 'true');
         $.post('{% url 'api:sms' %}', {phone: phone, csrfmiddlewaretoken: '{{ csrf_token }}'}, function (result) {
             if (result['status'] == 0) {
                 countDown()
@@ -119,7 +121,7 @@
             } else if (result.status == 2) {
                 showErr('验证手机号不能为空');
             }
-        },'json')
+        }, 'json')
     }
 
     function countDown() {
@@ -137,33 +139,42 @@
     }
 
     function submitData() {
-        $.post('{% url "user:members_bound" %}',{
-            username:$('#username').val(),
-            telphone:$('#telphone').val(),
-            vcode:$('#vcode').val(),
-            idnumber:$('#idnumber').val(),
-            openid:$('#openid').val(),
-            access_token:$('#access_token').val(),
+        $.post('{% url "user:members_bound" %}', {
+            username: $('#username').val(),
+            telphone: $('#telphone').val(),
+            vcode: $('#vcode').val(),
+            idnumber: $('#idnumber').val(),
+            openid: $('#openid').val(),
+            access_token: $('#access_token').val(),
+            user_unionid: $('#user_unionid').val(),
+            user_nickname: $('#user_nickname').val(),
+            user_sex: $('#user_sex').val(),
+            user_province: $('#user_province').val(),
+            user_city: $('#user_city').val(),
+            user_country: $('#user_country').val(),
             csrfmiddlewaretoken: '{{ csrf_token }}'
-        },function (result) {
-            if(result.status==1){
+        }, function (result) {
+            if (result.status == 1) {
                 showErr('此用户不存在，请核对填写信息');
-            }else if(result.status==2){
+            } else if (result.status == 2) {
                 showErr('此微信已绑定会员');
-            }else if(result.status==3){
+            } else if (result.status == 3) {
                 showErr('数据提交失败');
-            }else if(result.status==4){
+            } else if (result.status == 4) {
                 showErr('验证码失效');
-            }else if(result.status==5){
+            } else if (result.status == 5) {
                 showErr('验证码错误');
-            }else{
+            } else {
                 window.location.href = '{% url 'user:success' %}'
             }
-        },'json')
+        }, 'json')
     }
+
     function showErr(txt) {
         $('.weui-toptips').text(txt).show();
-        setTimeout(function() {$('.weui-toptips').hide();}, 2000);
+        setTimeout(function () {
+            $('.weui-toptips').hide();
+        }, 2000);
     }
 </script>
 </body>
