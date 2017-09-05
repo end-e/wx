@@ -32,7 +32,12 @@ class MembersBoundView(View):
         redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
         # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
         oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
-        res = oauth.fetch_access_token(code)
+        try:
+            res = oauth.fetch_access_token(code)
+        except Exception as e:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect'
+            )
         # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
         # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
         openid = res['openid']
@@ -191,6 +196,7 @@ class MembersUnionid(View):
     """
     获取微信用户unionid
     """
+
     def get(self, reuqest):
         all_members = WechatMembers.objects.values_list('openid', flat=True)
         all_openid = group_list(all_members, 50)
