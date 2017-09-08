@@ -29,7 +29,7 @@ class CashCouponsStoreListView(View):
         access_token = MyViewIkg().token
         url = 'https://api.weixin.qq.com/cgi-bin/poi/getpoilist?access_token={access_token}'.format(
             access_token=access_token)
-        params = {'begin': 0, 'limit': 20}
+        params = {'begin': 0, 'limit': 50}
         json_params = json.dumps(params, ensure_ascii=False).encode('utf-8')
         response = requests.post(url, data=json_params)
         response_dict = response.json()
