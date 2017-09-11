@@ -12,24 +12,13 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:cash_coupons:img_edit' %}"
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:cash_coupons:img_add' %}"
                       enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="control-group">
                         <label class="control-label" for="title">图片标题</label>
                         <div class="controls">
                             <input type="text" name="title" id="title" value="{{ img.title }}">
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="shop">所属门店</label>
-                        <div class="controls">
-                            <select name="shop" id="shop">
-                                {% for shop in shops_list %}
-                                    <option value="{{ shop.shop_code }}"
-                                            {% if img and shop.shop_code == img.shop_code %}selected{% endif %}>{{ shop.shop_name }}</option>
-                                {% endfor %}
-                            </select>
                         </div>
                     </div>
                     <div class="control-group">
@@ -59,9 +48,8 @@
     <script>
         function submitForm() {
             var title = $('#title').val();
-            var shop = $('#shop').val();
             var img = $('#img').val();
-            if (!shop || !title || !img) {
+            if (!title || !img) {
                 noty({"text": "补全信息后，再次提交", "layout": "bottom", "type": "error"});
                 return false;
             } else {

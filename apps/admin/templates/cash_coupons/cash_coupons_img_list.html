@@ -17,16 +17,6 @@
                 <fieldset>
                     {% csrf_token %}
                     <div class="control-group">
-                        <label class="control-label" for="shop">所属门店</label>
-                        <div class="controls">
-                            <select name="shop" id="shop">
-                                {% for shop in shops_list %}
-                                    <option value="{{ shop.shop_code }}">{{ shop.shop_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="control-group">
                         <label class="control-label" for="name">素材名称</label>
                         <div class="controls">
                             <input class="span6" id="name" name="name" type="text" placeholder="素材名称"
@@ -42,9 +32,14 @@
                     </div>
                 </fieldset>
             </form>
+            <div class="alert alert-block ">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <h4 class="alert-heading">提示！</h4>
+                <i class="icon-lock"></i>&nbsp;&nbsp;表示资源不可用，系统将不展示这部分数据，但不会删除。<br>
+            </div>
             <div class="box-content">
                 <div class="span12">
-                    <a class="btn btn-primary" href="{% url 'admin:cash_coupons:img_edit' %}">
+                    <a class="btn btn-primary" href="{% url 'admin:cash_coupons:img_add' %}">
                         <i class="icon-plus"></i>
                         添加素材
                     </a>
@@ -54,7 +49,6 @@
                     <tr>
                         <th>ID</th>
                         <th>素材名称</th>
-                        <th>所属门店</th>
                         <th>图片预览</th>
                         <th>操作</th>
                     </tr>
@@ -63,29 +57,25 @@
                     {% if all_imgs %}
                         {% for img in all_imgs %}
                             <tr>
-                                <td class="center">{{ img.id }}</td>
+                                <td class="center">{{ forloop.counter }}</td>
                                 <td class="center">{{ img.title }}</td>
-                                <td class="center">{{ img.get_shop_code_display }}</td>
-                                <td class="center">{{ img.url }}</td>
+                                <td class="center"><img src="{{ img.url | safe }}" width="25px" height="21px"></td>
                                 <td>
                                     <a class="btn btn-primary" title="编辑"
-                                       href="{% url 'admin:cash_coupons:img_edit' img.id %}">
+                                       href="{% url 'admin:cash_coupons:img_detail' img.id %}">
                                         <i class="icon-edit"></i>
                                     </a>
                                     {% if img.status == '0' %}
-                                        <a class="btn btn-warning" title="禁用"
-                                           onclick="changeStatus('{{ img.id }}','1')">
+                                        <a class="btn btn-warning" title="启用"
+                                           onclick="changeStatus('1','{{ img.id }}')">
                                             <i class="icon-lock"></i>
                                         </a>
                                     {% else %}
-                                        <a class="btn btn-primary" title="启用"
-                                           onclick="changeStatus('{{ img.id }}','0')">
+                                        <a class="btn btn-primary" title="禁用"
+                                           onclick="changeStatus('0','{{ img.id }}')">
                                             <i class="icon-unlock"></i>
                                         </a>
                                     {% endif %}
-                                    <a class="btn btn-danger" title="删除" onclick="imgDel('{{ img.id }}')">
-                                        <i class="icon-trash"></i>
-                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -130,6 +120,20 @@
 {% endblock %}
 {% block common_js %}
     <script>
+        function changeStatus(status, id) {
+            var url = "{% url 'admin:cash_coupons:img_status' 1 0 %}";
+            url = url.replace(0, id);
+            url = url.replace(1, status);
+            $.get(url, function (data) {
+                if (data.status == 0) {
+                    noty({"text": "状态更改成功", "layout": "bottom", "type": "information"});
+                    window.location.reload()
+                } else {
+                    noty({"text": "状态更改失败", "layout": "bottom", "type": "error"});
+                }
+            }, 'json')
+        }
+
         function imgDel(id) {
             var url = "{% url 'admin:giftcard:img_del' %}?id=" + id;
             $.get(url, function (data) {

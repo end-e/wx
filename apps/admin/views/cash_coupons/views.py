@@ -7,9 +7,9 @@ import json
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.views.generic.base import View
+from django.http import JsonResponse
 
 from admin.utils.paginator import MyPaginator
-from wxapp.models import Shops
 from cash_coupons.models import CashCouponsImg
 from apps.admin.utils.myClass import MyViewIkg
 from .forms import UploadFileForm
@@ -46,18 +46,12 @@ class CashCouponsImgListView(View):
     """
 
     def get(self, request):
-        shop_code = request.GET.get('shop', '')
         img_name = request.GET.get('name', '')
 
-        if shop_code and img_name:
-            all_imgs = CashCouponsImg.objects.filter(shop_code=shop_code, title__icontains=img_name).order_by(
-                'create_time')
-        elif shop_code:
-            all_imgs = CashCouponsImg.objects.filter(shop_code=shop_code).order_by('-create_time')
+        if img_name:
+            all_imgs = CashCouponsImg.objects.filter(title__icontains=img_name).order_by('-create_time')
         else:
             all_imgs = CashCouponsImg.objects.all().order_by('-create_time')
-
-        shops_list = Shops.objects.all()
 
         paginator = MyPaginator(all_imgs, 10)
         page_num = request.GET.get('page', 1)
@@ -66,8 +60,7 @@ class CashCouponsImgListView(View):
         except Exception as e:
             print(e)
         return render(request, 'cash_coupons/cash_coupons_img_list.html', {
-            'all_imgs': all_imgs,
-            'shops_list': shops_list
+            'all_imgs': all_imgs
         })
 
 
@@ -77,10 +70,7 @@ class CashCouponsImgUploadView(View):
     """
 
     def get(self, request):
-        img_id = request.GET.get('id', '')
-        shops_list = Shops.objects.all()
-        if img_id:
-            img = CashCouponsImg.objects.get(img_id)
+        form = UploadFileForm()
         return render(request, 'cash_coupons/cash_coupons_img_upload.html', locals())
 
     def post(self, request):
@@ -91,7 +81,6 @@ class CashCouponsImgUploadView(View):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             title = form.cleaned_data['title']
-            shop_code = form.cleaned_data['shop']
             mypic = request.FILES.get('img', '')
             ext = os.path.splitext(mypic.name)[1]
             mypic.name = str(int(time.time())) + ext
@@ -106,9 +95,9 @@ class CashCouponsImgUploadView(View):
                 try:
                     img_id = request.POST.get('img_id', '')
                     if img_id:
-                        CashCouponsImg.objects.filter(id=img_id).update(title=title, shop_code=shop_code, url=cdn_url)
+                        CashCouponsImg.objects.filter(id=img_id).update(title=title, url=cdn_url)
                     else:
-                        CashCouponsImg.objects.create(title=title, shop_code=shop_code, url=cdn_url)
+                        CashCouponsImg.objects.create(title=title, url=cdn_url)
                     return redirect(reverse('cash_coupons/cash_coupons_img_list.html'))
                 except Exception as e:
                     print(e)
@@ -116,4 +105,23 @@ class CashCouponsImgUploadView(View):
             else:
                 res['status'] = 1
                 res['msg'] = rep_data['errmsg']
-            return render(request, 'cash_coupons/cash_coupons_list.html', {})
+            return render(request, 'cash_coupons/cash_coupons_img_upload.html', locals())
+
+
+class CashCouponsImgDetailView(View):
+    def get(self, request, img_id):
+        img = CashCouponsImg.objects.get(id=int(img_id))
+        return render(request, 'cash_coupons/cash_coupons_img_upload.html', {
+            'img': img
+        })
+
+
+class CashCouponsImgStatusView(View):
+    def get(self, request, status, img_id):
+        img_status = CashCouponsImg.objects.filter(id=int(img_id)).update(status=status)
+        res = {}
+        if img_status:
+            res['status'] = 0
+        else:
+            res['status'] = 1
+        return JsonResponse(res)
