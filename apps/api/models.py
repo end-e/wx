@@ -29,3 +29,13 @@ class LogWx(models.Model):
     class Meta:
         db_table='log_wx'
 
+
+class LogShop(models.Model):
+    errmsg = models.CharField(max_length=128, verbose_name=u'错误信息')
+    errcode = models.CharField(max_length=16, verbose_name=u'错误编码')
+    remark = models.CharField(max_length=256, verbose_name='备注', blank=True, null=True)
+    add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
+
+    class Meta:
+        db_table='log_shop'
+

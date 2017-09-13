@@ -34,6 +34,7 @@ urlpatterns =[
     url(r'^order/goods/save/$',order.orderGoodsSave),
     url(r'^order/kgmoney/save/$',order.orderKgMoneySave),
     url(r'^order/$',order.getOrderBySn),
+    url(r'^order/update/status/$',order.updateOrderStatus),
     url(r'^user/orders/(?P<page>[0-9]+)$',order.getOrdersByUser),
 
     #微信支付相关接口

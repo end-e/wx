@@ -44,7 +44,6 @@ def signature2(func):
         token = request.META.get('HTTP_TOKEN','')
         if token:
             wxUser = caches['default'].get(token, '')
-            print(wxUser,token)
             if not wxUser:
                 flag = False
         else:

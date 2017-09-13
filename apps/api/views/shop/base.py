@@ -119,7 +119,6 @@ def getGoodBySn(request,g_sn):
 
 def getShopList(request):
     shops = caches['default'].get('base_shopDict','')
-    print(shops)
     if shops:
         shop_name_list = []
         for code,name in shops.items():

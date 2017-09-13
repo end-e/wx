@@ -55,4 +55,6 @@ urlpatterns = [
     # 微信礼品卡
     url(r'^giftcard/$', include('giftcard.urls', namespace='giftcard')),
 
+
+    url(r'^user/point/(?P<member_id>.*)/(?P<card_no>.*)/(?P<total_pay>.*)/(?P<result_point>.*)/$', 'utils.shop.updateGuestPoint', ),
 ]

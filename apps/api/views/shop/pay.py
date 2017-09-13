@@ -1,4 +1,6 @@
 # -*-  coding:utf-8 -*-
+from django.db import transaction
+
 __author__ = ''
 __date__ = '2017/6/6 9:02'
 import hashlib
@@ -7,9 +9,10 @@ from urllib import parse
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import F
 
-from utils import consts, wxPay
-from admin.models import ShopKgMoneyOrder
+from utils import consts, wxPay,shop
+from admin.models import ShopKgMoneyOrder, ShopUser
 from api.models import LogWx
 
 # @signature
@@ -34,7 +37,6 @@ def getPay(req):
 
 @csrf_exempt
 def payNotify(request):
-    LogWx.objects.create(type='0', errmsg='payNotify', errcode='0')
     recv_xml = request.body
     xml_recv = ET.fromstring(recv_xml)
     # {
@@ -56,30 +58,46 @@ def payNotify(request):
     # "time_end": "20170609093241"
     # }
     return_code = xml_recv.find("return_code").text
-    LogWx.objects.create(type='0', errmsg='payNotify', errcode='0',remark=return_code)
+    out_trade_no = xml_recv.find("out_trade_no").text
+    openid = xml_recv.find("openid").text
+    total_fee = xml_recv.find("total_fee").text
+    remark = "sn:{sn},openid:{openid},total_fee:{total_fee}".format(sn=out_trade_no, openid=openid,total_fee=total_fee)
+    flag = True
     if return_code == 'SUCCESS':
         try:
-            out_trade_no = xml_recv.find("out_trade_no").text
-            ShopKgMoneyOrder.objects.filter(sn=out_trade_no).update(status='9')
+            with transaction.atomic():
+                qs_order = ShopKgMoneyOrder.objects.filter(sn=out_trade_no)
+                order = qs_order.values('count').first()
+                count = int(order['count'])
+                #更新用户宽豆数量
+                ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') + count)
+                #更新订单状态
+                qs_order.update(status='9')
 
-            return_xml = '''
-                <xml>
-                    <return_code><![CDATA[SUCCESS]]></return_code>
-                    <return_msg><![CDATA[OK]]></return_msg>
-                </xml>'''
+                shop.createLogShop({"errcode":21399,"errmsg":"ok","remark":remark})
         except Exception as e:
             print(e)
-            return_xml = '''
-                <xml>
-                    <return_code><![CDATA[FAIL]]></return_code>
-                    <return_msg><![CDATA[参数格式校验错误]]></return_msg>
-                </xml>'''
+            flag = False
+            shop.createLogShop({"errcode": 21302, "errmsg": "wx pay success, local update fail", "remark": remark})
+    else:
+        flag = False
+        remark = "sn:{sn},type:1".format(sn=out_trade_no)
+        shop.createLogShop({"errcode": 21301, "errmsg": "wx pay fail", "remark": remark})
+
+    if flag:
+        return_xml = '''
+        <xml>
+            <return_code><![CDATA[SUCCESS]]></return_code>
+            <return_msg><![CDATA[OK]]></return_msg>
+        </xml>
+        '''
     else:
         return_xml = '''
-                <xml>
-                    <return_code><![CDATA[FAIL]]></return_code>
-                    <return_msg><![CDATA[参数格式校验错误]]></return_msg>
-                </xml>'''
+        <xml>
+            <return_code><![CDATA[FAIL]]></return_code>
+            <return_msg><![CDATA[参数格式校验错误]]></return_msg>
+        </xml>
+        '''
     return HttpResponse(return_xml)
 
 

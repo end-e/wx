@@ -53,59 +53,37 @@
                     <tr>
                         <th>订单号</th>
                         <th>宽豆(个)</th>
+                        <th>价格</th>
                         <th>用户</th>
-                        <th>电话</th>
-                        <th>地址</th>
-                        <th>配送</th>
+                        <th>支付类型</th>
+
                         <th>状态</th>
                         <th>下单时间</th>
-                        <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for order in orders %}
                         <tr>
                             <td>{{ order.sn }}</td>
-                            <td>{{ order.price }}</td>
-                            <td>{{ order.name }}</td>
-                            <td>{{ order.tel }}</td>
-                            <td>{{ order.snap_address }}</td>
-                            <td>{{ order.express |toShopOrderExpress }}</td>
-                            <td>{{ order.status | toShopOrderStatus }}</td>
-                            <td>{{ order.save_time }}</td>
-                            <td class="center  sorting_1">
-                                <a class="btn btn-info btn-toggle" title="详情">
-                                    <i class="icon-double-angle-down"></i>
-                                </a>
-                                {% if order.express == 1 and order.status == 9  %}
-                                <a class="btn btn-warning btn-express" data-sn="{{ order.sn }}" data-express="{{ order.express }}" title="确认发货">
-                                    <i class=" icon-truck"></i>
-                                </a>
+                            <td>{{ order.count }}</td>
+                            <td>
+                                {{ order.price }}
+                                {% if order.pay_type == '0' %}
+                                    积分
+                                {% else %}
+                                    人民币
                                 {% endif %}
-                                <a class="btn btn-danger btn-sign" data-sn="{{ order.sn }}" title="确认签收">
-                                    <i class="icon-retweet"></i>
-                                </a>
                             </td>
-                        </tr>
-                        <tr class="card_list" style="display: none">
-                            <td colspan="9">
-                                <table class="table table-striped table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>名称</th>
-                                            <th>数量</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in order.items %}
-                                            <tr>
-                                                <td>{{ item.good_name }}</td>
-                                                <td>{{ item.good_num }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                            <td>{{ order.name }}</td>
+                            <td>
+                                {% if order.pay_type == '0' %}
+                                    积分兑换
+                                {% else %}
+                                    人民币兑换
+                                {% endif %}
                             </td>
+                            <td>{{ order.status }}</td>
+                            <td>{{ order.save_time }}</td>
                         </tr>
                     {% empty %}
                         <tr>
@@ -178,74 +156,10 @@
             }
         }
     });
-
-</script>
-<script type="text/javascript">
-    $('.btn-toggle').click(function () {
-        var icon = $(this).find('i').attr('class');
-        if(icon =='icon-double-angle-down'){
-            $(this).parents('tr').next('tr').css('display','table-row');
-            $(this).find('i').attr('class','icon-double-angle-up');
-        }else {
-            $(this).parents('tr').next('tr').css('display','none');
-            $(this).find('i').attr('class','icon-double-angle-down');
-        }
-    });
-
-    function switchPage(page_num) {
+function switchPage(page_num) {
         $('#page_num').val(page_num);
         $('#Form').submit();
     }
 
-    $(".btn-sign").click(function(b){
-        b.preventDefault();
-        $("#signModal").modal("show");
-        var order_sn = $(this).attr('data-sn');
-        $("#sign-enter").attr('data-sn',order_sn);
-    });
-
-    $(".btn-express").click(function(b){
-        b.preventDefault();
-        $("#expressModal").modal("show");
-        var express=$(this).attr('data-express');
-        if(express=='0'){
-            $('#express_sn').hide();
-        }else {
-            $('#express_sn').show();
-        }
-        var order_sn = $(this).attr('data-sn');
-        $("#express-enter").attr({'data-sn':order_sn,'data-express':express});
-    });
-
-    function updateOrderStatus(status,dom) {
-        var sn = $(dom).attr('data-sn');
-        var data = {
-            status:status,
-            sn:sn,
-            csrfmiddlewaretoken:"{{ csrf_token }}"
-        };
-        if(status=='7'){
-            var express = $(dom).attr('data-express');
-            if(express=='1'){
-                var express_sn = $('#express_sn').val();
-                if(!express_sn){
-                    alert('物流配送单号不能为空');
-                    return false;
-                }
-                data['express_sn'] = express_sn;
-            }
-            data['express'] = express;
-        }
-        var url = "{% url 'admin:shop:update_status' %}";
-
-        $.post(url,data,function (res) {
-            if(res.errcode=='0'){
-                noty({"text": "状态更新成功", "layout": "bottom", "type": "information"});
-                window.location.reload(true)
-            }else {
-                noty({"text": "状态更新失败", "layout": "bottom", "type": "error"});
-            }
-        },'json')
-    }
 </script>
 {% endblock %}

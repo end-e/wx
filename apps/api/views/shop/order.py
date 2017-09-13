@@ -16,8 +16,9 @@ from utils.myClass import MyException
 from user.models import WechatMembers
 from api.decorator import signature2
 
-
+str = {'session_key': 'm1KGGCKeHa7LbIQd7y9VjA==', 'openid': 'oDZT50NGqXbcAZrFRHUBDll6uK5A', 'expires_in': 7200, 'unionid': 'oczeW0ZcLgIUMzQUqePOckA3s2Yk'}
 @csrf_exempt
+@signature2
 def orderGoodsSave(request):
     openid = shop.getWxUserOpenID(request)
     order = request.POST.get('order',{})
@@ -79,61 +80,82 @@ def orderGoodsSave(request):
             res = method.createResult(0,'ok', {'order_sn':sn})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
         if hasattr(e,'value'):
             err = e.value.split(':')
             res = method.createResult(err[0],err[1])
-
 
     return HttpResponse(json.dumps(res))
 
 
 @csrf_exempt
+@signature2
 def orderKgMoneySave(request):
-    openid = shop.getWxUserOpenID(request)
+    wxUser = shop.getWxUser(request)
+    openid = wxUser['openid']
+    unionid = wxUser['unionid']
     kg_money = request.POST.get('kgMoney', 0)
     pay_type = request.POST.get('payType', '0')
-    total_pay = request.POST.get('totalPay', 0)
-
-    res = {}
+    total_pay = float(request.POST.get('totalPay', 0))
     try:
         with transaction.atomic():
             if pay_type not in ('0','1'):
-                raise MyException('支付类型错误')
-            # 0、获取订单编号并新建订单
+                raise MyException('{"errcode":21101,"errmsg":"支付类型错误"}')
+
             sn = shop.createOrderSn(ShopKgMoneyOrder)
-            ShopKgMoneyOrder.objects.create(
-                sn = sn, count = kg_money, pay_type = pay_type, price = total_pay, customer = openid
-            )
+            if pay_type == '0':#积分支付
+                # 1、guest中查询会员积分数量
+                member = WechatMembers.objects.values('membernumber').filter(unionid=unionid).first()
+                if not member:
+                    raise MyException('{"errcode":21201,"errmsg":"未查询到此openid对应的会员卡号"}')
+                # 2、新建订单
+                ShopKgMoneyOrder.objects.create(
+                    sn=sn, count=kg_money, pay_type=pay_type, price=total_pay, customer=openid,status='9'
+                )
 
-            #guest中查询会员积分数量
-            member = WechatMembers.objects.values('membernumber').filter(openid=openid).first()
-            point_now = 0
-            if member:
-                if pay_type == '0':
-                    member_id = member['membernumber']
-                    res_update = shop.updateGuestPoint(member_id,total_pay)
-                    if res_update[0] == 0 :
-                        point_now = res_update[3]
-                    else:
-                        raise MyException(res_update[1])
+                # 3、增加会员宽广豆数量
+                ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money') + int(kg_money))
 
-                    #增加会员宽广豆数量
-                    ShopUser.objects.filter(openid=openid).update(kg_money=F('kg_money')+int(kg_money))
-            else:
-                raise MyException('微查询到此openid对应的会员')
-            res = method.createResult(0, 'ok',{'order_sn':sn,'point':point_now})
+                # 4、更新会员积分
+                card_no = member['membernumber']
+                member = shop.getGuest(card_no)
+                if not member:
+                    raise MyException('{"errcode":21202,"errmsg":"实名绑定的会员卡异常"}')
+                member_point = float(member['point'])
+                member_id = member['memberid']
+                if member_point<total_pay:
+                    raise MyException('{"errcode":21203,"errmsg":"会员卡积分余额不足"}')
+
+                result_point = member_point-total_pay
+                res_update = shop.updateGuestPoint(member_id,card_no,total_pay,result_point)
+                if not res_update:
+                    raise MyException('{"errcode":21202,"errmsg":"系统错误，积分减值失败"}')
+
+                res = method.createResult(0, 'ok', {'order_sn': sn, 'point': result_point})
+
+            elif pay_type == '1':# 微信支付
+                ShopKgMoneyOrder.objects.create(
+                    sn=sn, count=kg_money, pay_type=pay_type, price=total_pay, customer=openid
+                )
+                res = method.createResult(0, 'ok', {'order_sn': sn})
+
+            log = '{"errcode":21199,"errmsg":"ok"}'
+            log = json.loads(log)
+            log['remark'] = "type:{type},sn:{sn}".format(type=pay_type, sn=sn)
+
     except Exception as e:
         print(e)
-        if hasattr(e, 'value'):
-            errmsg = e.value
-        else:
-            errmsg = e
-        res = method.createResult(1, errmsg)
+        log = '{{"errcode":21102,"errmsg":"{errmsg}"}}'
+        log = log.format(errmsg=e.value ) if hasattr(e, 'value') else log.format(errmsg=e.args[0] )
 
+        log = json.loads(log)
+        res = method.createResult(1, log['errmsg'])
+
+    shop.createLogShop(log)
     return HttpResponse(json.dumps(res))
 
 
+@signature2
 def getOrdersByUser(request,page):
     openid = shop.getWxUserOpenID(request)
     try:
@@ -142,7 +164,7 @@ def getOrdersByUser(request,page):
                 'count':'SELECT COUNT(*) FROM shop_order_info WHERE shop_order_info.order_sn=shop_order.sn',
                 'type':'0'
             }
-        ).values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
+        ).values('sn', 'price', 'save_time', 'status','count','type','snap_img','snap_name').filter(customer=openid)
 
         money_orders = ShopKgMoneyOrder.objects.extra(select={'type':'1'}) \
             .values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
@@ -162,6 +184,7 @@ def getOrdersByUser(request,page):
     return HttpResponse(json.dumps(res))
 
 
+@signature2
 def getOrderBySn(request):
     """
     获取用户订单
@@ -201,4 +224,19 @@ def getOrderBySn(request):
     except Exception as e:
         print(e)
         res = method.createResult(1, str(e))
+    return HttpResponse(json.dumps(res))
+
+
+@csrf_exempt
+@signature2
+def updateOrderStatus(request):
+    sn =request.POST.get('sn','')
+    status =request.POST.get('status','')
+    order_type =request.POST.get('orderType','')
+    if order_type == '1':
+        ShopKgMoneyOrder.objects.filter(sn=sn).update(status=status)
+        res = method.createResult(0, 'ok')
+    elif order_type == '0':
+        ShopOrder.objects.filter(sn=sn).update(status=status)
+        res = method.createResult(0, 'ok')
     return HttpResponse(json.dumps(res))

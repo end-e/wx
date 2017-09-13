@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import caches
 from django.http import HttpResponse
 
-from admin.models import GiftCardCode, GiftBalanceChangeLog
+from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder
 from api.models import LogWx
 from utils import consts, method,wx,giftcard,data
 
@@ -116,47 +116,6 @@ def cron_gift_change_balance():
 
     return HttpResponse(res_msg)
 
-
-def cron_gift_change_balance2():
-    prev_id = caches['default'].get('wx_log_balance_id', '')
-
-    kwarg = {}
-    if prev_id:
-        kwarg.setdefault('id__gt',prev_id)
-    kwarg.setdefault('type', 2)
-    kwarg.setdefault('errcode', 40001)
-    log_list = LogWx.objects.values('id','remark').filter(**kwarg)
-    LogWx.objects.create(type='2', errmsg=len(log_list), errcode='2')
-    access_token = caches['default'].get('wx_kgcs_access_token', '')
-    if not access_token:
-        wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
-    if(len(log_list)>0):
-        try:
-            threads = []
-            for log in log_list:
-                remark = log['remark']
-                info = remark.split(',')
-                info = {obj.split(':')[0]: obj.split(':')[1] for obj in info }
-
-                thread = Thread(target=gift_change_balance,
-                                args=(info['card_id'].strip(), info['code'], info['balance'], access_token,)
-                                )
-                threads.append(thread)
-                thread.start()
-            last_id = log_list[-1]['id']
-            caches['default'].set('wx_log_balance_id', last_id)
-            res_msg = 'ok'
-        except Exception as e:
-            print(e)
-            LogWx.objects.create(type='2', errmsg=e, errcode='2')
-            res_msg = e
-
-    else:
-        res_msg = 'no order'
-
-    return HttpResponse(res_msg)
-
-
 def cron_gift_compare_order():
     res = {}
     res['status'] = 0
@@ -193,3 +152,8 @@ def gift_compare_order(offset=0):
         res['status'] = 1
 
     return res
+
+def cron_shop_order_sign():
+    save_time = datetime.date.today()+datetime.timedelta(-1)
+    res = ShopOrder.objects.filter(save_time__lte=save_time,status='7').update(status='8')
+    print('cron_shop_order_sign update rows:'+res)

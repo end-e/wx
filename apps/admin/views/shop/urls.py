@@ -7,7 +7,7 @@ from admin.views.shop.good import GoodView,GoodEditView,GoodCategoryView,GoodImg
 from admin.views.shop.category import CategoryView,CategoryEditView
 from admin.views.shop.theme import ThemeView,ThemeEditView,ThemeInfoEditView
 from admin.views.shop.banner import BannerView,BannerEditView,BannerInfoView,BannerInfoEditView
-from admin.views.shop.order import OrderView
+from admin.views.shop.order import OrderView,KgMoneyOrderView,UpdateStatus
 
 urlpatterns = [
     url(r'^good/$',GoodView.as_view(),name='goods'),
@@ -29,6 +29,8 @@ urlpatterns = [
     url(r'^banner/info/edit/(?P<b_id>[0-9]+)/(?P<i_id>[0-9]+)$',BannerInfoEditView.as_view(),name='banner_info_edit'),
 
     url(r'^order/(?P<page>[0-9]+)/$',OrderView.as_view(),name='orders'),
+    url(r'^order/kg/(?P<page>[0-9]+)/$',KgMoneyOrderView.as_view(),name='kg_orders'),
+    url(r'^order/status/$',UpdateStatus.as_view(),name='update_status'),
 ]
 
 

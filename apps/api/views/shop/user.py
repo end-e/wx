@@ -109,12 +109,14 @@ def getUserPoint(request):
     unionid = wxUser['unionid']
     res = {}
     try:
-        member_list = WechatMembers.objects.values('membernumber').filter(unionid=unionid)
-        if member_list.count()>0:
-            member = member_list.first()
+        member = WechatMembers.objects.values('membernumber').filter(unionid=unionid).first()
+        if member:
             member_id = member['membernumber']
             res['member_id'] = member_id
-            point = shop.getGuestPoint(member_id)
+            guest = shop.getGuest(member_id)
+            if not guest:
+                raise MyException('the card is abnormal')
+            point = float(guest['point'])
             res = method.createResult(0, 'ok', {'point': point, 'openid': openid})
         else:
             raise MyException('the member is not in WechatMembers')

@@ -114,12 +114,15 @@ if __name__ == '__main__':
     # q.join()
     # print(q.get())
 
-    from concurrent.futures import ThreadPoolExecutor
-    def echo_data(data):
-        print(data)
-    pool = ThreadPoolExecutor(10)
-    for i in range(1,10):
-        pool.submit(echo_data,i)
+    # from concurrent.futures import ThreadPoolExecutor
+    # def echo_data(data):
+    #     print(data)
+    # pool = ThreadPoolExecutor(10)
+    # for i in range(1,10):
+    #     pool.submit(echo_data,i)
+
+    from utils import method
+    method.getAllShops()
 
 
 

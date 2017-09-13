@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'cron/temp/', cron.cron_send_temp, name='cron_send_temp'),
     url(r'cron/gift/card/check', cron.cron_gift_compare_order, name='cron_gift_card_check'),
     url(r'cron/gift/change/balance/$', cron.cron_gift_change_balance, name='cron_gift_change_balance'),
-    url(r'cron/gift/change/balance2/$', cron.cron_gift_change_balance2, name='cron_gift_change_balance2'),
+    url(r'cron//shop/order/update$', cron.cron_shop_order_sign),
     # 配置自定义菜单(https://www.zisai.net/api/menu/create/)
     url(r'^menu/create/$', views.create_nav, name='menu_create'),
     url(r'^sms/$', sms.main, name='sms'),

@@ -240,6 +240,7 @@ class ShopOrder(models.Model):
     status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
     shop = models.CharField(max_length=12, verbose_name=u'配送门店', blank=True,null=True)
     express = models.IntegerField(verbose_name=u'快递',default='0')
+    express_sn = models.CharField(max_length=32,verbose_name=u'快递单号',blank=True,null=True)
     save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
     sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
     remark = models.TextField(verbose_name=u'备注留言',blank=True,null=True)
@@ -265,6 +266,7 @@ class ShopKgMoneyOrder(models.Model):
     customer = models.CharField(max_length=50, verbose_name=u'用户openID', default='0')
     status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
     save_time = models.DateTimeField(default=datetime.now, verbose_name=u'下单时间')
+
     class Meta:
         db_table = 'shop_kgmoney_order'
 
@@ -278,7 +280,6 @@ class ShopTheme(models.Model):
     begin_time = models.DateTimeField(default=datetime.now, verbose_name=u'开始日期')
     end_time = models.DateTimeField(default=datetime.now, verbose_name=u'结束日期')
     sort = models.CharField(max_length=2, verbose_name=u'排序', default=1)
-
 
     class Meta:
         db_table = 'shop_theme'
@@ -344,4 +345,3 @@ class ShopBannerInfo(models.Model):
 
     class Meta:
         db_table = 'shop_banner_info'
-
