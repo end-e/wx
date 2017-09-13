@@ -25,6 +25,7 @@
                         <th>门店名称</th>
                         <th>所在城市</th>
                         <th>所在地区</th>
+                        <th>门店经纬度</th>
                         <th>门店状态</th>
                     </tr>
                     </thead>
@@ -36,6 +37,7 @@
                             <td class="center">{{ shop.base_info.branch_name }}</td>
                             <td class="center">{{ shop.base_info.city }}</td>
                             <td class="center">{{ shop.base_info.district }}</td>
+                            <td class="center">{{ shop.base_info.longitude }},{{ shop.base_info.latitude }}</td>
                             <td class="center">{% if shop.base_info.available_state == 3 %}审核通过{% else %}
                                 审核未通过{% endif %}</td>
                         </tr>

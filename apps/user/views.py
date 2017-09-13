@@ -25,18 +25,30 @@ class MembersBoundView(View):
         code = request.GET.get('code', '')
         if not code:
             return redirect(
-                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect'
             )
 
         # 会员绑定页面 urlEncode，除0~9，a~Z外，全部转换成ascii形式
         redirect_uri = parse.quote('http://www.zisai.net/user/membersbound/')
         # 通过code获取网页授权access_token，这里的access_token不同于与调用接口的access_token不同
         oauth = WeChatOAuth(consts.APPID, consts.APPSECRET, redirect_uri)
-        res = oauth.fetch_access_token(code)
+        try:
+            res = oauth.fetch_access_token(code)
+        except Exception as e:
+            return redirect(
+                u'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5afe243d26d9fe30&redirect_uri=http%3A//www.zisai.net/user/membersbound&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect'
+            )
         # 因为这里使用的授权作用域是snsapi_base，所以微信也返回了openid，snsapi_base网页授权流程到此为止
         # 如果使用的授权作用域是snsapi_userinfo，还需要继续使用网页授权access_token，详情见官网文档
         openid = res['openid']
         access_token = res['access_token']
+        user_info = oauth.get_user_info()
+        user_unionid = user_info['unionid']
+        user_nickname = user_info['nickname']
+        user_sex = user_info['sex']
+        user_province = user_info['province']
+        user_city = user_info['city']
+        user_country = user_info['country']
 
         wx_ikg_access_token = caches['default'].get('wx_ikg_access_token', '')
         app_id = consts.APPID
@@ -69,6 +81,12 @@ class MembersBoundView(View):
             idnumber = request.POST.get('idnumber', '')
             openid = request.POST.get('openid', '')
             access_token = request.POST.get('access_token', '')
+            user_unionid = request.POST.get('user_unionid', '')
+            user_nickname = request.POST.get('user_nickname', '')
+            user_sex = request.POST.get('user_sex', '')
+            user_province = request.POST.get('user_province', '')
+            user_city = request.POST.get('user_city', '')
+            user_country = request.POST.get('user_country', '')
 
             # 验证是否是实名制会员
             conn = db.getMysqlConn2()
@@ -97,6 +115,12 @@ class MembersBoundView(View):
                     wechat_member.openid = openid
                     wechat_member.username = username
                     wechat_member.telphone = telphone
+                    wechat_member.nikename = user_nickname
+                    wechat_member.sex = user_sex
+                    wechat_member.city = user_city
+                    wechat_member.country = user_country
+                    wechat_member.province = user_province
+                    wechat_member.unionid = user_unionid
                     wechat_member.save()
                 except IntegrityError:
                     # 此微信已绑定会员
@@ -169,6 +193,10 @@ class SuccessView(View):
 
 
 class MembersUnionid(View):
+    """
+    获取微信用户unionid
+    """
+
     def get(self, reuqest):
         all_members = WechatMembers.objects.values_list('openid', flat=True)
         all_openid = group_list(all_members, 50)

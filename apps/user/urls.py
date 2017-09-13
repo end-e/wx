@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from .views import MembersBoundView, MembersImageView,SuccessView, MembersUnionid
+from .views import MembersBoundView, MembersImageView, SuccessView, MembersUnionid
 
 urlpatterns = [
     # 会员绑定页面
