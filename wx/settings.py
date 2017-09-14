@@ -90,8 +90,8 @@ DATABASES = {
         'NAME': consts.DB_NAME,
         'USER': consts.DB_USER,
         'PASSWORD': consts.DB_PASSWORD,
-        'HOST': '192.168.250.12',
-        # 'HOST': '127.0.0.1'
+        # 'HOST': '192.168.250.12',
+        'HOST': '127.0.0.1'
     }
 }
 
@@ -167,7 +167,7 @@ CRONJOBS = [
     ('1 */1 * * *', 'api.views.cron.cron_get_kgcs_token'),
     ('* 6-23 * * *', 'api.views.cron.cron_send_temp'),
     ('* 6-23 * * *', 'api.views.cron.cron_gift_change_balance'),
-    ('30 23 * * *', 'api.views.cron.cron_gift_compare_order'),
+    ('1 */1 * * *', 'api.views.cron.cron_gift_compare_order'),
     ('59 23 * * *', 'api.views.cron.cron_shop_order_sign'),
 ]
 
