@@ -5,10 +5,12 @@ import json,requests
 
 from django.db import transaction
 
+from admin.utils.myClass import MyException
 from admin.models import GiftCardCode,GiftOrder,GiftOrderInfo
 from api.models import LogWx
 from django.core.cache import caches
 from utils import consts,wx
+from admin.utils import method
 
 @transaction.atomic
 def giftcard_pay_done(order_id):
@@ -38,6 +40,7 @@ def giftcard_pay_done(order_id):
                 orderID = order.id
                 info_list = []
                 code_list = []
+                #
                 for card in card_list:
                     code_list.append(card['code'])
                     info = GiftOrderInfo()
@@ -48,6 +51,10 @@ def giftcard_pay_done(order_id):
                     info_list.append(info)
                 GiftOrderInfo.objects.bulk_create(info_list)
                 GiftCardCode.objects.filter(code__in=code_list).update(status='1')
+                # 更改guest状态
+                res_guest = method.updateCardMode(code_list, 9, 1)
+                if res_guest['status'] == 1:
+                    raise MyException('订单'+order_id+'中的code,在guest中状态更新失败')
                 res['status'] = 0
         except Exception as e:
             print(e)

@@ -407,10 +407,10 @@ class CardUpCodeManualView(MyView):
                         item.code = code
                         mode_list.append(item)
                     GiftCardCode.objects.bulk_create(mode_list)
-                    #更新guest中code的状态
-                    res_update1 = method.updateCardMode(codes,9,1)
-                    if res_update1['status'] != 0:
-                        raise MyException('Code状态更新失败')
+                    # #更新guest中code的状态
+                    # res_update1 = method.updateCardMode(codes,9,1)
+                    # if res_update1['status'] != 0:
+                    #     raise MyException('Code状态更新失败')
 
                     if res_upload['status'] == 0 :
                         res['status'] = 0#全部成功

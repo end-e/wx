@@ -8,7 +8,7 @@ from django.db import transaction
 
 from user.models import WechatMembers
 from utils import db
-from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode, GiftBalanceChangeLog
+from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode, GiftBalanceChangeLog,GiftOrder1,GiftOrderInfo1
 from api.models import LogWx
 
 def get_user_order():
@@ -55,7 +55,7 @@ def getGiftBalance():
     else:
         whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 AS a,guest AS b " \
+    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 a with (nolock) ,guest b with (nolock)  " \
                 "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
 
 
@@ -86,7 +86,7 @@ def getGiftBalance():
 @transaction.atomic
 def local_save_gift_order(wx_orders):
     for order in wx_orders:
-        order_qs = GiftOrder.objects.filter(order_id=order['order_id'])
+        order_qs = GiftOrder.objects.select_for_update().filter(order_id=order['order_id'])
         if order_qs.count()==0:
             try:
                 with transaction.atomic():
@@ -108,20 +108,14 @@ def local_save_gift_order(wx_orders):
                         info_list.append(info)
                     GiftOrderInfo.objects.bulk_create(info_list)
                     GiftCardCode.objects.filter(code__in=code_list).update(status='1')
-            except Exception as e:
-                print(e)
-                LogWx.objects.create(
-                    type='6',
-                    errmsg=e,
-                    errcode='6',
-                    remark='wx_order_id:{order}'.format(order=order['order_id'])
-                )
+            except :
+                pass
 
 
 def getCodeBySheetID(sheetid,price,count=100):
     num_new = 100 if int(count) > 100 else int(count)
     conn = db.getMsSqlConn()
-    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest " \
+    sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest with (nolock) " \
           "WHERE cardType='12' AND sheetid='{sheetid}' AND New_amount={value} AND Detail ={value} " \
           "ORDER BY cardNo" \
         .format(sheetid=sheetid, value=price, num=num_new)

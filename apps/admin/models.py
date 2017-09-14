@@ -62,9 +62,7 @@ class GiftCard(models.Model):
     notice = models.CharField(verbose_name=u'使用提醒',max_length=12,default='')
     description = models.CharField(verbose_name=u'使用说明',max_length=1000,default='')
     status = models.CharField(max_length=1, verbose_name=u'状态(0:封存;1:禁用,2:启用,9:上线;)', default='2')
-    # supply_bonus = models.CharField(max_length=1, verbose_name=u'支持积分',default='1')
-    # supply_balance = models.CharField(max_length=1, verbose_name=u'支持余额',default='0')
-    # auto_activate = models.CharField(max_length=1, verbose_name=u'自动激活',default='1')
+    update_time = models.DateTimeField(default=datetime.now)
 
     class Meta:
         verbose_name = u'礼品卡信息'
@@ -136,10 +134,13 @@ class GiftPage(models.Model):
 
 class GiftCardCode(models.Model):
     wx_card_id = models.CharField(max_length=32,verbose_name=u'卡实例ID')
-    code = models.CharField(max_length=12,verbose_name=u'线下Code',unique=True)
+    code = models.CharField(max_length=12,verbose_name=u'线下Code')
     status = models.CharField(max_length=1, default='0', verbose_name='code状态u(0:未销售;1:已销售)')
+    update_time = models.DateTimeField(default=datetime.now)
+
     class Meta:
         db_table = 'gift_card_code'
+        unique_together = ('wx_card_id', 'code',)
 
 
 class GiftBalanceChangeLog(models.Model):
@@ -295,8 +296,8 @@ class ShopThemeInfo(models.Model):
 
 
 class ShopUser(models.Model):
-    openid = models.CharField(max_length=50,verbose_name=u'',unique=True)
-    unionid = models.CharField(max_length=50,verbose_name=u'',unique=True,default='')
+    openid = models.CharField(max_length=50,verbose_name=u'')
+    unionid = models.CharField(max_length=50,verbose_name=u'')
     nickname = models.CharField(max_length=20,verbose_name=u'昵称')
     extend = models.CharField(max_length=128,verbose_name=u'',default='')
     kg_money = models.IntegerField(default=0,verbose_name=u'宽广豆')
@@ -305,6 +306,7 @@ class ShopUser(models.Model):
 
     class Meta:
         db_table = 'shop_user'
+        unique_together = ('openid', 'unionid',)
 
 
 class ShopAddress(models.Model):

@@ -76,7 +76,7 @@ def cron_send_temp():
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
 
 
-def cron_gift_change_balance(req):
+def cron_gift_change_balance():
     # 1、查询消费记录
     prev_last_serial, orders = data.getGiftBalance()
     if len(orders) > 0:
@@ -122,17 +122,8 @@ def cron_gift_change_balance(req):
 def cron_gift_compare_order(req):
     res = {}
     res['status'] = 0
-    res_get = giftcard.get_Wx_order()
-    if res_get['status'] == 0:
-        offset = res_get['offset']
-        total_count = res_get['total_count']
-        wx_orders = res_get['wx_orders']
-        data.local_save_gift_order(wx_orders)
-
-        if total_count > (offset + 1) * 100:
-            gift_compare_order(offset + 1)
-
-    else:
+    res_compare = gift_compare_order()
+    if res_compare['status'] != 0:
         LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
         return HttpResponse('fail')
     return HttpResponse('ok')
@@ -143,12 +134,12 @@ def gift_compare_order(offset=0):
     res['status'] = 0
     res_get = giftcard.get_Wx_order(offset)
     if res_get['status'] == 0:
-        offset = res_get['offset']
         total_count = res_get['total_count']
         wx_orders = res_get['wx_orders']
         data.local_save_gift_order(wx_orders)
+
         if total_count > (offset + 1) * 100:
-            gift_compare_order(offset + 1)
+            gift_compare_order(offset+1)
 
     else:
         res['status'] = 1
