@@ -24,7 +24,14 @@ def index(request):
     if voucher_name != '':
         kwargs.setdefault('voucher_name__contains', voucher_name)
 
-    List = Voucher.objects.filter(**kwargs).order_by('voucher_no')
+    List = Voucher.objects.filter(**kwargs).order_by('-end_date')
+
+    paginator = MyPaginator(List, 10)
+    page_num = request.GET.get('page', 1)
+    try:
+        List = paginator.page(page_num)
+    except Exception as e:
+        print(e)
 
     return render(request, 'wxapp/voucher/index.html', locals())
 
