@@ -5,11 +5,10 @@
         <div class="box span12">
             <div class="box-header">
                 <h2>
-                    <i class="icon-list"></i>券列表
+                    <i class="icon-list"></i>券分类
                 </h2>
             </div>
             <div class="box-content">
-                <a class="btn btn-success" href="{% url 'wxapp:class_edit' 0 %}">新建</a>
                 <div class="widget-box">
                     <div class="widget-content nopadding" style="overflow-x:auto; ">
                         <table class="table table-striped table-hover table-form-my">
@@ -24,7 +23,6 @@
                                 <tr>
                                     <td>{{ row.class_name }}</td>
                                     <td><a class="btn btn-success" href="{% url 'wxapp:class_edit' row.id %}">修改</a>
-                                        <a class="btn btn-danger" onclick="delete_info({{ row.id }})">删除</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -45,7 +43,7 @@
     <script>
         function delete_info(id) {
             if (window.confirm("确定要删除该记录吗？")) {
-                var v_url = "{% url 'wxapp:class_delete' 0%}";
+                var v_url = "{% url 'wxapp:class_delete' 0%}"
                 v_url = v_url.replace('0', id);
                 window.location.href = v_url;
             }
