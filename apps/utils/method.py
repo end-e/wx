@@ -51,6 +51,8 @@ def getCityShops(city):
         cur = conn.cursor()
         cur.execute(sql)
         shops = cur.fetchall()
+        cur.close()
+        conn.close()
     elif city == 'T':
         conn = db.getMysqlConnection(
             consts.DB_SERVER_18,
@@ -63,6 +65,8 @@ def getCityShops(city):
         cur = conn.cursor()
         cur.execute(sql)
         shops = cur.fetchall()
+        cur.close()
+        conn.close()
 
     return shops
 

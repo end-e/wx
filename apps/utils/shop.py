@@ -33,6 +33,8 @@ def getGuest(card_no):
     cur = conn.cursor()
     cur.execute(sql)
     guest = cur.fetchone()
+    cur.close()
+    conn.close()
     if guest:
         return guest
     else:
@@ -45,13 +47,14 @@ def updateGuestPoint(member_id,card_no,total_pay,result_point):
         consts.DB_SERVER_22, consts.DB_PORT_22, consts.DB_USER_22,
         consts.DB_PASSWORD_22, consts.DB_DATABASE_22, None
     )
+    cur = conn.cursor()
     try:
 
         conn.autocommit(False)
 
         update_guest = "update Guest  set Point={result_point},LastUseDate=GETDATE(),LastShopID='K001' " \
                        "where CardNo='{CardNo}'".format(result_point=result_point,CardNo=card_no)
-        cur = conn.cursor()
+
         cur.execute(update_guest)
 
         update_shop_guest = "update ShopGuest set Point=Point-{total_pay} where CardNo='{CardNo}' and Shopid='K001'"\
@@ -75,6 +78,9 @@ def updateGuestPoint(member_id,card_no,total_pay,result_point):
         print(e)
         conn.rollback()
         return None
+    finally:
+        cur.close()
+        conn.close()
 
 
 def getWxUser(request):

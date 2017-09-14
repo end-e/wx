@@ -256,6 +256,7 @@ class CardStockView(View):
 
 
 class CardDelView(MyView):
+    @transaction.atomic
     def post(self, request):
         res = {}
         action = request.POST.get('action')
@@ -337,6 +338,7 @@ class CardUpCodeManualView(MyView):
         price = card['price']
         return render(request,'giftcard/card_code_up.html',locals())
 
+    @transaction.atomic
     def post(self,request, wx_card_id):
         action = request.POST.get('action','')
         qs_card = GiftCard.objects.values('id','init_balance','quantity').filter(wx_card_id=wx_card_id).first()
@@ -358,29 +360,6 @@ class CardUpCodeManualView(MyView):
 
             codes_correct_num = len(codes_correct)
             codes_error_num = len(codes_error)
-
-            # starts = request.POST.getlist('start[]')
-            # ends = request.POST.getlist('end[]')
-            # card_code_list = []
-            # card_code_list_old = []
-            #
-            # for i in range(0,len(starts)):
-            #     for code in range(int(starts[i]),int(ends[i])+1):
-            #         card_code_list_old.append(str(code))
-            #     start = starts[i].strip()
-            #     end = ends[i].strip()
-            #     card_codes = method.getCardCode2(start,end,value,quantity)
-            #     card_code_list.extend(card_codes)
-            #
-            # new= set(card_code_list)
-            # if new:
-            #     codes_correct = json.dumps(card_code_list)
-            #     codes_correct_num = len(card_code_list)
-            # old= set(card_code_list_old)
-            # code_err_list = [code for code in old if code not in new]
-            # if code_err_list:
-            #     codes_error = json.dumps(code_err_list)
-            #     codes_error_num = len(code_err_list)
 
             return render(request, 'giftcard/card_code_up.html', locals())
         elif action == 'upload' :
@@ -416,7 +395,7 @@ class CardUpCodeManualView(MyView):
             res['code_success_num'] = len(code_success)
             res['code_fail'] = ','.join(code_fail)
             res['code_fail_num'] = len(code_fail)
-            LogWx.objects.create(type='5', errmsg='res_upload status:' + res_upload['status'], errcode='', )
+
             try:
                 with transaction.atomic():
                     #存储wx_card_id与code的对应关系
@@ -504,7 +483,7 @@ class CheckCodeInfo(MyView):
         return HttpResponse(json.dumps(rep_data))
 
 
-class ChangBalanceView(MyView):
+class ChangeBalanceView(MyView):
     def get(self, request,card_id,code,balance):
         access_token = MyView().token
         url = 'https://api.weixin.qq.com/card/generalcard/updateuser?access_token={token}' \

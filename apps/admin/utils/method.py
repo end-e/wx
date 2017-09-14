@@ -375,6 +375,8 @@ def getCardCode(value):
     cards = cur.fetchall()
 
     card_codes = [card['cardNo'].strip() for card in cards]
+    cur.close()
+    conn.close()
 
     return card_codes
 
@@ -393,6 +395,8 @@ def getCardCode2(start, end, value, count=100):
     cards = cur.fetchall()
 
     card_codes = [card['cardNo'].strip() for card in cards]
+    cur.close()
+    conn.close()
 
     return card_codes
 
@@ -483,6 +487,9 @@ def updateCardMode(codes, old, new):
         print(e)
         res['status'] = 1
         conn.rollback()
+    finally:
+        cur.close()
+        conn.close()
 
     return res
 

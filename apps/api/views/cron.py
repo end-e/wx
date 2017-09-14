@@ -76,7 +76,7 @@ def cron_send_temp():
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
 
 
-def cron_gift_change_balance():
+def cron_gift_change_balance(req):
     # 1、查询消费记录
     prev_last_serial, orders = data.getGiftBalance()
     if len(orders) > 0:
@@ -90,13 +90,15 @@ def cron_gift_change_balance():
             if not access_token:
                 wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
-            threads = []
             for o in orders:
-                thread = Thread(target=giftcard.change_balance,args=(o,access_token,))
-                threads.append(thread)
-                thread.start()
-            for t in threads:
-                t.join()
+                giftcard.change_balance(o,access_token)
+            # threads = []
+            # for o in orders:
+            #     thread = Thread(target=giftcard.change_balance,args=(o,access_token,))
+            #     threads.append(thread)
+            #     thread.start()
+            # for t in threads:
+            #     t.join()
 
             this_last_serial = orders[-1]['PurchSerial']
 
@@ -116,7 +118,8 @@ def cron_gift_change_balance():
 
     return HttpResponse(res_msg)
 
-def cron_gift_compare_order():
+
+def cron_gift_compare_order(req):
     res = {}
     res['status'] = 0
     res_get = giftcard.get_Wx_order()
@@ -135,7 +138,6 @@ def cron_gift_compare_order():
     return HttpResponse('ok')
 
 
-
 def gift_compare_order(offset=0):
     res = {}
     res['status'] = 0
@@ -152,6 +154,7 @@ def gift_compare_order(offset=0):
         res['status'] = 1
 
     return res
+
 
 def cron_shop_order_sign():
     save_time = datetime.date.today()+datetime.timedelta(-1)

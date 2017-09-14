@@ -19,6 +19,7 @@ from api.decorator import signature2
 str = {'session_key': 'm1KGGCKeHa7LbIQd7y9VjA==', 'openid': 'oDZT50NGqXbcAZrFRHUBDll6uK5A', 'expires_in': 7200, 'unionid': 'oczeW0ZcLgIUMzQUqePOckA3s2Yk'}
 @csrf_exempt
 @signature2
+@transaction.atomic
 def orderGoodsSave(request):
     openid = shop.getWxUserOpenID(request)
     order = request.POST.get('order',{})
@@ -90,6 +91,7 @@ def orderGoodsSave(request):
 
 @csrf_exempt
 @signature2
+@transaction.atomic
 def orderKgMoneySave(request):
     wxUser = shop.getWxUser(request)
     openid = wxUser['openid']

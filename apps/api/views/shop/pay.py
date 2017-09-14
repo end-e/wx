@@ -36,6 +36,7 @@ def getPay(req):
     return HttpResponse(prepay_id)
 
 @csrf_exempt
+@transaction.atomic
 def payNotify(request):
     recv_xml = request.body
     xml_recv = ET.fromstring(recv_xml)

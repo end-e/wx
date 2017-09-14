@@ -5,7 +5,7 @@ from django.conf.urls import url
 
 from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView,ThemeEditView,ImgStatusView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView, \
-    CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangBalanceView,CardCodeOnLine
+    CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangeBalanceView,CardCodeOnLine
 from admin.views.giftcard.page import UploadPageView,PageView
 from admin.views.giftcard.report import OrderView,BizuininfoView,CardPaidView
 
@@ -37,7 +37,7 @@ urlpatterns = [
     url(r'^card/code/online/(?P<wx_card_id>[\S]+)$',CardCodeOnLine.as_view(),name='card_code_online'),
 
     url(r'^card/check/code/wx/(?P<card_id>[\S]+)/(?P<code>[0-9]+)$',CheckCodeInfo.as_view(),name='card_check_code_wx'),
-    url(r'^card/change/balance/(?P<card_id>[\S]+)/(?P<code>[0-9]+)/(?P<balance>.*)',ChangBalanceView.as_view()),
+    url(r'^card/change/balance/(?P<card_id>[\S]+)/(?P<code>[0-9]+)/(?P<balance>.*)',ChangeBalanceView.as_view()),
 
 
     #Report
