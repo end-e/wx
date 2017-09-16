@@ -8,8 +8,11 @@ from django.db import transaction
 
 from user.models import WechatMembers
 from utils import db
-from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode, GiftBalanceChangeLog,GiftOrder1,GiftOrderInfo1
+from admin.utils import method
+from admin.utils.myClass import MyException
+from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode, GiftBalanceChangeLog
 from api.models import LogWx
+
 
 def get_user_order():
     # TODO：查询ERP内的消费数据
@@ -58,15 +61,14 @@ def getGiftBalance():
     sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 a with (nolock) ,guest b with (nolock)  " \
                 "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
 
-
     cur_226 = conn_226.cursor()
     cur_226.execute(sql_order)
     orders = cur_226.fetchall()
 
     cardNo_list = [int(order['CardNo']) for order in orders]
 
-    log_list = LogWx.objects.values('id','remark','repeat_status')\
-        .filter(type='2',errcode__in=['40001','40073','-1','45009'],repeat_status='0')
+    log_list = LogWx.objects.values('id', 'remark', 'repeat_status') \
+        .filter(type='2', errcode__in=['40001', '40073', '-1', '45009'], repeat_status='0')
 
     for log in log_list:
         item = {}
@@ -79,15 +81,16 @@ def getGiftBalance():
             item['repeat_status'] = log['repeat_status']
             orders.append(item)
 
-    orders = sorted(orders,key= lambda order:int(order['PurchSerial']))
+    orders = sorted(orders, key=lambda order: int(order['PurchSerial']))
 
-    return prev_last_serial,orders
+    return prev_last_serial, orders
+
 
 @transaction.atomic
 def local_save_gift_order(wx_orders):
     for order in wx_orders:
         order_qs = GiftOrder.objects.select_for_update().filter(order_id=order['order_id'])
-        if order_qs.count()==0:
+        if order_qs.count() == 0:
             try:
                 with transaction.atomic():
                     order_save = GiftOrder.objects.create(
@@ -108,11 +111,19 @@ def local_save_gift_order(wx_orders):
                         info_list.append(info)
                     GiftOrderInfo.objects.bulk_create(info_list)
                     GiftCardCode.objects.filter(code__in=code_list).update(status='1')
-            except :
+                    # 更改guest状态
+                    res_guest = method.updateCardMode(code_list, 9, 1)
+                    if res_guest['status'] == 1:
+                        time = datetime.datetime.now()
+                        try:
+                            raise MyException(time + 'guest中卡状态更新失败')
+                        except MyException as e:
+                            LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=code_list)
+            except:
                 pass
 
 
-def getCodeBySheetID(sheetid,price,count=100):
+def getCodeBySheetID(sheetid, price, count=100):
     num_new = 100 if int(count) > 100 else int(count)
     conn = db.getMsSqlConn()
     sql = "SELECT TOP {num} cardNo,Mode,New_amount FROM guest with (nolock) " \
@@ -127,4 +138,3 @@ def getCodeBySheetID(sheetid,price,count=100):
     conn.close()
 
     return data
-

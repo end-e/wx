@@ -119,7 +119,7 @@ def cron_gift_change_balance():
     return HttpResponse(res_msg)
 
 
-def cron_gift_compare_order(req):
+def cron_gift_compare_order():
     res = {}
     res['status'] = 0
     res_compare = gift_compare_order()
