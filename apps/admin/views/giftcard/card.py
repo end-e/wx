@@ -336,7 +336,7 @@ class CardDelView(MyView):
         return HttpResponse(json.dumps(res))
 
 
-class CardUpCodeManualView(MyView):
+class CardUpCodeManualView(View):
     def get(self, request, wx_card_id):
         card = GiftCard.objects.values('price', 'name').get(wx_card_id=wx_card_id)
         price = card['price']
@@ -354,21 +354,23 @@ class CardUpCodeManualView(MyView):
             count = request.POST.get('count', '')
             price = request.POST.get('price', '')
             card_list = data.getCodeBySheetID(sheetid, price, count)
+            print(card_list)
             codes_correct = []
             codes_error = []
+            codes_temp = []
             for card in card_list:
                 if card['Mode'] == '9':
-                    codes_correct.append(card['cardNo'].strip())
+                    codes_temp.append(card['cardNo'].strip())
                 else:
                     codes_error.append(card['cardNo'].strip())
+            qs_codes =  GiftCardCode.objects.values('code').filter(wx_card_id=wx_card_id)
+            qs_code_list = [qs_code['code'] for qs_code in qs_codes ]
 
-            # # 查询库存中所有的卡号
-            # all_code_list = list(GiftCardCode.objects.values_list('code', flat=True))
-            # for card in card_list:
-            #     if card['cardNo'].strip() in all_code_list:
-            #         codes_error.append(card['cardNo'].strip())
-            #     else:
-            #         codes_correct.append(card['cardNo'].strip())
+            for code in codes_temp:
+                if code in qs_code_list:
+                    codes_error.append(code)
+                else:
+                    codes_correct.append(code)
 
             codes_correct_num = len(codes_correct)
             codes_error_num = len(codes_error)

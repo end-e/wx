@@ -128,6 +128,15 @@ def cron_gift_compare_order():
         return HttpResponse('fail')
     return HttpResponse('ok')
 
+def gift_compare_order_manual(req):
+    res = {}
+    res['status'] = 0
+    res_compare = gift_compare_order()
+    if res_compare['status'] != 0:
+        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
+        return HttpResponse('fail')
+    return HttpResponse('ok')
+
 
 def gift_compare_order(offset=0):
     res = {}

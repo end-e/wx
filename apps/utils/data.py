@@ -114,13 +114,10 @@ def local_save_gift_order(wx_orders):
                     # 更改guest状态
                     res_guest = method.updateCardMode(code_list, 9, 1)
                     if res_guest['status'] == 1:
-                        time = datetime.datetime.now()
-                        try:
-                            raise MyException(time + 'guest中卡状态更新失败')
-                        except MyException as e:
-                            LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=code_list)
-            except:
-                pass
+                        raise MyException('guest中卡状态更新失败')
+
+            except Exception as e:
+                LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=order['order_id'])
 
 
 def getCodeBySheetID(sheetid, price, count=100):
