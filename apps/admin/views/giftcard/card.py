@@ -356,19 +356,19 @@ class CardUpCodeManualView(MyView):
             card_list = data.getCodeBySheetID(sheetid, price, count)
             codes_correct = []
             codes_error = []
-            # for card in card_list:
-            #     if card['Mode'] == '9':
-            #         codes_correct.append(card['cardNo'].strip())
-            #     else:
-            #         codes_error.append(card['cardNo'].strip())
-
-            # 查询库存中所有的卡号
-            all_code_list = list(GiftCardCode.objects.values_list('code', flat=True))
             for card in card_list:
-                if card['cardNo'].strip() in all_code_list:
-                    codes_error.append(card['cardNo'].strip())
-                else:
+                if card['Mode'] == '9':
                     codes_correct.append(card['cardNo'].strip())
+                else:
+                    codes_error.append(card['cardNo'].strip())
+
+            # # 查询库存中所有的卡号
+            # all_code_list = list(GiftCardCode.objects.values_list('code', flat=True))
+            # for card in card_list:
+            #     if card['cardNo'].strip() in all_code_list:
+            #         codes_error.append(card['cardNo'].strip())
+            #     else:
+            #         codes_correct.append(card['cardNo'].strip())
 
             codes_correct_num = len(codes_correct)
             codes_error_num = len(codes_error)
