@@ -1,0 +1,48 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">礼品卡</a>
+    <a href="#" class="current">退款</a>
+{% endblock %}
+{% block content_r %}
+    <style>.card_list{background-color: #eee}</style>
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    退款
+                </h2>
+            </div>
+            <div class="box-content">
+                <form action="{% url 'admin:giftcard:card_refund' %}" method="post" id="Form" style="overflow: hidden">
+                    <div class="row-fluid">
+                        {% csrf_token %}
+                        <label class="span5">交易订单：
+                            <input type="text" name="trans_id" id="trans_id" class="form-control" value="{{ trans_id }}">
+                        </label>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="icon-search"></i>
+                            提交
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+
+<script type="text/javascript">
+    var res = {{ res | safe | default:'' }}
+    if (res.errcode === 0) {
+        alert("数据提交成功");
+    }else if(res.errcode === 1){
+        alert("未查询到此交易订单号");
+    }else if(res.errcode === 2){
+        alert("微信退款接口调用失败（"+res.errmsg+")");
+    }
+</script>
+{% endblock %}

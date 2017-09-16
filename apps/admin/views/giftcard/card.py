@@ -1,22 +1,20 @@
 # -*-  coding:utf-8 -*-
-from django.db import transaction
-
-from api.models import LogWx
-
 __author__ = ''
 __date__ = '2017/6/20 8:52'
 import json, math, time, requests
 
 from django.shortcuts import render
+from django.db import transaction
 from django.http import HttpResponse
 from django.views.generic.base import View
 from django.db.models import Count, F
 
-from admin.models import GiftCard, GiftImg, GiftTheme, GiftThemeItem, GiftCardCode
+from admin.models import GiftCard, GiftImg, GiftTheme, GiftThemeItem, GiftCardCode, GiftOrder, GiftOrderInfo
 from admin.utils.myClass import MyView, MyException
 from admin.utils import method
 from utils import data
 from admin.forms import GiftCardForm, GiftCardEditForm
+from api.models import LogWx
 
 
 class CardView(View):
@@ -516,3 +514,35 @@ class ChangeBalanceView(MyView):
             return HttpResponse('ok')
         else:
             return HttpResponse(rep_data['errmsg'])
+
+
+class CardRefundView(View):
+    def get(self,request):
+        return render(request,'giftcard/card_refund.html')
+    def post(self,request):
+        trans_id = request.POST.get('trans_id','')
+
+        qs_order = GiftOrder.objects.values('id').filter(trans_id=trans_id).first()
+        if qs_order:
+            order_id = qs_order['id']
+            qs_order_info = GiftOrderInfo.objects.values('card_id','code').filter(order_id=order_id).first()
+
+            access_token = MyView().token
+            url = 'https://api.weixin.qq.com/card/code/unavailable?access_token={token}' \
+                .format(token=access_token)
+            data = {
+                "code": qs_order_info['code'],
+                "card_id": qs_order_info['card_id']
+            }
+            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            rep = requests.post(url, data=data)
+            rep_data = json.loads(rep.text)
+            if rep_data['errcode'] == 0:
+                res = method.createResult(0,'ok')
+            else:
+                res = method.createResult(2, rep_data['errmsg'])
+        else:
+            res = method.createResult(1, 'trans_id is not exist')
+
+        return render(request, 'giftcard/card_refund.html', locals())
+

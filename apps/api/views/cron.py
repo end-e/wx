@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import caches
 from django.http import HttpResponse
 
-from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder
+from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder, GiftOrder
 from api.models import LogWx
 from utils import consts, method,wx,giftcard,data
 
@@ -138,17 +138,25 @@ def gift_compare_order_manual(req):
     return HttpResponse('ok')
 
 
-def gift_compare_order(offset=0):
+def gift_compare_order(offset=0,flag=True):
     res = {}
     res['status'] = 0
     res_get = giftcard.get_Wx_order(offset)
     if res_get['status'] == 0:
         total_count = res_get['total_count']
         wx_orders = res_get['wx_orders']
-        data.local_save_gift_order(wx_orders)
-
-        if total_count > (offset + 1) * 100:
-            gift_compare_order(offset+1)
+        if flag:
+            today = datetime.date.today().strftime('%Y-%m-%d')
+            begin_time = method.getTimeStamp(today + ' 00:00:00')
+            qs_orders = GiftOrder.objects.filter(create_time__gte=begin_time).values('order_id')
+            if total_count>qs_orders.count():
+                data.local_save_gift_order(wx_orders)
+                if total_count > (offset + 1) * 100:
+                    gift_compare_order(offset+1,False)
+        else:
+            data.local_save_gift_order(wx_orders)
+            if total_count > (offset + 1) * 100:
+                gift_compare_order(offset + 1, False)
 
     else:
         res['status'] = 1
