@@ -474,7 +474,6 @@ def updateCardMode(codes, old, new):
         conn.autocommit(False)
         sql = "UPDATE Guest Set Mode='{new}' WHERE CardNo in ({codes_str}) AND Mode='{old}'" \
             .format(codes_str=codes_str, new=new, old=old)
-
         cur.execute(sql)
         num_update = cur.rowcount
         if num_update == len(codes):
@@ -489,7 +488,7 @@ def updateCardMode(codes, old, new):
         conn.rollback()
     finally:
         cur.close()
-        conn.close()
+        conn.colse()
 
     return res
 
@@ -519,11 +518,3 @@ def group_list(l, block):
     """
     size = len(l)
     return [l[i:i + block] for i in range(0, size, block)]
-
-
-def createResult(errcode,errmsg,data=''):
-    return {
-        'errcode':errcode,
-        'errmsg':errmsg,
-        'data':data,
-    }
