@@ -138,26 +138,23 @@ def gift_compare_order_manual(req):
     return HttpResponse('ok')
 
 
-def gift_compare_order(offset=0,flag=True):
+def gift_compare_order(offset=0):
     res = {}
     res['status'] = 0
     res_get = giftcard.get_Wx_order(offset)
     if res_get['status'] == 0:
         total_count = res_get['total_count']
         wx_orders = res_get['wx_orders']
-        if flag:
-            today = datetime.date.today().strftime('%Y-%m-%d')
-            begin_time = method.getTimeStamp(today + ' 00:00:00')
-            qs_orders = GiftOrder.objects.filter(create_time__gte=begin_time).values('order_id')
-            if total_count>qs_orders.count():
-                data.local_save_gift_order(wx_orders)
-                if total_count > (offset + 1) * 100:
-                    gift_compare_order(offset+1,False)
-        else:
-            data.local_save_gift_order(wx_orders)
+        wx_order_ids = [wx_order['order_id'] for wx_order in wx_orders]
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        begin_time = method.getTimeStamp(today + ' 00:00:00')
+        qs_orders = GiftOrder.objects.filter(create_time__gte=begin_time).values('order_id')
+        qs_order_ids = [qs_order['order_id'] for qs_order in qs_orders]
+        diff = [id for id in wx_order_ids if id not in qs_order_ids]
+        if total_count>len(qs_order_ids):
+            data.local_save_gift_order(wx_orders,diff)
             if total_count > (offset + 1) * 100:
-                gift_compare_order(offset + 1, False)
-
+                gift_compare_order(offset+1)
     else:
         res['status'] = 1
 

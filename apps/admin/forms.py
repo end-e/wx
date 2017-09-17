@@ -3,8 +3,8 @@ __author__ = ''
 __date__ = '2017/5/23 11:27'
 from django import forms
 
-from admin.models import User,Nav,Role,GiftCard,ShopTheme,\
-    ShopGood,ShopCategory,ShopBanner,ShopBannerInfo
+from admin.models import User,Nav,Role,GiftCard,ShopTheme,ShopGood,ShopCategory,ShopBanner,ShopBannerInfo,\
+    GiftOrderRefund
 
 class LoginForm(forms.Form):
     name = forms.CharField(required=True)
@@ -78,3 +78,8 @@ class ShopBannerInfoForm(forms.ModelForm):
     class Meta:
         model = ShopBannerInfo
         fields = ['name','banner','img','type','target_id','begin_time','end_time','sort']
+
+class GiftRefundForm(forms.ModelForm):
+    class Meta:
+        model = GiftOrderRefund
+        fields = ['trans_id','tel','number','wx']

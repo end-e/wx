@@ -7,7 +7,8 @@ from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView, \
     CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangeBalanceView,CardCodeOnLine,CardRefundView
 from admin.views.giftcard.page import UploadPageView,PageView
-from admin.views.giftcard.report import OrderView,BizuininfoView,CardPaidView
+from admin.views.giftcard.report import BizuininfoView,CardPaidView
+from admin.views.giftcard.order import OrderView,OrderRefundView
 
 urlpatterns = [
     #图片素材
@@ -38,8 +39,10 @@ urlpatterns = [
 
     url(r'^card/check/code/wx/(?P<card_id>[\S]+)/(?P<code>[0-9]+)$',CheckCodeInfo.as_view(),name='card_check_code_wx'),
     url(r'^card/change/balance/(?P<card_id>[\S]+)/(?P<code>[0-9]+)/(?P<balance>.*)',ChangeBalanceView.as_view()),
-    url(r'^card/refund/$',CardRefundView.as_view(),name='card_refund'),
+    # url(r'^card/refund/$',CardRefundView.as_view(),name='card_refund'),
 
+
+    url(r'^order/refund/$',OrderRefundView.as_view(),name='order_refund'),
 
     #Report
     url(r'^order/$',OrderView.as_view(),name='orders'),

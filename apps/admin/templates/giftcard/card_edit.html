@@ -13,8 +13,7 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form class="form-horizontal" id="Form" method="post"
-                      action="{% url 'admin:giftcard:card_edit' card_id %}">
+                <form class="form-horizontal" id="Form" method="post" action="{% url 'admin:giftcard:card_edit' card_id %}">
                     {% csrf_token %}
                     <input type="hidden" id="action" name="action">
                     {% if card.wx_card_id == '' or card_id == '0' %}

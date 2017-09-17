@@ -87,37 +87,41 @@ def getGiftBalance():
 
 
 @transaction.atomic
-def local_save_gift_order(wx_orders):
+def local_save_gift_order(wx_orders,diff):
     for order in wx_orders:
-        order_qs = GiftOrder.objects.select_for_update().filter(order_id=order['order_id'])
-        if order_qs.count() == 0:
-            try:
-                with transaction.atomic():
-                    order_save = GiftOrder.objects.create(
-                        order_id=order['order_id'], trans_id=order['trans_id'],
-                        create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
-                        total_price=order['total_price'], open_id=order['open_id']
-                    )
-                    orderID = order_save.id
-                    info_list = []
-                    code_list = []
-                    for card in order['card_list']:
-                        code_list.append(card['code'])
-                        info = GiftOrderInfo()
-                        info.order_id = orderID
-                        info.card_id = card['card_id']
-                        info.price = card['price']
-                        info.code = card['code']
-                        info_list.append(info)
-                    GiftOrderInfo.objects.bulk_create(info_list)
-                    GiftCardCode.objects.filter(code__in=code_list).update(status='1')
-                    # 更改guest状态
-                    res_guest = method.updateCardMode(code_list, 9, 1)
-                    if res_guest['status'] == 1:
-                        raise MyException('guest中卡状态更新失败')
+        if order['order_id'] in diff:
+            saveAndUpdate(order)
 
-            except Exception as e:
-                LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=order['order_id'])
+
+
+def saveAndUpdate(order):
+    try:
+        with transaction.atomic():
+            order_save = GiftOrder.objects.create(
+                order_id=order['order_id'], trans_id=order['trans_id'],
+                create_time=order['create_time'], pay_finish_time=order['pay_finish_time'],
+                total_price=order['total_price'], open_id=order['open_id']
+            )
+            orderID = order_save.id
+            info_list = []
+            code_list = []
+            for card in order['card_list']:
+                code_list.append(card['code'])
+                info = GiftOrderInfo()
+                info.order_id = orderID
+                info.card_id = card['card_id']
+                info.price = card['price']
+                info.code = card['code']
+                info_list.append(info)
+            GiftOrderInfo.objects.bulk_create(info_list)
+            GiftCardCode.objects.filter(code__in=code_list).update(status='1')
+            # 更改guest状态
+            res_guest = method.updateCardMode(code_list, 9, 1)
+            # if res_guest['status'] == 1:
+            #     raise MyException('guest中卡状态更新失败')
+
+    except Exception as e:
+        LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=order['order_id'])
 
 
 def getCodeBySheetID(sheetid, price, count=100):

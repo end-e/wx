@@ -1,0 +1,78 @@
+{% extends 'base/commont.html' %}
+{% load myFilter %}
+{% block current_page %}
+    <a href="#">礼品卡</a>
+    <a href="#" class="current">订单退款</a>
+{% endblock %}
+{% block content_r %}
+    <style>.card_list {
+        background-color: #eee
+    }</style>
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-align-justify"></i>
+                    <span class="break"></span>
+                    退款
+                </h2>
+            </div>
+            <div class="box-content">
+                <form class="form-horizontal" action="{% url 'admin:giftcard:order_refund' %}" method="post" id="Form">
+                    <div class="row-fluid">
+                        {% csrf_token %}
+                        <div class="control-group {% if form.errors.trans_id %}error{% endif %}">
+                            <label class="control-label">交易订单</label>
+                            <div class="controls">
+                                <input type="text" name="trans_id" value="{{ form.data.trans_id }}" required>
+                                {% if form.errors.trans_id %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group {% if form.errors.tel %}error{% endif %}">
+                            <label class="control-label">手机号码</label>
+                            <div class="controls">
+                                <input type="text" name="tel" value="{{ form.data.tel }}" required>
+                                {% if form.errors.tel %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group {% if form.errors.number %}error{% endif %}">
+                            <label class="control-label">身份证号</label>
+                            <div class="controls">
+                                <input type="text" name="number" value="{{ form.data.number }}" required>
+                                {% if form.errors.number %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group {% if form.errors.wx %}error{% endif %}">
+                            <label class="control-label">微信帐号</label>
+                            <div class="controls">
+                                <input type="text" name="wx" value="{{ form.data.wx }}" required>
+                                {% if form.errors.wx %}<span class="help-inline">此字段必填</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="icon-search"></i>
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+
+    <script type="text/javascript">
+        var res =
+        {{ res | safe | default:'' }}
+        if (res.errcode === 0) {
+            alert("数据提交成功");
+        } else if (res.errcode === 1) {
+            alert("未查询到此交易订单号");
+        } else if (res.errcode === 2) {
+            alert("微信退款接口调用失败（" + res.errmsg + ")");
+        }
+    </script>
+{% endblock %}

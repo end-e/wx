@@ -9,7 +9,7 @@ from admin.utils.myClass import MyException
 from admin.models import GiftCardCode,GiftOrder,GiftOrderInfo
 from api.models import LogWx
 from django.core.cache import caches
-from utils import consts,wx
+from utils import consts,wx,giftcard
 from admin.utils import method
 
 @transaction.atomic
@@ -18,13 +18,7 @@ def giftcard_pay_done(order_id):
     if not access_token:
         wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
-    url = 'https://api.weixin.qq.com/card/giftcard/order/get?access_token={token}' \
-        .format(token=access_token)
-    data = {"order_id": order_id}
-    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    client = requests.Session()
-    rep = client.post(url, data=data, headers={'Connection': 'close'})
-    rep_data = json.loads(rep.text)
+    rep_data = giftcard.getOrder(access_token, order_id)
 
     res = {}
     if rep_data['errcode'] == 0:
