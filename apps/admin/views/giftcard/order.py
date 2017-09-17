@@ -7,11 +7,11 @@ from django.shortcuts import render
 from django.db import transaction
 from django.views.generic.base import View
 
-from admin.models import  GiftOrder
+from admin.models import  GiftOrder, GiftOrderInfo,GiftCardCode
 from admin.forms import GiftRefundForm
 from admin.utils.myClass import MyView,MyException
 from admin.utils import method
-from utils import giftcard
+from utils import giftcard,data
 
 class OrderView(MyView):
     def get(self,request):
@@ -56,26 +56,35 @@ class OrderRefundView(View):
         form = GiftRefundForm(request.POST)
         if form.is_valid():
             trans_id = form.cleaned_data['trans_id']
-            qs_order = GiftOrder.objects.values('order_id').filter(trans_id=trans_id,refund='0')
+            qs_order = GiftOrder.objects.values('order_id','id').filter(trans_id=trans_id,refund='0')
+
             if qs_order.first():
+                order = qs_order.first()
+                qs_card = GiftOrderInfo.objects.values('code').filter(order_id=order['id'])
+                code_list = [card['code'] for card in qs_card]
                 try:
+                    cards = data.getCardsBalance(code_list)
+                    for card in cards:
+                        if card['Detail'] != card['New_amount']:
+                            raise MyException('卡号：' + card['cardNo'] + ',已存在消费')
                     with transaction.atomic():
                         #保存log
                         form.save()
                         #更新订单状态
                         qs_order.update(refund='1')
+                        #更新卡状态
+                        res_code = GiftCardCode.objects.filter(code__in=code_list).update(status='0')
+                        if res_code != len(code_list):
+                            raise MyException('card_code中状态更新失败')
+                        res_guest = method.updateCardMode(code_list,1,9)
+                        if res_guest['status'] == 1:
+                            raise MyException('Guest中状态更新失败')
+
                         #调用退款接口
-                        order_id = qs_order.first()['order_id']
+                        order_id = order['order_id']
                         access_token = MyView().token
-                        url = 'https://api.weixin.qq.com/card/giftcard/order/refund?access_token={token}' \
-                            .format(token=access_token)
-                        data = {
-                            "order_id": order_id
-                        }
-                        data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-                        rep = requests.post(url, data=data)
-                        rep_data = json.loads(rep.text)
-                        print(rep_data)
+                        rep_data = giftcard.oderRefund(access_token,order_id)
+
                         if rep_data['errcode'] == 0:
                             res = method.createResult(0,'ok')
                         else:

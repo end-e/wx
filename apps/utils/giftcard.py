@@ -164,3 +164,16 @@ def deleteCard(access_token,card_id):
     rep_data = json.loads(rep.text)
 
     return rep_data
+
+
+def oderRefund(access_token,order_id):
+    url = 'https://api.weixin.qq.com/card/giftcard/order/refund?access_token={token}' \
+        .format(token=access_token)
+    data = {
+        "order_id": order_id
+    }
+    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+    rep = requests.post(url, data=data)
+    rep_data = json.loads(rep.text)
+
+    return rep_data

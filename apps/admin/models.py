@@ -136,7 +136,7 @@ class GiftCardCode(models.Model):
     wx_card_id = models.CharField(max_length=32,verbose_name=u'卡实例ID')
     code = models.CharField(max_length=12,verbose_name=u'线下Code')
     status = models.CharField(max_length=1, default='0', verbose_name='code状态u(0:未销售;1:已销售)')
-    update_time = models.DateTimeField(default=datetime.now)
+    create_time = models.DateTimeField(default=datetime.now)
 
     class Meta:
         db_table = 'gift_card_code'

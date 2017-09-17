@@ -139,3 +139,16 @@ def getCodeBySheetID(sheetid, price, count=100):
     conn.close()
 
     return data
+
+def getCardsBalance(code_list):
+    codes = "'" + "','".join(code_list) + "'"
+    conn = db.getMsSqlConn()
+    sql = "SELECT cardNo,Detail,New_amount FROM Guest WHERE CardNo in ({codes})".format(codes=codes)
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    data = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return data
