@@ -65,8 +65,7 @@
 {% block common_js %}
 
     <script type="text/javascript">
-        var res =
-        {{ res | safe | default:'' }}
+        var res = {{ res | safe | default:'' }};
         if (res.errcode === 0) {
             alert("数据提交成功");
         } else if (res.errcode === 1) {

@@ -518,3 +518,11 @@ def group_list(l, block):
     """
     size = len(l)
     return [l[i:i + block] for i in range(0, size, block)]
+
+
+def createResult(errcode,errmsg,data=None):
+    return {
+        'errcode':errcode,
+        'errmsg':errmsg,
+        'data':data,
+    }
