@@ -456,11 +456,7 @@ def modifyCardStock(access_token, wx_card_id, increase=0, reduce=0):
         res["status"] = 0
     else:
         res["status"] = 1
-        LogWx.objects.create(
-            type='8',
-            errmsg=rep_data['errmsg'],
-            errcode=rep_data['errcode']
-        )
+        LogWx.objects.create(type='8', errmsg=rep_data['errmsg'],errcode=rep_data['errcode'])
 
     return res
 

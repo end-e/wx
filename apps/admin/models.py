@@ -70,6 +70,17 @@ class GiftCard(models.Model):
         db_table = 'gift_card'
 
 
+class GiftCardCode(models.Model):
+    wx_card_id = models.CharField(max_length=32,verbose_name=u'卡实例ID')
+    code = models.CharField(max_length=12,verbose_name=u'线下Code')
+    status = models.CharField(max_length=1, default='0', verbose_name='code状态u(0:未销售;1:已销售)')
+    create_time = models.DateTimeField(default=datetime.now)
+
+    class Meta:
+        db_table = 'gift_card_code'
+        unique_together = ('wx_card_id', 'code',)
+
+
 class GiftImg(models.Model):
     title = models.CharField(max_length=12,verbose_name=u'名称')
     url = models.CharField(max_length=128,verbose_name=u'背景图片')
@@ -131,16 +142,6 @@ class GiftPage(models.Model):
         verbose_name = u'货架'
         verbose_name_plural = verbose_name
         db_table = 'gift_page'
-
-class GiftCardCode(models.Model):
-    wx_card_id = models.CharField(max_length=32,verbose_name=u'卡实例ID')
-    code = models.CharField(max_length=12,verbose_name=u'线下Code')
-    status = models.CharField(max_length=1, default='0', verbose_name='code状态u(0:未销售;1:已销售)')
-    create_time = models.DateTimeField(default=datetime.now)
-
-    class Meta:
-        db_table = 'gift_card_code'
-        unique_together = ('wx_card_id', 'code',)
 
 
 class GiftBalanceChangeLog(models.Model):
