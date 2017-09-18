@@ -488,7 +488,7 @@ def updateCardMode(codes, old, new):
         conn.rollback()
     finally:
         cur.close()
-        conn.colse()
+        conn.close()
 
     return res
 
