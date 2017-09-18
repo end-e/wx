@@ -1,7 +1,7 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/7/28 16:56'
-import json
+import json,datetime
 
 from django.http import HttpResponse
 from django.core.cache import caches
@@ -26,7 +26,9 @@ def getThemes(request):
     theme_ids = request.GET.get('ids','')
     theme_ids = theme_ids.split(',')
     try:
-        themes = ShopTheme.objects.values('img','id','name').filter(id__in=theme_ids)
+        today = datetime.datetime.now()
+        themes = ShopTheme.objects.values('img','id','name')\
+            .filter(id__in=theme_ids,begin_time__lte=today,end_time__gte=today)
         res = method.createResult(0, 'ok', {'themes': list(themes)})
     except Exception as e:
         print(e)

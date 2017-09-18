@@ -1,7 +1,7 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/8/24 14:24'
-import datetime,json,requests
+import datetime,json,requests,time
 
 from django.core.cache import caches
 
@@ -26,14 +26,12 @@ def gift_compare_order(offset=0):
     return res
 
 
-def get_Wx_order(offset=0):
+def get_Wx_order(begin_time,end_time,offset=0):
     offset_now = offset * 100
     access_token = caches['default'].get('wx_kgcs_access_token', '')
     if not access_token:
         wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
-    today = datetime.date.today().strftime('%Y-%m-%d')
-    begin_time = method.getTimeStamp(today + ' 00:00:00')
-    end_time = method.getTimeStamp(today + ' 23:59:59')
+
     rep_data = order_batchget(access_token,begin_time,end_time,offset_now)
     res = {}
     if rep_data['errmsg'] == 'ok':

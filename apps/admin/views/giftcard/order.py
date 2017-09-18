@@ -1,10 +1,11 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/9/16 11:01'
-import json,requests,datetime,math
+import json,datetime,math
 
 from django.shortcuts import render
 from django.db import transaction
+from django.http import HttpResponse
 from django.views.generic.base import View
 
 from admin.models import  GiftOrder, GiftOrderInfo,GiftCardCode
@@ -12,6 +13,7 @@ from admin.forms import GiftRefundForm
 from admin.utils.myClass import MyView,MyException
 from admin.utils import method
 from utils import giftcard,data
+from api.views import cron
 
 class OrderView(MyView):
     def get(self,request):
@@ -97,3 +99,26 @@ class OrderRefundView(View):
                 res = method.createResult(1, 'trans_id is not exist')
 
         return render(request, 'giftcard/order_refund.html', locals())
+
+
+class OrderCompareView(View):
+    def get(self,request):
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        return render(request,'giftcard/order_compare.html',locals())
+    def post(self,request):
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        begin = request.POST.get('begin',today)
+        end = request.POST.get('end',today)
+
+        begin_time = method.getTimeStamp(begin + ' 00:00:00')
+        end_time = method.getTimeStamp(end + ' 23:59:59')
+
+        res = {}
+        res['status'] = 0
+        res_compare = cron.gift_compare_order(begin_time,end_time)
+        if res_compare['status'] == 0:
+            res = method.createResult(0,'ok')
+        else:
+            res = method.createResult(1, 'fail')
+
+        return HttpResponse(json.dumps(res))
