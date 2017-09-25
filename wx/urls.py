@@ -57,5 +57,4 @@ urlpatterns = [
 
 
     url(r'^user/point/(?P<member_id>.*)/(?P<card_no>.*)/(?P<total_pay>.*)/(?P<result_point>.*)/$', 'utils.shop.updateGuestPoint', ),
-    url(r'^guest/orders/$', 'utils.data.get_user_order1', ),
 ]
