@@ -135,5 +135,8 @@ def createResult(errcode,errmsg,data=None):
     }
 
 
-def CreateLog(err_type,err_code,err_msg,err_remark):
-    LogWx.objects.create(type=err_type, errmsg=err_msg, errcode=err_code, remark=err_remark)
+def CreateLog(err_type,err_code,err_msg,err_remark='',repeat_status=''):
+    log = LogWx.objects.create(
+        type=err_type, errmsg=err_msg, errcode=err_code,remark=err_remark,repeat_status=repeat_status
+    )
+    return log

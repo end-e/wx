@@ -113,7 +113,7 @@ def cron_gift_change_balance():
             res_msg = 'ok'
         except Exception as e:
             print(e)
-            method.CreateLog('2', '1203', e, 'method:cron_gift_change_balance error')
+            method.CreateLog('2', '1203', e)
             res_msg = e
     else:
         res_msg = 'no order'

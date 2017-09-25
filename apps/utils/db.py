@@ -17,7 +17,7 @@ def getMsSqlConn(as_dict=True):
         database=consts.DB_DATABASE_226,
         charset='utf8',
         as_dict=as_dict,
-        timeout = 30
+        timeout = 5
     )
     return conn
 
@@ -31,7 +31,7 @@ def getMsSqlConn22(as_dict=True):
         database=consts.DB_DATABASE_22,
         charset='utf8',
         as_dict=as_dict,
-        timeout = 30
+        timeout = 5
     )
     return conn
 
@@ -84,7 +84,7 @@ def getMsSqlConnection(host, port, user, password, db,as_dict=True):
         database=db,
         charset='utf8',
         as_dict=as_dict,
-        timeout = 30
+        timeout = 5
     )
     return conn
 
@@ -97,6 +97,6 @@ def get_MssqlConnection(host, port, user, password, db):
         password=password,
         database=db,
         charset='utf8',
-        timeout = 30
+        timeout = 5
     )
     return conn

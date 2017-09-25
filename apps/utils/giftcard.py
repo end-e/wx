@@ -72,6 +72,7 @@ def change_balance(order,access_token):
     :param access_token:
     :return:
     """
+
     code = order['CardNo'].strip()
     card_id = order['wx_card_id']
     balance = float(order['detail'])
@@ -86,17 +87,13 @@ def change_balance(order,access_token):
             else:
                 LogWx.objects.filter(id=order['id']).update(add_time=datetime.datetime.now())
         else:
-            log = LogWx()
-            log.type = 2
-            log.errmsg = rep_data['errmsg']
-            log.errcode = rep_data['errcode']
-            log.remark = remark
             if rep_data['errcode'] != 0:
-                log.repeat_status = '0'
-            log.save()
+                method.CreateLog('2', rep_data['errcode'], rep_data['errmsg'], remark,'0')
+            else:
+                method.CreateLog('2', rep_data['errcode'], rep_data['errmsg'], remark)
     except Exception as e:
         print(e)
-        method.CreateLog('2', '1202', e, 'method:change_balance error')
+        method.CreateLog('2', '1202', e, remark,'0')
 
 
 def doChangeBalance(access_token,code,card_id,balance):
@@ -109,7 +106,7 @@ def doChangeBalance(access_token,code,card_id,balance):
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data)
+    rep = requests.post(url, data=data, verify=False, timeout=0.5)
     rep_data = json.loads(rep.text)
     return rep_data
 

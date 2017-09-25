@@ -25,10 +25,10 @@ def get_user_order():
     else:
         whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point,a.HistoryPoint,a.ListNO,a.Branchno " \
-          "FROM GuestPurch0 AS a,guest AS b,cardtype AS c " \
-          "WHERE " + whereStr + " AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0 " \
-                                "ORDER BY a.PurchSerial"
+    sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point,a.HistoryPoint,a.ListNO,a.Branchno" \
+          " FROM GuestPurch0 AS a with (nolock),guest AS b with (nolock),cardtype AS c with (nolock)" \
+          " WHERE " + whereStr + " AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
+          " ORDER BY a.PurchSerial"
 
     cur = conn.cursor()
     cur.execute(sql)
@@ -54,8 +54,10 @@ def getGuestPurch(start,prev_last_serial):
 
     try:
         conn_226 = db.getMsSqlConn()
-        sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 a with (nolock) ,guest b with (nolock)  " \
-                    "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
+        sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial" \
+                    " FROM GuestPurch0 AS a with (nolock) ,guest AS b with (nolock)" \
+                    " WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12" \
+                    " ORDER BY a.PurchSerial "
         cur_226 = conn_226.cursor()
         cur_226.execute(sql_order)
         orders = cur_226.fetchall()
@@ -83,7 +85,7 @@ def getGiftBalance():
 
     cardNo_list = [int(order['CardNo']) for order in orders]
     log_list = LogWx.objects.values('id', 'remark', 'repeat_status') \
-        .filter(type='2', errcode__in=['40001', '40073', '-1', '45009'], repeat_status='0')
+        .filter(type='2', errcode__in=['40001', '40073', '-1', '45009','1202'], repeat_status='0')
     for log in log_list:
         item = {}
         remark_list = log['remark'].split(',')
