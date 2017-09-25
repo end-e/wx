@@ -46,6 +46,27 @@ def get_wechat_users(orders):
     return wechat_users
 
 
+def getGuestPurch(start,prev_last_serial):
+    if prev_last_serial:
+        whereStr = "a.PurchSerial> '{last_serial}'".format(last_serial=prev_last_serial)
+    else:
+        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
+
+    try:
+        conn_226 = db.getMsSqlConn()
+        sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 a with (nolock) ,guest b with (nolock)  " \
+                    "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
+        cur_226 = conn_226.cursor()
+        cur_226.execute(sql_order)
+        orders = cur_226.fetchall()
+    except Exception as e:
+        orders = []
+        print(e)
+        method.CreateLog('2', '1201', e, 'guestPurch0 fail')
+
+    return orders
+
+
 def getGiftBalance():
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
@@ -53,29 +74,16 @@ def getGiftBalance():
     prev_last_serial = ''
     if balanceChangeLog:
         prev_last_serial = balanceChangeLog['last_serial']
+    orders = getGuestPurch(start,prev_last_serial)
 
-        whereStr = "a.PurchSerial> '{last_serial}'".format(last_serial=prev_last_serial)
-    else:
-        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
-
-
-    conn_226 = db.getMsSqlConn()
-    sql_order = "SELECT a.detail, a.CardNo,a.PurchSerial FROM GuestPurch0 a with (nolock) ,guest b with (nolock)  " \
-                "WHERE " + whereStr + " AND a.CardNo=b.CardNo AND b.cardtype = 12 ORDER BY a.PurchSerial "
-
-    cur_226 = conn_226.cursor()
-    cur_226.execute(sql_order)
-    orders = cur_226.fetchall()
     if len(orders)>0:
         update_serial = True
     else:
         update_serial = False
 
     cardNo_list = [int(order['CardNo']) for order in orders]
-
     log_list = LogWx.objects.values('id', 'remark', 'repeat_status') \
         .filter(type='2', errcode__in=['40001', '40073', '-1', '45009'], repeat_status='0')
-
     for log in log_list:
         item = {}
         remark_list = log['remark'].split(',')
@@ -88,10 +96,11 @@ def getGiftBalance():
             orders.append(item)
 
     orders = sorted(orders, key=lambda order: int(order['PurchSerial']))
-
-
-
-    return update_serial,prev_last_serial, orders
+    if len(orders)>0:
+        res = {'status':True,'update_serial':update_serial,'prev_last_serial':prev_last_serial,'orders':orders}
+    else:
+        res = {'status':False}
+    return res
 
 
 @transaction.atomic
@@ -99,7 +108,6 @@ def local_save_gift_order(wx_orders,diff):
     for order in wx_orders:
         if order['order_id'] in diff:
             saveAndUpdate(order)
-
 
 
 def saveAndUpdate(order):
@@ -151,7 +159,7 @@ def getCodeBySheetID(sheetid, price, count=100):
 def getCardsBalance(code_list):
     codes = "'" + "','".join(code_list) + "'"
     conn = db.getMsSqlConn()
-    sql = "SELECT cardNo,Detail,New_amount FROM Guest WHERE CardNo in ({codes})".format(codes=codes)
+    sql = "SELECT cardNo,Detail,New_amount FROM Guest with (nolock) WHERE CardNo in ({codes})".format(codes=codes)
 
     cur = conn.cursor()
     cur.execute(sql)

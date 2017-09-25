@@ -40,16 +40,3 @@ class LogShop(models.Model):
         db_table='log_shop'
 
 
-class LogGiftBalance(models.Model):
-    errmsg = models.CharField(max_length=128, verbose_name=u'错误信息')
-    errcode = models.CharField(max_length=16, verbose_name=u'错误编码')
-    serial = models.CharField(max_length=16, verbose_name=u'')
-    card_no = models.CharField(max_length=16, verbose_name=u'')
-    detail = models.DecimalField(max_digits=8,decimal_places=2,verbose_name=u'')
-    card_id = models.CharField(max_length=16, verbose_name=u'')
-    add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
-    repeat_status = models.CharField(blank=True,null=True,max_length=1,verbose_name=u'重发状态')
-
-    class Meta:
-        db_table='LogGiftBalance'
-

@@ -1,3 +1,12 @@
+1.*:礼品卡
+12.*：减值接口
+1201:GuestPurch0数据查询失败
+1202:change_balance函数报错
+1203:cron_gift_change_balance函数报错
+
+
+
+
 2.*:积分商城
 
 21.*：订单

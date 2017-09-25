@@ -49,9 +49,10 @@ class OrderView(MyView):
         return render(request, 'giftcard/order_list.html',locals())
 
 
-class OrderRefundView(View):
+class OrderRefundView(MyView):
     def get(self,request):
-        return render(request,'giftcard/order_refund.html')
+        res = method.createResult(-1, '',{})
+        return render(request,'giftcard/order_refund.html',locals())
 
     @transaction.atomic
     def post(self,request):
@@ -88,15 +89,15 @@ class OrderRefundView(View):
                         rep_data = giftcard.oderRefund(access_token,order_id)
 
                         if rep_data['errcode'] == 0:
-                            res = method.createResult(0,'ok')
+                            res = method.createResult(0,'ok',{})
                         else:
                             raise MyException(rep_data['errmsg'])
                 except Exception as e:
                     print(e)
                     msg =e.value if hasattr(e, 'value') else e.args[0]
-                    res = method.createResult(2, msg)
+                    res = method.createResult(2, msg,{})
             else:
-                res = method.createResult(1, 'trans_id is not exist')
+                res = method.createResult(1, 'trans_id is not exist',{})
 
         return render(request, 'giftcard/order_refund.html', locals())
 

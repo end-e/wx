@@ -78,20 +78,22 @@ def cron_send_temp():
 
 def cron_gift_change_balance():
     # 1、查询消费记录
-    update_serial,prev_last_serial, orders = data.getGiftBalance()
-    if len(orders) > 0:
+    res = data.getGiftBalance()
+    if res['status']:
+        orders = res['orders']
+        update_serial = res['update_serial']
+        prev_last_serial =  res['prev_last_serial']
         try:
-            # 2、拼接wx_card_id
-            for order in orders:
-                qs_card = GiftCardCode.objects.values('wx_card_id').filter(code=order['CardNo']).first()
-                order['wx_card_id'] = qs_card['wx_card_id']
-
             access_token = caches['default'].get('wx_kgcs_access_token', '')
             if not access_token:
                 wx.get_access_token('kgcs', consts.KG_APPID, consts.KG_APPSECRET)
 
-            for o in orders:
-                giftcard.change_balance(o,access_token)
+            # 2、拼接wx_card_id
+            for order in orders:
+                qs_card = GiftCardCode.objects.values('wx_card_id').filter(code=order['CardNo']).first()
+                order['wx_card_id'] = qs_card['wx_card_id']
+                giftcard.change_balance(order, access_token)
+
             # threads = []
             # for o in orders:
             #     thread = Thread(target=giftcard.change_balance,args=(o,access_token,))
@@ -111,7 +113,7 @@ def cron_gift_change_balance():
             res_msg = 'ok'
         except Exception as e:
             print(e)
-            LogWx.objects.create(type='2', errmsg=e, errcode='2')
+            method.CreateLog('2', '1203', e, 'method:cron_gift_change_balance error')
             res_msg = e
     else:
         res_msg = 'no order'

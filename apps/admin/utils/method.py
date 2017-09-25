@@ -485,7 +485,6 @@ def updateCardMode(codes, old, new):
     finally:
         cur.close()
         conn.close()
-
     return res
 
 
@@ -522,3 +521,7 @@ def createResult(errcode,errmsg,data=None):
         'errmsg':errmsg,
         'data':data,
     }
+
+
+def CreateLog(err_type,err_code,err_msg,err_remark):
+    LogWx.objects.create(type=err_type, errmsg=err_msg, errcode=err_code, remark=err_remark)

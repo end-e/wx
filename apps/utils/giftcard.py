@@ -72,11 +72,13 @@ def change_balance(order,access_token):
     :param access_token:
     :return:
     """
+    code = order['CardNo'].strip()
+    card_id = order['wx_card_id']
+    balance = float(order['detail'])
+    serial = order['PurchSerial']
+    remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}' \
+        .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
     try:
-        code = order['CardNo'].strip()
-        card_id = order['wx_card_id']
-        balance= float(order['detail'])
-        serial= order['PurchSerial']
         rep_data = doChangeBalance(access_token,code,card_id,balance)
         if 'repeat_status' in order :
             if rep_data['errcode'] == 0:
@@ -88,15 +90,13 @@ def change_balance(order,access_token):
             log.type = 2
             log.errmsg = rep_data['errmsg']
             log.errcode = rep_data['errcode']
-            log.remark = 'PurchSerial:{serial},CardNo:{code},detail:{balance},card_id:{card_id}' \
-                .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
+            log.remark = remark
             if rep_data['errcode'] != 0:
                 log.repeat_status = '0'
             log.save()
-
     except Exception as e:
         print(e)
-        LogWx.objects.create(type='2', errmsg=e, errcode='2')
+        method.CreateLog('2', '1202', e, 'method:change_balance error')
 
 
 def doChangeBalance(access_token,code,card_id,balance):
@@ -109,7 +109,7 @@ def doChangeBalance(access_token,code,card_id,balance):
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data, headers={'Connection': 'close'})
+    rep = requests.post(url, data=data)
     rep_data = json.loads(rep.text)
     return rep_data
 
