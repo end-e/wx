@@ -144,7 +144,7 @@ def getOrder(access_token,order_id):
     data = {"order_id": order_id}
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
     client = requests.Session()
-    rep = client.post(url, data=data, headers={'Connection': 'close'})
+    rep = client.post(url, data=data, verify=False, timeout=0.5)
     rep_data = json.loads(rep.text)
 
     return  rep_data

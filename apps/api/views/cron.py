@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import caches
 from django.http import HttpResponse
 
-from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder, GiftOrder
+from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder, GiftOrder, GiftOrderInfo
 from api.models import LogWx
 from utils import consts, method,wx,giftcard,data
 
@@ -76,7 +76,7 @@ def cron_send_temp():
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
 
 
-def cron_gift_change_balance():
+def cron_gift_change_balance(req):
     # 1、查询消费记录
     res = data.getGiftBalance()
     if res['status']:
@@ -90,17 +90,13 @@ def cron_gift_change_balance():
 
             # 2、拼接wx_card_id
             for order in orders:
-                qs_card = GiftCardCode.objects.values('wx_card_id').filter(code=order['CardNo']).first()
-                order['wx_card_id'] = qs_card['wx_card_id']
-                giftcard.change_balance(order, access_token)
-
-            # threads = []
-            # for o in orders:
-            #     thread = Thread(target=giftcard.change_balance,args=(o,access_token,))
-            #     threads.append(thread)
-            #     thread.start()
-            # for t in threads:
-            #     t.join()
+                qs_card = GiftCardCode.objects.values('wx_card_id').filter(code=order['CardNo'].strip()).first()
+                if qs_card:
+                    order['wx_card_id'] = qs_card['wx_card_id']
+                    giftcard.change_balance(order, access_token)
+                else:
+                    errmsg = 'cardNo:{card} is empty in GiftCardCode'.format(card = order['CardNo'])
+                    method.CreateLog('2', '1204', errmsg)
 
             this_last_serial = orders[-1]['PurchSerial']
             if update_serial:
@@ -132,16 +128,6 @@ def cron_gift_compare_order():
         return HttpResponse('fail')
     return HttpResponse('ok')
 
-def gift_compare_order_manual(req):
-    res = {}
-    res['status'] = 0
-    end_time = time.time()
-    begin_time = end_time - 3 * 60 * 60
-    res_compare = gift_compare_order(begin_time,end_time)
-    if res_compare['status'] != 0:
-        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
-        return HttpResponse('fail')
-    return HttpResponse('ok')
 
 
 def gift_compare_order(begin_time,end_time,offset=0):
@@ -169,7 +155,21 @@ def gift_compare_order(begin_time,end_time,offset=0):
     return res
 
 
+
 def cron_shop_order_sign():
     save_time = datetime.date.today()+datetime.timedelta(-1)
     res = ShopOrder.objects.filter(save_time__lte=save_time,status='7').update(status='8')
     print('cron_shop_order_sign update rows:'+res)
+
+
+
+def gift_compare_order_manual(req):
+    res = {}
+    res['status'] = 0
+    end_time = time.time()
+    begin_time = end_time - 3 * 60 * 60
+    res_compare = gift_compare_order(begin_time,end_time)
+    if res_compare['status'] != 0:
+        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
+        return HttpResponse('fail')
+    return HttpResponse('ok')

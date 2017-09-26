@@ -105,13 +105,13 @@ def getGiftBalance():
     return res
 
 
-@transaction.atomic
+
 def local_save_gift_order(wx_orders,diff):
     for order in wx_orders:
         if order['order_id'] in diff:
             saveAndUpdate(order)
 
-
+@transaction.atomic
 def saveAndUpdate(order):
     try:
         with transaction.atomic():
@@ -122,19 +122,33 @@ def saveAndUpdate(order):
             )
             orderID = order_save.id
             info_list = []
+            card_code_list = []
             code_list = []
             for card in order['card_list']:
-                code_list.append(card['code'])
+                #order_info
                 info = GiftOrderInfo()
                 info.order_id = orderID
                 info.card_id = card['card_id']
                 info.price = card['price']
                 info.code = card['code']
                 info_list.append(info)
+                #card_code
+                qs_code = GiftCardCode.objects.filter(wx_card_id=card['card_id'],code=card['code'])
+                if not qs_code:
+                    card_code = GiftCardCode()
+                    card_code.wx_card_id = card['card_id']
+                    card_code.code = card['code']
+                    card_code.status = '1'
+                    card_code_list.append(card_code)
+                else:
+                    code_list.append(card['code'])
+
             GiftOrderInfo.objects.bulk_create(info_list)
+            if len(card_code_list)>0:
+                GiftCardCode.objects.bulk_create(card_code_list)
             GiftCardCode.objects.filter(code__in=code_list).update(status='1')
             # 更改guest状态
-            res_guest = method.updateCardMode(code_list, 9, 1)
+            method.updateCardMode(code_list, 9, 1)
             # if res_guest['status'] == 1:
             #     raise MyException('guest中卡状态更新失败')
 

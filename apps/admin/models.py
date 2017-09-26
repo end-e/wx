@@ -181,6 +181,7 @@ class GiftOrderRefund(models.Model):
     tel = models.CharField(max_length=11)
     number = models.CharField(max_length=20)
     wx = models.CharField(max_length=12)
+    reason = models.IntegerField(default=1)
     create_time = models.DateTimeField(default=datetime.now)
 
     class Meta:

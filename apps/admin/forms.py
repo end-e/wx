@@ -82,4 +82,4 @@ class ShopBannerInfoForm(forms.ModelForm):
 class GiftRefundForm(forms.ModelForm):
     class Meta:
         model = GiftOrderRefund
-        fields = ['trans_id','tel','number','wx']
+        fields = ['trans_id','tel','number','wx','reason']

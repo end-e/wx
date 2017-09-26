@@ -8,7 +8,7 @@ from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelVi
     CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangeBalanceView,CardCodeOnLine,CardRefundView
 from admin.views.giftcard.page import UploadPageView,PageView
 from admin.views.giftcard.report import BizuininfoView,CardPaidView
-from admin.views.giftcard.order import OrderView,OrderRefundView,OrderCompareView
+from admin.views.giftcard.order import OrderView,OrderRefundView,OrderCompareView,CodeCompareView
 
 urlpatterns = [
     #图片素材
@@ -44,6 +44,7 @@ urlpatterns = [
 
     url(r'^order/refund/$',OrderRefundView.as_view(),name='order_refund'),
     url(r'order/compare/$', OrderCompareView.as_view(),name='order_compare'),
+    url(r'code/compare/$', CodeCompareView.as_view(),name='code_compare'),
     #Report
     url(r'^order/$',OrderView.as_view(),name='orders'),
     url(r'^bizuininfo/$',BizuininfoView.as_view(),name='bizuininfo'),

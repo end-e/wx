@@ -3,6 +3,7 @@
 1201:GuestPurch0数据查询失败
 1202:change_balance函数报错
 1203:cron_gift_change_balance函数报错
+1203:gift_card_code未查询到数据
 
 
 

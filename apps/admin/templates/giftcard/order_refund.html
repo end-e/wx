@@ -46,10 +46,17 @@
                                 {% if form.errors.wx %}<span class="help-inline">此字段必填</span>{% endif %}
                             </div>
                         </div>
+                        <div class="control-group">
+                            <label class="control-label">退单原因</label>
+                            <div class="controls">
+                                <select name="reason">
+                                    <option value="1">顾客要求</option>
+                                    <option value="2">重复上架</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-actions">
-                            <button class="btn btn-primary" type="submit">
-                                提交
-                            </button>
+                            <button class="btn btn-primary" type="submit">提交</button>
                         </div>
                     </div>
                 </form>

@@ -49,7 +49,7 @@ class OrderView(MyView):
         return render(request, 'giftcard/order_list.html',locals())
 
 
-class OrderRefundView(MyView):
+class OrderRefundView(View):
     def get(self,request):
         res = method.createResult(-1, '',{})
         return render(request,'giftcard/order_refund.html',locals())
@@ -63,35 +63,47 @@ class OrderRefundView(MyView):
 
             if qs_order.first():
                 order = qs_order.first()
-                qs_card = GiftOrderInfo.objects.values('code').filter(order_id=order['id'])
+                qs_card = GiftOrderInfo.objects.values('code','card_id').filter(order_id=order['id'])
                 code_list = [card['code'] for card in qs_card]
                 try:
-                    cards = data.getCardsBalance(code_list)
-                    for card in cards:
-                        if card['Detail'] != card['New_amount']:
-                            raise MyException('卡号：' + card['cardNo'] + ',已存在消费')
+                    reason = form.data['reason']
+                    #1、查询余额
+                    if reason == '1':
+                        cards = data.getCardsBalance(code_list)
+                        for card in cards:
+                            if card['Detail'] != card['New_amount']:
+                                raise MyException('卡号：' + card['cardNo'] + ',已存在消费')
+                    # 2、调用退款接口
+                    order_id = order['order_id']
+                    access_token = MyView().token
+                    rep_data = giftcard.oderRefund(access_token, order_id)
+                    if rep_data['errcode'] != 0:
+                        raise MyException(rep_data['errmsg'])
+
+                    #3、处理线下数据
                     with transaction.atomic():
-                        #保存log
+                        #3.1、保存log
                         form.save()
-                        #更新订单状态
+                        #3.2、更新订单状态
                         qs_order.update(refund='1')
-                        #更新卡状态
-                        res_code = GiftCardCode.objects.filter(code__in=code_list).update(status='0')
-                        if res_code != len(code_list):
-                            raise MyException('card_code中状态更新失败')
-                        res_guest = method.updateCardMode(code_list,1,9)
-                        if res_guest['status'] == 1:
-                            raise MyException('Guest中状态更新失败')
 
-                        #调用退款接口
-                        order_id = order['order_id']
-                        access_token = MyView().token
-                        rep_data = giftcard.oderRefund(access_token,order_id)
+                        # 3.3、更新卡状态
+                        for card in qs_card:
+                            if reason == '1':
+                                res_code = GiftCardCode.objects.filter(code=card['code'],wx_card_id=card['card_id'])\
+                                    .update(status='0')
+                                if res_code == 0:
+                                    raise MyException(card['code'] + '状态更新失败')
+                                res_guest = method.updateCardMode(code_list, 1, 9)
+                                if res_guest['status'] == 1:
+                                    raise MyException('Guest中状态更新失败')
+                            elif reason == '2':
+                                res_code = GiftCardCode.objects.filter(code=card['code'], wx_card_id=card['card_id']) \
+                                    .update(status='2')
+                                if res_code == 0:
+                                    raise MyException(card['code'] + '状态更新失败')
 
-                        if rep_data['errcode'] == 0:
-                            res = method.createResult(0,'ok',{})
-                        else:
-                            raise MyException(rep_data['errmsg'])
+                        res = method.createResult(0, 'ok', {})
                 except Exception as e:
                     print(e)
                     msg =e.value if hasattr(e, 'value') else e.args[0]
@@ -123,3 +135,43 @@ class OrderCompareView(View):
             res = method.createResult(1, 'fail')
 
         return HttpResponse(json.dumps(res))
+
+
+class CodeCompareView(View):
+    def get(self,request):
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        return render(request,'giftcard/code_compare.html',locals())
+    def post(self,request):
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        begin = request.POST.get('begin',today)
+        end = request.POST.get('end',today)
+
+        begin_time = method.getTimeStamp(begin + ' 00:00:00')
+        end_time = method.getTimeStamp(end + ' 23:59:59')
+
+        res = {}
+        res['status'] = 0
+        res_compare = self.gift_compare_code(begin_time,end_time)
+        if res_compare['status'] == 0:
+            res = method.createResult(0,'ok')
+        else:
+            res = method.createResult(1, 'fail')
+
+        return HttpResponse(json.dumps(res))
+
+    def gift_compare_code(self,begin_time, end_time):
+        res = {}
+        try:
+            orders = GiftOrder.objects.values('id').filter(create_time__gte=begin_time, create_time__lte=end_time)
+
+            for order in orders:
+                info = GiftOrderInfo.objects.values('code', 'card_id').filter(order_id=order['id']).first()
+                qs_card = GiftCardCode.objects.filter(wx_card_id=info['card_id'], code=info['code'])
+                if not qs_card:
+                    GiftCardCode.objects.create(wx_card_id=info['card_id'], code=info['code'], status='1')
+            res['status'] = 0
+        except Exception as e:
+            print(e)
+            res['status'] = 1
+
+        return res
