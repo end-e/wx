@@ -76,7 +76,7 @@ def cron_send_temp():
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
 
 
-def cron_gift_change_balance(req):
+def cron_gift_change_balance():
     # 1、查询消费记录
     res = data.getGiftBalance()
     if res['status']:
