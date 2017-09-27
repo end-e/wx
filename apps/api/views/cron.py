@@ -47,7 +47,6 @@ def cron_send_temp():
         wechat_users = data.get_wechat_users(orders)
         try:
             threads = []
-            msg_list = []
             for wechat_user in wechat_users:
                 userId = wechat_user['membernumber']
                 for order in orders:
@@ -61,16 +60,12 @@ def cron_send_temp():
                             'secret':secret,
                             'access_token':access_token
                         }
-                        # msg_list.append(msg)
+
                         thread = Thread(target=wx.send_temp,args=(msg,))
                         threads.append(thread)
                         thread.start()
             for t in threads:
                 t.join()
-            # if len(msg_list)>0:
-            #     pool = ThreadPoolExecutor(len(msg_list)+1)
-            #     for msg in msg_list:
-            #         pool.submit(method.send_temp,msg)
         finally:
             last_one = orders[-1]['PurchSerial']
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
@@ -129,13 +124,8 @@ def cron_gift_compare_order():
     return HttpResponse('ok')
 
 
-
 def gift_compare_order(begin_time,end_time,offset=0):
-    res = {}
-    res['status'] = 0
-    # today = datetime.date.today().strftime('%Y-%m-%d')
-    # begin_time = method.getTimeStamp(today + ' 00:00:00')
-    # end_time = method.getTimeStamp(today + ' 23:59:59')
+    res = {'status':0}
 
     res_get = giftcard.get_Wx_order(begin_time,end_time,offset)
     if res_get['status'] == 0:
@@ -155,21 +145,7 @@ def gift_compare_order(begin_time,end_time,offset=0):
     return res
 
 
-
 def cron_shop_order_sign():
     save_time = datetime.date.today()+datetime.timedelta(-1)
     res = ShopOrder.objects.filter(save_time__lte=save_time,status='7').update(status='8')
     print('cron_shop_order_sign update rows:'+res)
-
-
-
-def gift_compare_order_manual(req):
-    res = {}
-    res['status'] = 0
-    end_time = time.time()
-    begin_time = end_time - 3 * 60 * 60
-    res_compare = gift_compare_order(begin_time,end_time)
-    if res_compare['status'] != 0:
-        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
-        return HttpResponse('fail')
-    return HttpResponse('ok')

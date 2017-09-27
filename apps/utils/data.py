@@ -109,10 +109,10 @@ def getGiftBalance():
 def local_save_gift_order(wx_orders,diff):
     for order in wx_orders:
         if order['order_id'] in diff:
-            saveAndUpdate(order)
+            saveAndUpdateLocalData(order)
 
 @transaction.atomic
-def saveAndUpdate(order):
+def saveAndUpdateLocalData(order):
     try:
         with transaction.atomic():
             order_save = GiftOrder.objects.create(

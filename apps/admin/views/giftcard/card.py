@@ -159,9 +159,10 @@ class CardWxView(MyView):
         }
         data = json.dumps(data, ensure_ascii=False).encode('utf-8')
         try:
-            rep = requests.post(url, data=data, headers={'Connection': 'close'})
-            rep_data = json.loads(rep.text)
             total_page, next_page, prev_page = 1, 1, 1
+            rep = requests.post(url, data=data, verify=False, timeout=0.5)
+            rep_data = json.loads(rep.text)
+
             if rep_data['errcode'] == 0:
                 total_num = rep_data['total_num']
                 total_page = math.ceil(total_num / count)
@@ -345,7 +346,7 @@ class CardDelView(MyView):
             if rep_card['errmsg'] == 'ok':
                 rep_order = giftcard.getOrder(access_token, rep_card['order_id'])
                 if rep_order['errmsg'] == 'ok':
-                    data.saveAndUpdate(rep_order['order'])
+                    data.saveAndUpdateLocalData(rep_order['order'])
             else:
                 code_delete.append(card['code'])
         return code_delete
