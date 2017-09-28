@@ -20,7 +20,7 @@ def giftcard_pay_done(order_id):
         order = rep_data['order']
         data.saveAndUpdateLocalData(order)
     else:
-        method.CreateLog('6',rep_data['errcode'],rep_data['errmsg'],order_id)
+        method.createLog('6',rep_data['errcode'],rep_data['errmsg'],order_id)
         res['status'] = 1
 
     return res

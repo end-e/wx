@@ -64,7 +64,7 @@ def getGuestPurch(start,prev_last_serial):
     except Exception as e:
         orders = []
         print(e)
-        method.CreateLog('2', '1201', e, 'guestPurch0 fail')
+        method.createLog('2', '1201', e, 'guestPurch0 fail')
 
     return orders
 
@@ -149,11 +149,9 @@ def saveAndUpdateLocalData(order):
             GiftCardCode.objects.filter(code__in=code_list).update(status='1')
             # 更改guest状态
             method.updateCardMode(code_list, 9, 1)
-            # if res_guest['status'] == 1:
-            #     raise MyException('guest中卡状态更新失败')
 
     except Exception as e:
-        LogWx.objects.create(type='9', errmsg=e, errcode='9', remark=order['order_id'])
+        method.createLog('6', '1101', e, order['order_id'])
 
 
 def getCodeBySheetID(sheetid, price, count=100):

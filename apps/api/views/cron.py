@@ -91,7 +91,7 @@ def cron_gift_change_balance():
                     giftcard.change_balance(order, access_token)
                 else:
                     errmsg = 'cardNo:{card} is empty in GiftCardCode'.format(card = order['CardNo'])
-                    method.CreateLog('2', '1204', errmsg)
+                    method.createLog('2', '1204', errmsg)
 
             this_last_serial = orders[-1]['PurchSerial']
             if update_serial:
@@ -104,7 +104,7 @@ def cron_gift_change_balance():
             res_msg = 'ok'
         except Exception as e:
             print(e)
-            method.CreateLog('2', '1203', e)
+            method.createLog('2', '1203', e)
             res_msg = e
     else:
         res_msg = 'no order'
@@ -119,7 +119,7 @@ def cron_gift_compare_order():
     begin_time = end_time - 3 * 60 * 60
     res_compare = gift_compare_order(begin_time,end_time)
     if res_compare['status'] != 0:
-        LogWx.objects.create(type='0', errmsg='cron_gift_compare_order_fail', errcode='0')
+        LogWx.objects.create(type='6', errmsg='cron_gift_compare_order_fail', errcode='0')
         return HttpResponse('fail')
     return HttpResponse('ok')
 
