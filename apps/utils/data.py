@@ -63,7 +63,6 @@ def getGuestPurch(start,prev_last_serial):
         orders = cur_226.fetchall()
     except Exception as e:
         orders = []
-        print(e)
         method.createLog('2', '1201', e, 'guestPurch0 fail')
 
     return orders

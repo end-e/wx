@@ -1,18 +1,17 @@
 # -*-  coding:utf-8 -*-
 # __author__ = ''
 # __date__ = '2017/4/19 14:04'
-import datetime, time,requests,json
+import datetime, time, logging
 from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
 
 from django.core.cache import caches
 from django.http import HttpResponse
 
-from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder, GiftOrder, GiftOrderInfo
+from admin.models import GiftCardCode, GiftBalanceChangeLog,ShopOrder, GiftOrder
 from api.models import LogWx
 from utils import consts, method,wx,giftcard,data
 
-
+logging.basicConfig(level=logging.INFO)
 def cron_get_ikg_token():
     '''
     获取并缓存 爱宽广access_token
@@ -103,7 +102,7 @@ def cron_gift_change_balance():
                     GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
             res_msg = 'ok'
         except Exception as e:
-            print(e)
+            logging.exception(e)
             method.createLog('2', '1203', e)
             res_msg = e
     else:
@@ -148,4 +147,4 @@ def gift_compare_order(begin_time,end_time,offset=0):
 def cron_shop_order_sign():
     save_time = datetime.date.today()+datetime.timedelta(-1)
     res = ShopOrder.objects.filter(save_time__lte=save_time,status='7').update(status='8')
-    print('cron_shop_order_sign update rows:'+res)
+

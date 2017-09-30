@@ -62,7 +62,6 @@ def change_balance(order,access_token):
         .format(serial=serial, code=code, balance=str(float(balance)), card_id=card_id)
     try:
         rep_data = doChangeBalance(access_token,code,card_id,balance)
-
         if rep_data['errcode'] != 0:
             if 'repeat_status' in order:
                 LogWx.objects.filter(id=order['id'])\
@@ -74,9 +73,7 @@ def change_balance(order,access_token):
                 LogWx.objects.filter(id=order['id']).update(repeat_status='1')
             else:
                 method.createLog('2', rep_data['errcode'], rep_data['errmsg'], remark)
-
     except Exception as e:
-        print(e)
         if 'repeat_status' not in order:
             method.createLog('2', '1202', e, remark,'0')
 
