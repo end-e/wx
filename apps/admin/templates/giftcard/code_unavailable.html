@@ -16,7 +16,7 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form action="{% url 'admin:giftcard:card_refund' %}" method="post" id="Form" style="overflow: hidden">
+                <form action="{% url 'admin:giftcard:code_unavailable' %}" method="post" id="Form" style="overflow: hidden">
                     <div class="row-fluid">
                         {% csrf_token %}
                         <label class="span5">交易订单：
@@ -36,13 +36,15 @@
 {% block common_js %}
 
 <script type="text/javascript">
-    var res = {{ res | safe | default:'' }}
+    var res = {{ res | safe }};
     if (res.errcode === 0) {
         alert("数据提交成功");
     }else if(res.errcode === 1){
         alert("未查询到此交易订单号");
     }else if(res.errcode === 2){
         alert("微信退款接口调用失败（"+res.errmsg+")");
+    }else if (res.errcode === 2) {
+        alert("更新本地数据失败");
     }
 </script>
 {% endblock %}

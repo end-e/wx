@@ -85,7 +85,10 @@ class OrderRefundView(View):
                         #3.1、保存log
                         form.save()
                         #3.2、更新订单状态
-                        qs_order.update(refund='1')
+                        if reason == '1':
+                            qs_order.update(refund='1')
+                        elif reason == '2':
+                            qs_order.update(refund='2')
 
                         # 3.3、更新卡状态
                         for card in qs_card:

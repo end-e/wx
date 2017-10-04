@@ -230,7 +230,7 @@ class CardStockView(View):
         cards = []
         if theme_id:
             items = GiftThemeItem.objects.values('wx_card_id').filter(theme_id=theme_id)
-            if items.count() > 0:
+            if items.exists():
                 card_ids = [item['wx_card_id'] for item in items]
                 kwargs.setdefault('wx_card_id__in', card_ids)
                 cards = GiftCard.objects.filter(**kwargs).values('name', 'title', 'init_balance', 'price', 'wx_card_id')
@@ -269,7 +269,7 @@ class CardDelView(MyView):
             try:
                 with transaction.atomic():
                     qs_card_codes = GiftCardCode.objects.filter(wx_card_id=wx_card_id, status='0')
-                    if qs_card_codes.count() > 0:
+                    if qs_card_codes.exists():
                         cards = qs_card_codes.values('code', 'wx_card_id')
                         codes_delete = self.getDeleteCodes(access_token, cards)
                         if codes_delete < cards.count():
@@ -308,7 +308,7 @@ class CardDelView(MyView):
                         GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
                         # 2处理未出售的code
                         qs_card_codes = GiftCardCode.objects.filter(wx_card_id=wx_card_id, status='0')
-                        if qs_card_codes.count() > 0:
+                        if qs_card_codes.exists():
                             cards = qs_card_codes.values('','code')
                             codes_delete = self.getDeleteCodes(access_token, cards)
 
@@ -515,32 +515,35 @@ class ChangeBalanceView(MyView):
             return HttpResponse(rep_data['errmsg'])
 
 
-class CardRefundView(MyView):
+class CardUnavailableView(MyView):
     def get(self,request):
-        return render(request,'giftcard/card_refund.html')
+        res = method.createResult(-1, '', {})
+        return render(request, 'giftcard/code_unavailable.html',locals())
+
+    @transaction.atomic
     def post(self,request):
         trans_id = request.POST.get('trans_id','')
-        qs_order = GiftOrder.objects.values('id').filter(trans_id=trans_id,refund='0').first()
+        qs_order = GiftOrder.objects.values('id').filter(trans_id=trans_id,refund='0')
         if qs_order:
-            order_id = qs_order['id']
+            order = qs_order.first()
+            order_id = order['id']
             qs_order_info = GiftOrderInfo.objects.values('card_id','code').filter(order_id=order_id).first()
 
             access_token = MyView().token
-            url = 'https://api.weixin.qq.com/card/code/unavailable?access_token={token}' \
-                .format(token=access_token)
-            data = {
-                "code": qs_order_info['code'],
-                "card_id": qs_order_info['card_id']
-            }
-            data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-            rep = requests.post(url, data=data)
-            rep_data = json.loads(rep.text)
+            rep_data = giftcard.codeUnavailable(access_token,qs_order_info['code'],qs_order_info['card_id'])
             if rep_data['errcode'] == 0:
-                res = method.createResult(0,'ok')
+                try:
+                    with transaction.atomic():
+                        qs_order.update(refund='3')
+                        GiftCardCode.objects.filter(wx_card_id=qs_order_info['card_id'],code=qs_order_info['code'])\
+                            .update(status='3')
+                        res = method.createResult(0,'ok',{})
+                except Exception as e:
+                    res = method.createResult(3, e, {})
             else:
-                res = method.createResult(2, rep_data['errmsg'])
+                res = method.createResult(2, rep_data['errmsg'],{})
         else:
-            res = method.createResult(1, 'trans_id is not exist')
+            res = method.createResult(1, 'trans_id is not exist',{})
 
-        return render(request, 'giftcard/card_refund.html', locals())
+        return render(request, 'giftcard/code_unavailable.html', locals())
 

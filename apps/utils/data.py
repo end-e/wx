@@ -84,7 +84,7 @@ def getGiftBalance():
 
     cardNo_list = [int(order['CardNo']) for order in orders]
     log_list = LogWx.objects.values('id', 'remark', 'repeat_status') \
-        .filter(type='2', errcode__in=['40001', '40073', '-1', '45009','1202'], repeat_status='0')
+        .filter(type='2', errcode__in=['40001', '40073', '-1', '45009','40056','1202'], repeat_status='0')
     for log in log_list:
         item = {}
         remark_list = log['remark'].split(',')
@@ -131,6 +131,7 @@ def saveAndUpdateLocalData(order):
                 info.price = card['price']
                 info.code = card['code']
                 info_list.append(info)
+
                 #card_code
                 qs_code = GiftCardCode.objects.filter(wx_card_id=card['card_id'],code=card['code'])
                 if not qs_code:

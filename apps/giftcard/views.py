@@ -35,7 +35,7 @@ def conn(request):
             httpResponse = HttpResponse()
             httpResponse.status_code = 200
             flag = True
-            if order.count()==0:
+            if order.exists():
                 res = Event.giftcard_pay_done(orderId)
                 if res['status'] != 0:
                     flag= False

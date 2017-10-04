@@ -16,7 +16,6 @@ from utils.myClass import MyException
 from user.models import WechatMembers
 from api.decorator import signature2
 
-str = {'session_key': 'm1KGGCKeHa7LbIQd7y9VjA==', 'openid': 'oDZT50NGqXbcAZrFRHUBDll6uK5A', 'expires_in': 7200, 'unionid': 'oczeW0ZcLgIUMzQUqePOckA3s2Yk'}
 @csrf_exempt
 @signature2
 @transaction.atomic

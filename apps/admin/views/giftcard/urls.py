@@ -5,7 +5,7 @@ from django.conf.urls import url
 
 from admin.views.giftcard.base import ImgUploadView,ImgView,ThemeView,ImgDelView,ThemeEditView,ImgStatusView
 from admin.views.giftcard.card import CardEditView,CardView,CardWxView,CardDelView,CardInfoWxView, \
-    CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangeBalanceView,CardCodeOnLine,CardRefundView
+    CardUpCodeManualView,CardModifyStockView,CheckCodeInfo,CardStockView,ChangeBalanceView,CardCodeOnLine,CardUnavailableView
 from admin.views.giftcard.page import UploadPageView,PageView
 from admin.views.giftcard.report import BizuininfoView,CardPaidView
 from admin.views.giftcard.order import OrderView,OrderRefundView,OrderCompareView,CodeCompareView
@@ -35,11 +35,11 @@ urlpatterns = [
     url(r'^card/code/get/','admin.utils.method.getCardCode2',name='card_code_get_guest'),
     url(r'^card/stock/$',CardStockView.as_view(),name='card_stock'),
     url(r'^card/stock/modify/$',CardModifyStockView.as_view(),name='card_stock_modify'),
-    url(r'^card/code/online/(?P<wx_card_id>[\S]+)$',CardCodeOnLine.as_view(),name='card_code_online'),
 
-    url(r'^card/check/code/wx/(?P<card_id>[\S]+)/(?P<code>[0-9]+)$',CheckCodeInfo.as_view(),name='card_check_code_wx'),
-    url(r'^card/change/balance/(?P<card_id>[\S]+)/(?P<code>[0-9]+)/(?P<balance>.*)',ChangeBalanceView.as_view()),
-    # url(r'^card/refund/$',CardRefundView.as_view(),name='card_refund'),
+    url(r'^card/code/online/(?P<wx_card_id>[\S]+)$',CardCodeOnLine.as_view(),name='card_code_online'),
+    url(r'^card/code/info/(?P<card_id>[\S]+)/(?P<code>[0-9]+)$',CheckCodeInfo.as_view(),name='card_check_code_wx'),
+    url(r'^card/code/balance/update/(?P<card_id>[\S]+)/(?P<code>[0-9]+)/(?P<balance>.*)',ChangeBalanceView.as_view()),
+    url(r'^card/code/unavailable/$',CardUnavailableView.as_view(),name='code_unavailable'),
 
 
     url(r'^order/refund/$',OrderRefundView.as_view(),name='order_refund'),

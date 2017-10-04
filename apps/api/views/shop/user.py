@@ -26,7 +26,7 @@ def userSave(request):
     res = {}
     try:
         user = ShopUser.objects.filter(unionid=unionid)
-        if user.count()>0:
+        if user.exists():
             user.update(nickname=nickname,extend=extend)
         else:
             ShopUser.objects.create(openid=openid,unionid=unionid,nickname=nickname,extend=extend)
@@ -75,7 +75,7 @@ def userAddressEdit(request):
     detail = request.POST.get('detail','')
     try:
         qs_address = ShopAddress.objects.filter(openid=openid)
-        if qs_address.count()>0:
+        if qs_address.exists():
             qs_address.update(name=name,tel=mobile,province=province,city=city,country=country,detail=detail)
         else:
             ShopAddress.objects.create(

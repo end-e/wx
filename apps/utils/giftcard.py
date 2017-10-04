@@ -151,3 +151,16 @@ def oderRefund(access_token,order_id):
     rep_data = json.loads(rep.text)
 
     return rep_data
+
+
+def codeUnavailable(access_token,code,card_id):
+    url = 'https://api.weixin.qq.com/card/code/unavailable?access_token={token}' \
+        .format(token=access_token)
+    data = {
+        "code": code,
+        "card_id": card_id
+    }
+    data = json.dumps(data, ensure_ascii=False).encode('utf-8')
+    rep = requests.post(url, data=data)
+    rep_data = json.loads(rep.text)
+    return rep_data
