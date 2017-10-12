@@ -10,6 +10,7 @@ from admin.views.giftcard.page import UploadPageView,PageView
 from admin.views.giftcard.report import BizuininfoView,CardPaidView
 from admin.views.giftcard.order import OrderView,OrderRefundView,OrderCompareView,CodeCompareView
 
+
 urlpatterns = [
     #图片素材
     url(r'^img/edit/$',ImgUploadView.as_view(),name='img_upload'),

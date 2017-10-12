@@ -267,7 +267,7 @@ class ShopOrder(models.Model):
 
 class ShopOrderInfo(models.Model):
     order_sn = models.CharField(max_length=16, verbose_name='订单编号')
-    good_sn= models.CharField(max_length=8,verbose_name='商品编码')
+    good_sn= models.CharField(max_length=32,verbose_name='商品编码')
     good_num = models.IntegerField(verbose_name='商品数量')
 
     class Meta:

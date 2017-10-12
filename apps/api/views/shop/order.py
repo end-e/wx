@@ -120,6 +120,7 @@ def orderKgMoneySave(request):
                 # 4、更新会员积分
                 card_no = member['membernumber']
                 member = shop.getGuest(card_no)
+                print(member)
                 if not member:
                     raise MyException('{"errcode":21202,"errmsg":"实名绑定的会员卡异常"}')
                 member_point = float(member['point'])
@@ -165,7 +166,7 @@ def getOrdersByUser(request,page):
                 'count':'SELECT COUNT(*) FROM shop_order_info WHERE shop_order_info.order_sn=shop_order.sn',
                 'type':'0'
             }
-        ).values('sn', 'price', 'save_time', 'status','count','type','snap_img','snap_name').filter(customer=openid)
+        ).values('sn', 'price', 'save_time', 'status','count','type','snap_img','snap_name','express').filter(customer=openid)
 
         money_orders = ShopKgMoneyOrder.objects.extra(select={'type':'1'}) \
             .values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
@@ -180,7 +181,7 @@ def getOrdersByUser(request,page):
         res = method.createResult(0, 'ok', {'orders': list(orders),'openid':openid})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -208,7 +209,7 @@ def getOrderBySn(request):
                 good['count'] = info['good_num']
                 goods.append(good)
         else:
-            order = ShopKgMoneyOrder.objects.values('sn','price','count','status','save_time').get(sn=sn)
+            order = ShopKgMoneyOrder.objects.values('sn','price','count','status','save_time','pay_type').get(sn=sn)
             goods = []
             good ={'img':'','price':float(order['price']),'name':'宽广豆','count':order['count']}
             goods.append(good)
@@ -220,11 +221,13 @@ def getOrderBySn(request):
             address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
             data['address'] = address
             data['shop'] = order['shop']
+        else:
+            data['pay_type'] = order['pay_type']
 
         res = method.createResult(0, 'ok', {'order': data,'openid':openid})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
     return HttpResponse(json.dumps(res))
 
 

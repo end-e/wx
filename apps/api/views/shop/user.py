@@ -33,7 +33,7 @@ def userSave(request):
             res = method.createResult(0, 'ok')
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -45,7 +45,7 @@ def getuserInfo(request):
         user = ShopUser.objects.values('nickname','kg_money','openid').get(openid=openid)
         res = method.createResult(0, 'ok', {'user': user})
     except Exception as e:
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -59,7 +59,7 @@ def getUserAddresses(request):
         res = method.createResult(0, 'ok',{'addresses':list(addresses)})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
     return HttpResponse(json.dumps(res))
 
 
@@ -84,7 +84,7 @@ def userAddressEdit(request):
         res = method.createResult(0, 'ok')
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -98,7 +98,7 @@ def getUserKgMoney(request):
         res = method.createResult(0, 'ok', {'kg_money': kg_money,'openid':openid})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
     return HttpResponse(json.dumps(res))
 
 
@@ -119,9 +119,9 @@ def getUserPoint(request):
             point = float(guest['point'])
             res = method.createResult(0, 'ok', {'point': point, 'openid': openid})
         else:
-            raise MyException('the member is not in WechatMembers')
+            res = method.createResult(1, 'the member is not in WechatMembers')
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(2, e.args[0])
     finally:
         return HttpResponse(json.dumps(res))

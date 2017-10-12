@@ -22,46 +22,47 @@ def createOrderSn(objModel):
 
 
 def getGuest(card_no):
-    conn = db.getMsSqlConnection(
-        consts.DB_SERVER_22, consts.DB_PORT_22, consts.DB_USER_22,
-        consts.DB_PASSWORD_22, consts.DB_DATABASE_22
-    )
-    sql = "select a.point,a.memberid from guest a,cardtype b " \
-        "where a.CardType=b.cardtype and b.flag=0 and a.mode='1'and a.Point>0 and  cardno='{card_no}' " \
-        "and CONVERT(char(10),a.EndDate,120)>=convert(char(10),GETDATE(),120) "\
-        .format(card_no=card_no)
-    cur = conn.cursor()
-    cur.execute(sql)
-    guest = cur.fetchone()
-    cur.close()
-    conn.close()
-    if guest:
-        return guest
-    else:
+    try:
+        conn = db.getMsSqlConnection(
+            consts.DB_SERVER_226, consts.DB_PORT_226, consts.DB_USER_226,
+            consts.DB_PASSWORD_226, consts.DB_DATABASE_226
+        )
+        sql = "select a.point,a.memberid from guest a,cardtype b " \
+            "where a.CardType=b.cardtype and b.flag=0 and a.mode='1'and a.Point>0 and  cardno='{card_no}' " \
+            "and CONVERT(char(10),a.EndDate,120)>=convert(char(10),GETDATE(),120) "\
+            .format(card_no=card_no)
+        cur = conn.cursor()
+        cur.execute(sql)
+        guest = cur.fetchone()
+        cur.close()
+        conn.close()
+        if guest:
+            return guest
+        else:
+            return None
+    except Exception as e:
+        print(e)
         return None
 
 
 
 def updateGuestPoint(member_id,card_no,total_pay,result_point):
     conn = db.getMsSqlConnection(
-        consts.DB_SERVER_22, consts.DB_PORT_22, consts.DB_USER_22,
-        consts.DB_PASSWORD_22, consts.DB_DATABASE_22, None
+        consts.DB_SERVER_226, consts.DB_PORT_226, consts.DB_USER_226,
+        consts.DB_PASSWORD_226, consts.DB_DATABASE_226, None
     )
     cur = conn.cursor()
     try:
-
         conn.autocommit(False)
-
         update_guest = "update Guest  set Point={result_point},LastUseDate=GETDATE(),LastShopID='K001' " \
                        "where CardNo='{CardNo}'".format(result_point=result_point,CardNo=card_no)
 
         cur.execute(update_guest)
-
         update_shop_guest = "update ShopGuest set Point=Point-{total_pay} where CardNo='{CardNo}' and Shopid='K001'"\
             .format(total_pay=total_pay,CardNo=card_no)
         cur.execute(update_shop_guest)
         if cur.rowcount==0:
-            insert_shop_guest = "insert into shopGuset (ShopID,CardNo,Point) values ('K001','{CardNo}',{Point})"\
+            insert_shop_guest = "insert into ShopGuest (ShopID,CardNo,Point) values ('K001','{CardNo}',{Point})"\
                 .format(CardNo=card_no,Point=-float(total_pay))
             cur.execute(insert_shop_guest)
 

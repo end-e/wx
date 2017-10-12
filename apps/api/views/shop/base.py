@@ -17,7 +17,7 @@ def getBannerById(request,b_id):
         res = method.createResult(0,'ok',{'banners':list(banner)})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -32,7 +32,7 @@ def getThemes(request):
         res = method.createResult(0, 'ok', {'themes': list(themes)})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -68,7 +68,7 @@ def getCategories(request):
         res = method.createResult(0, 'ok', {'categories': list(categories)})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
     return HttpResponse(json.dumps(res))
 
 
@@ -84,19 +84,19 @@ def getCategoryById(request,c_id):
         res = method.createResult(0, 'ok', {'category': data})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
     return HttpResponse(json.dumps(res))
 
 
 def getNewGood(request):
     try:
-        goods = ShopGood.objects.values('id','sn','name','price','img').filter(is_new=1)
+        goods = ShopGood.objects.values('id','sn','name','price','img').filter(is_new=1,status='0')
         for good in goods:
             good['price'] = float(good['price'])
         res = method.createResult(0, 'ok', {'goods': list(goods)})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 
@@ -114,7 +114,7 @@ def getGoodBySn(request,g_sn):
         res = method.createResult(0, 'ok', {'good': data})
     except Exception as e:
         print(e)
-        res = method.createResult(1, str(e))
+        res = method.createResult(1, e.args[0])
 
     return HttpResponse(json.dumps(res))
 

@@ -16,7 +16,7 @@
                 </h2>
             </div>
             <div class="box-content">
-                <form action="{% url 'admin:giftcard:orders' %}" method="post" id="Form" style="overflow: hidden">
+                <form action="{% url 'admin:shop:orders' page %}" method="post" id="Form" style="overflow: hidden">
                     <div class="span12 row-fluid">
                         {% csrf_token %}
                         <div data-date-format="yyyy-mm-dd" class="input-group date form_date span3">

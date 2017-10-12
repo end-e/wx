@@ -31,6 +31,7 @@ def conn(request):
         if event == 'giftcard_pay_done':
             # 购买付款成功--TODO 本地存储订单
             orderId = xml.find('OrderId').text
+            print(event,orderId)
             order = GiftOrder.objects.filter(order_id=orderId)
             httpResponse = HttpResponse()
             httpResponse.status_code = 200
