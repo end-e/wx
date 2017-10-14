@@ -99,8 +99,8 @@
                         <label class="control-label">状态</label>
                         <div class="controls">
                             <select name="status" id="">
-                                <option value="0">上架</option>
-                                <option value="1">下架</option>
+                                <option value="0" {% if good.status == '0' %} selected{% endif %}>上架</option>
+                                <option value="1" {% if good.status == '1' %} selected{% endif %}>下架</option>
                             </select>
                         </div>
                     </div>

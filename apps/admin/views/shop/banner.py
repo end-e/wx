@@ -81,9 +81,7 @@ class BannerInfoEditView(View):
             except Exception as e:
                 print(e)
                 res['status'] = 1
+        else:
+            res['status'] = 1
 
         return render(request, 'shop/banner_info_edit.html', locals())
-
-
-
-

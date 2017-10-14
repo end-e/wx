@@ -13,7 +13,9 @@ from utils import method
 
 def getBannerById(request,b_id):
     try:
-        banner = ShopBannerInfo.objects.values('img','target_id','type').filter(banner=b_id)
+        today = datetime.datetime.now()
+        banner = ShopBannerInfo.objects.values('img','target_id','type')\
+            .filter(banner=b_id,begin_time__lte=today,end_time__gte=today)
         res = method.createResult(0,'ok',{'banners':list(banner)})
     except Exception as e:
         print(e)
@@ -27,8 +29,8 @@ def getThemes(request):
     theme_ids = theme_ids.split(',')
     try:
         today = datetime.datetime.now()
-        themes = ShopTheme.objects.values('img','id','name')\
-            .filter(id__in=theme_ids,begin_time__lte=today,end_time__gte=today)
+        themes = ShopTheme.objects.values('img','id','name','type')\
+            .filter(id__in=theme_ids,begin_time__lte=today,end_time__gte=today,status='0')
         res = method.createResult(0, 'ok', {'themes': list(themes)})
     except Exception as e:
         print(e)
@@ -74,8 +76,8 @@ def getCategories(request):
 
 def getCategoryById(request,c_id):
     try:
-        category = ShopCategory.objects.values('banner').get(pk=c_id)
-        goods = ShopGood.objects.values('id','sn','name','price','img').filter(category=c_id)
+        category = ShopCategory.objects.values('banner').get(pk=c_id,status='0')
+        goods = ShopGood.objects.values('id','sn','name','price','img').filter(category=c_id,status='0')
         for good in goods:
             good['price'] = float(good['price'])
         data = {}

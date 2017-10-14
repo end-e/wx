@@ -295,6 +295,8 @@ class ShopTheme(models.Model):
     save_time = models.DateTimeField(default=datetime.now, verbose_name=u'更新时间')
     begin_time = models.DateTimeField(default=datetime.now, verbose_name=u'开始日期')
     end_time = models.DateTimeField(default=datetime.now, verbose_name=u'结束日期')
+    status = models.CharField(max_length=1, verbose_name=u'状态', default='0')
+    type = models.IntegerField(verbose_name=u'类型',blank=True,null=True)
     sort = models.CharField(max_length=2, verbose_name=u'排序', default=1)
 
     class Meta:
@@ -354,7 +356,7 @@ class ShopBannerInfo(models.Model):
     banner = models.IntegerField(default=0,verbose_name=u'bannerID')
     img = models.ImageField(upload_to='shop/%Y/%m',verbose_name=u'图片')
     type = models.CharField(max_length=1,verbose_name=u'类型（0:无导向;1:导向商品;2:导向专题）')
-    target_id = models.IntegerField(verbose_name=u'跳转目标',blank=True,null=True)
+    target_id = models.CharField(max_length=32,verbose_name=u'跳转目标',blank=True,null=True)
     save_time = models.DateTimeField(default=datetime.now, verbose_name=u'更新时间')
     begin_time = models.DateTimeField( verbose_name=u'开始日期')
     end_time = models.DateTimeField(verbose_name=u'结束日期')

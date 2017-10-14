@@ -59,7 +59,7 @@ class ShopGoodForm(forms.ModelForm):
 class ShopThemeForm(forms.ModelForm):
     class Meta:
         model = ShopTheme
-        fields = ['name','desc','img','banner','begin_time','end_time','sort']
+        fields = ['name','desc','img','banner','begin_time','end_time','sort','status','type']
 
 
 class ShopCategoryForm(forms.ModelForm):

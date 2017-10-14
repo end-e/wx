@@ -37,7 +37,7 @@ def orderGoodsSave(request):
     try:
         with transaction.atomic():
             # 0、获取订单编号
-            sn = shop.createOrderSn(ShopOrder)
+            sn = 'G' + shop.createOrderSn(ShopOrder)
             # 1、保存订单信息 更新商品库存
             info_list = []
             snap_name = []
@@ -103,7 +103,7 @@ def orderKgMoneySave(request):
             if pay_type not in ('0','1'):
                 raise MyException('{"errcode":21101,"errmsg":"支付类型错误"}')
 
-            sn = shop.createOrderSn(ShopKgMoneyOrder)
+            sn = 'K' + shop.createOrderSn(ShopKgMoneyOrder)
             if pay_type == '0':#积分支付
                 # 1、guest中查询会员积分数量
                 member = WechatMembers.objects.values('membernumber').filter(unionid=unionid).first()
@@ -199,7 +199,7 @@ def getOrderBySn(request):
     order_type = request.GET.get('type','')
     try:
         if order_type == '0':
-            order = ShopOrder.objects.values('sn','price','status','save_time','snap_address','name','tel','snap_address','shop')\
+            order = ShopOrder.objects.values('sn','express','price','status','save_time','snap_address','name','tel','snap_address','shop')\
                 .get(sn=sn)
             info_list = ShopOrderInfo.objects.values('good_sn','good_num').filter(order_sn=sn)
             goods = []
@@ -221,6 +221,7 @@ def getOrderBySn(request):
             address = {'tel':order['tel'],'name':order['name'],'totalDetail':order['snap_address']}
             data['address'] = address
             data['shop'] = order['shop']
+            data['express'] = order['express']
         else:
             data['pay_type'] = order['pay_type']
 

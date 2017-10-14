@@ -48,7 +48,6 @@
                             <img src="/media/{{ theme.banner }}" alt="" height="150" width="150">
                         </div>
                     </div>
-
                     <div data-date-format="yyyy-mm-dd" class="input-group date form_date" style="margin-bottom: 20px">
                         <label class="control-label">开始日期:</label>
                         <div class="controls">
@@ -71,6 +70,26 @@
                             <input type="text" name="sort" value="{{ theme.sort }}">
                         </div>
                     </div>
+                    <div class="control-group">
+                        <label class="control-label">状态:</label>
+                        <div class="controls">
+                            <select name="status" id="">
+                                <option value="0" {% if theme.status == '0' %}selected{% endif %}>启用</option>
+                                <option value="1" {% if theme.status == '1' %}selected{% endif %}>禁用</option>
+                            </select>
+                            {% if form.errors.status %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">链接目标:</label>
+                        <div class="controls">
+                            <select name="type" id="">
+                                <option value="0" {% if theme.type == '0' %}selected{% endif %}>无链接</option>
+                                <option value="1" {% if theme.type == '1' %}selected{% endif %}>链接专题</option>
+                            </select>
+                            {% if form.errors.status %}<span class="help-inline">此字段必填</span>{% endif %}
+                        </div>
+                    </div>
 
                     <hr>
                     <div class="form-actions">
@@ -78,9 +97,7 @@
                     </div>
                 </form>
             </div>
-
-        </div><!--/span-->
-
+        </div>
     </div>
 {% endblock %}
 {% block common_js %}
