@@ -70,7 +70,7 @@ def change_balance(order,access_token):
                 method.createLog('2', rep_data['errcode'], rep_data['errmsg'], remark, '0')
         else:
             if 'repeat_status' in order:
-                LogWx.objects.filter(id=order['id']).update(repeat_status='1')
+                LogWx.objects.filter(id=order['id']).update(repeat_status='1',add_time=datetime.datetime.now())
             else:
                 method.createLog('2', rep_data['errcode'], rep_data['errmsg'], remark)
     except Exception as e:
@@ -87,7 +87,7 @@ def doChangeBalance(access_token,code,card_id,balance):
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data, timeout=0.5)
+    rep = requests.post(url, data=data, timeout=1)
     rep_data = json.loads(rep.text)
     return rep_data
 

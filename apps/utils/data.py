@@ -82,7 +82,6 @@ def getGiftBalance():
     else:
         update_serial = False
 
-    cardNo_list = [int(order['CardNo']) for order in orders]
     log_list = LogWx.objects.values('id', 'remark', 'repeat_status') \
         .filter(type='2', errcode__in=['40001', '40073', '-1', '45009','40056','1202'], repeat_status='0')
     for log in log_list:
@@ -91,14 +90,21 @@ def getGiftBalance():
         for remark in remark_list:
             r = remark.split(':')
             item[r[0]] = r[1]
-        if int(item['CardNo']) not in cardNo_list:
-            item['id'] = log['id']
-            item['repeat_status'] = log['repeat_status']
-            orders.append(item)
+        item['id'] = log['id']
+        item['repeat_status'] = log['repeat_status']
+        orders.append(item)
 
     orders = sorted(orders, key=lambda order: int(order['PurchSerial']))
+    this_last_serial = orders[-1]['PurchSerial']
+    if update_serial:
+        if prev_last_serial:
+            now = datetime.datetime.now()
+            GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial) \
+                .update(last_serial=this_last_serial, create_time=now.strftime('%Y-%m-%d %H:%M:%S'))
+        else:
+            GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
     if len(orders)>0:
-        res = {'status':True,'update_serial':update_serial,'prev_last_serial':prev_last_serial,'orders':orders}
+        res = {'status':True,'orders':orders}
     else:
         res = {'status':False}
     return res

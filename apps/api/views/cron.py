@@ -75,8 +75,6 @@ def cron_gift_change_balance():
     res = data.getGiftBalance()
     if res['status']:
         orders = res['orders']
-        update_serial = res['update_serial']
-        prev_last_serial =  res['prev_last_serial']
         try:
             access_token = caches['default'].get('wx_kgcs_access_token', '')
             if not access_token:
@@ -91,15 +89,6 @@ def cron_gift_change_balance():
                 else:
                     errmsg = 'cardNo:{card} is empty in GiftCardCode'.format(card = order['CardNo'])
                     method.createLog('2', '1204', errmsg)
-
-            this_last_serial = orders[-1]['PurchSerial']
-            if update_serial:
-                if prev_last_serial:
-                    now = datetime.datetime.now()
-                    GiftBalanceChangeLog.objects.filter(last_serial=prev_last_serial) \
-                        .update(last_serial=this_last_serial,create_time=now.strftime('%Y-%m-%d %H:%M:%S'))
-                else:
-                    GiftBalanceChangeLog.objects.create(last_serial=this_last_serial)
             res_msg = 'ok'
         except Exception as e:
             logging.exception(e)
