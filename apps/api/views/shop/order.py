@@ -120,7 +120,6 @@ def orderKgMoneySave(request):
                 # 4、更新会员积分
                 card_no = member['membernumber']
                 member = shop.getGuest(card_no)
-                print(member)
                 if not member:
                     raise MyException('{"errcode":21202,"errmsg":"实名绑定的会员卡异常"}')
                 member_point = float(member['point'])

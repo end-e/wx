@@ -23,10 +23,7 @@ def createOrderSn(objModel):
 
 def getGuest(card_no):
     try:
-        conn = db.getMsSqlConnection(
-            consts.DB_SERVER_226, consts.DB_PORT_226, consts.DB_USER_226,
-            consts.DB_PASSWORD_226, consts.DB_DATABASE_226
-        )
+        conn = db.getMsSqlConn()
         sql = "select a.point,a.memberid from guest a,cardtype b " \
             "where a.CardType=b.cardtype and b.flag=0 and a.mode='1'and a.Point>0 and  cardno='{card_no}' " \
             "and CONVERT(char(10),a.EndDate,120)>=convert(char(10),GETDATE(),120) "\
@@ -43,7 +40,6 @@ def getGuest(card_no):
     except Exception as e:
         print(e)
         return None
-
 
 
 def updateGuestPoint(member_id,card_no,total_pay,result_point):

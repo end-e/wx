@@ -27,13 +27,13 @@ def getShopName(id):
         shopDict = {shop['Shopcode']: shop['Shopnm'].strip() for shop in shops}
         caches['default'].set('base_shopDict', shopDict, 60 * 60 * 12)
 
-    return shopDict.get(id,id)
+    return shopDict.get(id,'宽广超市')
 
 
 def getAllShops():
     shops1 = getCityShops('C')
     shops2 = getCityShops('T')
-    shops = shops1 + shops2
+    shops = list(shops1) + list(shops2)
 
     return shops
 

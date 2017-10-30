@@ -17,6 +17,7 @@ from api.models import LogWx
 def get_user_order():
     # TODO：查询ERP内的消费数据
     conn = db.getMsSqlConn()
+    print('conn mssql')
     start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
     start = start.strftime('%Y-%m-%d %H:%M:%S')
     last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')

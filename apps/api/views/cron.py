@@ -65,6 +65,8 @@ def cron_send_temp():
                         thread.start()
             for t in threads:
                 t.join()
+        except Exception as e:
+            print(e)
         finally:
             last_one = orders[-1]['PurchSerial']
             caches['default'].set('wx_ikg_tempmsg_last_purchserial', last_one, 7 * 24 * 60 * 60)
