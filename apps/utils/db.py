@@ -5,9 +5,10 @@ import pymssql
 import pymysql
 import _mssql
 
-from utils import consts
+from utils import consts,timeout
 
 
+@timeout.timeout(5)
 def getMsSqlConn(as_dict=True):
     conn = pymssql.connect(
         host=consts.DB_SERVER_226,
@@ -18,11 +19,13 @@ def getMsSqlConn(as_dict=True):
         charset='utf8',
         as_dict=as_dict,
         timeout = 5,
-        login_timeout=5
+        login_timeout=5,
+        tds_version = '7.1'
     )
     return conn
 
 
+@timeout.timeout(5)
 def getMsSqlConn22(as_dict=True):
     conn = pymssql.connect(
         host=consts.DB_SERVER_22,
@@ -33,7 +36,8 @@ def getMsSqlConn22(as_dict=True):
         charset='utf8',
         as_dict=as_dict,
         timeout = 5,
-        login_timeout=5
+        login_timeout=5,
+        tds_version = '7.1'
     )
     return conn
 
@@ -77,6 +81,7 @@ def getMysqlConnection(host, port, user, password, db):
     return conn
 
 
+@timeout.timeout(5)
 def getMsSqlConnection(host, port, user, password, db,as_dict=True):
     conn = pymssql.connect(
         host=host,
@@ -87,11 +92,13 @@ def getMsSqlConnection(host, port, user, password, db,as_dict=True):
         charset='utf8',
         as_dict=as_dict,
         timeout = 5,
-        login_timeout=5
+        login_timeout=5,
+        tds_version = '7.1'
     )
     return conn
 
 
+@timeout.timeout(5)
 def get_MssqlConnection(host, port, user, password, db):
     conn = _mssql.connect(
         server=host,
@@ -101,6 +108,7 @@ def get_MssqlConnection(host, port, user, password, db):
         database=db,
         charset='utf8',
         timeout = 5,
-        login_timeout=5
+        login_timeout=5,
+        tds_version = '7.1'
     )
     return conn

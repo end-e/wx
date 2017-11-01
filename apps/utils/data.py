@@ -1,7 +1,7 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/8/24 14:36'
-import datetime
+import datetime,traceback
 
 from django.core.cache import caches
 from django.db import transaction
@@ -16,28 +16,39 @@ from api.models import LogWx
 
 def get_user_order():
     # TODO：查询ERP内的消费数据
-    conn = db.getMsSqlConn()
-    print('conn mssql')
-    start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
-    start = start.strftime('%Y-%m-%d %H:%M:%S')
-    last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')
-    if last_purchserial:
-        whereStr = "a.PurchSerial> '{last_purchserial}'".format(last_purchserial=last_purchserial)
-    else:
-        whereStr = "a.PurchDateTime> '{start}'".format(start=start)
+    try:
+        conn = db.getMsSqlConn()
+        cur = conn.cursor()
+        print('conn')
+        if not cur:
+            raise (NameError, "连接数据库失败")
+        start = datetime.datetime.now() + datetime.timedelta(minutes=-1)
+        start = start.strftime('%Y-%m-%d %H:%M:%S')
+        last_purchserial = caches['default'].get('wx_ikg_tempmsg_last_purchserial', '')
+        if last_purchserial:
+            whereStr = "a.PurchSerial> '{last_purchserial}'".format(last_purchserial=last_purchserial)
+        else:
+            whereStr = "a.PurchDateTime> '{start}'".format(start=start)
 
-    sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point,a.HistoryPoint,a.ListNO,a.Branchno" \
-          " FROM GuestPurch0 AS a with (nolock),guest AS b with (nolock),cardtype AS c with (nolock)" \
-          " WHERE " + whereStr + " AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
-          " ORDER BY a.PurchSerial"
+        sql = "SELECT a.PurchSerial, a.PayMoney,a.CardNo,a.PurchDateTime,a.shopID,a.Point,a.HistoryPoint,a.ListNO,a.Branchno" \
+              " FROM GuestPurch0 AS a with (nolock),guest AS b with (nolock),cardtype AS c with (nolock)" \
+              " WHERE " + whereStr + " AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
+              " ORDER BY a.PurchSerial"
 
-    cur = conn.cursor()
-    cur.execute(sql)
-    orders = cur.fetchall()
-    cur.close()
-    conn.close()
 
-    return orders
+        cur.execute(sql)
+        orders = cur.fetchall()
+        cur.close()
+        conn.close()
+        return orders
+    except Exception as e:
+
+        traceback.print_exc()
+        print(e)
+        return []
+
+
+
 
 
 def get_wechat_users(orders):

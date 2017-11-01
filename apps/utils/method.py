@@ -140,3 +140,18 @@ def createLog(err_type,err_code,err_msg,err_remark='',repeat_status=''):
         type=err_type, errmsg=err_msg, errcode=err_code,remark=err_remark,repeat_status=repeat_status
     )
     return log
+
+
+import signal
+def time_limit(interval):
+    def wrapper(func):
+        def handler():
+            raise RuntimeError()
+        def deco(*args, **kwargs):
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(interval)
+            res = func(*args, **kwargs)
+            signal.alarm(0)
+            return res
+        return deco
+    return wrapper

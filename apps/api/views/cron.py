@@ -40,10 +40,11 @@ def cron_send_temp():
     access_token = caches['default'].get('wx_ikg_access_token', '')
     if not access_token:
         access_token = wx.get_access_token('ikg', app_id, secret)
-
     orders = data.get_user_order()
+    print('cron_send_temp orders:'+str(len(orders)))
     if len(orders)>0:
         wechat_users = data.get_wechat_users(orders)
+        print('cron_send_temp wechat_users:'+str(len(wechat_users)))
         try:
             threads = []
             for wechat_user in wechat_users:
@@ -138,4 +139,22 @@ def gift_compare_order(begin_time,end_time,offset=0):
 def cron_shop_order_sign():
     save_time = datetime.date.today()+datetime.timedelta(-1)
     res = ShopOrder.objects.filter(save_time__lte=save_time,status='7').update(status='8')
+
+
+from utils import timeout
+
+@timeout.timeout(5)
+def test():
+    import time
+    time.sleep(6)
+
+def main(request):
+    try:
+        test()
+        print('main')
+        return HttpResponse('ok')
+    except Exception as e:
+        print(e)
+        return HttpResponse('fail')
+
 

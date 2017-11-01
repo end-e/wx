@@ -205,7 +205,6 @@ class CardInfoWxView(MyView):
             item['quantity'] = card['general_card']['base_info']['sku']['quantity']
             item['price'] = card['general_card']['base_info']['giftcard_info']['price']
             item['init_balance'] = card['general_card']['init_balance']
-            # queue.put(item)
             return item
         else:
             LogWx.objects.create(type='99', errmsg=rep_data['errmsg'], errcode=rep_data['errcode'])
