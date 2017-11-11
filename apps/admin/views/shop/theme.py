@@ -3,35 +3,36 @@ __author__ = ''
 __date__ = '2017/7/24 15:29'
 import json
 
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic.base import View
-from django.db import  transaction
+from django.db import transaction
 from django.core.urlresolvers import reverse
 
-from admin.models import ShopTheme,ShopCategory,ShopGood,ShopThemeInfo
+from admin.models import ShopTheme, ShopCategory, ShopGood, ShopThemeInfo
 from admin.forms import ShopThemeForm
 
+
 class ThemeView(View):
-    def get(self,request):
+    def get(self, request):
         theme_list = ShopTheme.objects.values().all()
-        return render(request,'shop/theme_list.html',locals())
+        return render(request, 'shop/theme_list.html', locals())
 
 
 class ThemeEditView(View):
-    def get(self,request,t_id):
-        category_list = ShopCategory.objects.values('id','name').filter(status=0)
-        if t_id!='0':
+    def get(self, request, t_id):
+        category_list = ShopCategory.objects.values('id', 'name').filter(status=0)
+        if t_id != '0':
             theme = ShopTheme.objects.filter(id=t_id).first()
             info_list = ShopThemeInfo.objects.values('good_sn').filter(theme_id=t_id)
-        return render(request,'shop/theme_edit.html',locals())
+        return render(request, 'shop/theme_edit.html', locals())
 
-    def post(self,request,t_id):
-        if t_id=='0':
-            form = ShopThemeForm(request.POST,request.FILES)
+    def post(self, request, t_id):
+        if t_id == '0':
+            form = ShopThemeForm(request.POST, request.FILES)
         else:
             qs_theme = ShopTheme.objects.get(pk=t_id)
-            form = ShopThemeForm(request.POST,request.FILES,instance=qs_theme)
+            form = ShopThemeForm(request.POST, request.FILES, instance=qs_theme)
         res = {}
         if form.is_valid():
             res['status'] = 0
@@ -44,21 +45,20 @@ class ThemeEditView(View):
         return render(request, 'shop/theme_edit.html', locals())
 
 
-
 class ThemeInfoEditView(View):
-    def get(self,request,t_id):
-        if t_id=='0' :
+    def get(self, request, t_id):
+        if t_id == '0':
             return redirect(reverse('admin:shop:theme'))
-        category_list = ShopCategory.objects.values('id','name').filter(status=0)
+        category_list = ShopCategory.objects.values('id', 'name').filter(status=0)
         info_list = ShopThemeInfo.objects.values('good_sn').filter(theme_id=t_id)
-        return render(request,'shop/theme_info_edit.html',locals())
+        return render(request, 'shop/theme_info_edit.html', locals())
 
     @transaction.atomic
-    def post(self,request,t_id):
-        sources = request.POST.get('sn_list','')
+    def post(self, request, t_id):
+        sources = request.POST.get('sn_list', '')
         sn_list = sources.split(',')
         action = request.POST.get('action')
-        res = {'status':0}
+        res = {'status': 0}
         try:
             with transaction.atomic():
                 if action == 'add':
@@ -80,4 +80,3 @@ class ThemeInfoEditView(View):
             print(e)
             res['status'] = 1
         return HttpResponse(json.dumps(res))
-

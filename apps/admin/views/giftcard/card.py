@@ -160,7 +160,7 @@ class CardWxView(MyView):
         data = json.dumps(data, ensure_ascii=False).encode('utf-8')
         try:
             total_page, next_page, prev_page = 1, 1, 1
-            rep = requests.post(url, data=data, verify=False, timeout=0.5)
+            rep = requests.post(url, data=data, verify=False)
             rep_data = json.loads(rep.text)
 
             if rep_data['errcode'] == 0:
@@ -288,6 +288,10 @@ class CardDelView(MyView):
                             if not delete:
                                 res["status"] = 2
                     else:
+                        # 1.0更新线下card信息
+                        GiftCard.objects.filter(wx_card_id=wx_card_id).update(wx_card_id='', status=status)
+                        # 1.1删除主题下的此卡
+                        GiftThemeItem.objects.filter(wx_card_id=wx_card_id).delete()
                         delete = self.deleteCard(access_token,wx_card_id,action)
                         if not delete:
                             res["status"] = 2

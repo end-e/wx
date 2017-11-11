@@ -165,10 +165,11 @@ def getOrdersByUser(request,page):
                 'count':'SELECT COUNT(*) FROM shop_order_info WHERE shop_order_info.order_sn=shop_order.sn',
                 'type':'0'
             }
-        ).values('sn', 'price', 'save_time', 'status','count','type','snap_img','snap_name','express').filter(customer=openid)
+        ).values('sn', 'price', 'save_time', 'status','count','type','snap_img','snap_name','express')\
+            .filter(customer=openid,is_del=0)
 
         money_orders = ShopKgMoneyOrder.objects.extra(select={'type':'1'}) \
-            .values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid)
+            .values('sn', 'price', 'save_time', 'status','count','type').filter(customer=openid,is_del=0)
         orders = list(good_orders) + list(money_orders)
         orders = sorted(orders, key=lambda order: order['save_time'], reverse=True)
         paginator = Paginator(orders, 6)
@@ -241,6 +242,24 @@ def updateOrderStatus(request):
         ShopKgMoneyOrder.objects.filter(sn=sn).update(status=status)
         res = method.createResult(0, 'ok')
     elif order_type == '0':
-        ShopOrder.objects.filter(sn=sn).update(status=status)
+        if status == '8':
+            ShopOrder.objects.filter(sn=sn).update(status=status,sign_time=datetime.datetime.now)
+        else:
+            ShopOrder.objects.filter(sn=sn).update(status=status)
         res = method.createResult(0, 'ok')
     return HttpResponse(json.dumps(res))
+
+
+@csrf_exempt
+@signature2
+def delOrder(request):
+    sn = request.POST.get('sn','')
+    order_type = request.POST.get('orderType', '')
+    if order_type == '1':
+        ShopKgMoneyOrder.objects.filter(sn=sn).update(is_del=1)
+        res = method.createResult(0, 'ok')
+    elif order_type == '0':
+        ShopOrder.objects.filter(sn=sn).update(is_del=1)
+        res = method.createResult(0, 'ok')
+    return HttpResponse(json.dumps(res))
+

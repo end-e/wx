@@ -28,7 +28,7 @@ def signature(func):
                 if request_result != current_result:
                     flag = False
         if not flag:
-            response = HttpResponse(json.dumps({'status': 1}))
+            response = HttpResponse(json.dumps({'errcode': 3}))
             response.status_code = 500
             return response
         else:
@@ -50,7 +50,7 @@ def signature2(func):
             flag = False
 
         if not flag:
-            response = HttpResponse(json.dumps({'status': 1}))
+            response = HttpResponse(json.dumps({'errcode': 3}))
             response.status_code = 500
             return response
         else:

@@ -14,9 +14,15 @@ def createOrderSn(objModel):
     begin = today.strftime('%Y-%m-%d') + ' 00:00:00'
     end = today.strftime('%Y-%m-%d') + ' 23:59:59'
 
-    count = objModel.objects.filter(save_time__lte=end, save_time__gte=begin).count()
-    sn = str(count + 1).zfill(4)
-    sn = today.strftime('%Y%m%d') + sn
+    qs_list = objModel.objects.filter(save_time__lte=end, save_time__gte=begin)
+    count = qs_list.count()
+    if count == 0:
+        sn = str(count + 1).zfill(4)
+        sn = today.strftime('%Y%m%d') + sn
+    else:
+        qs_last = qs_list.values('sn').last()
+        pre_sn =qs_last['sn']
+        sn = pre_sn[0:9]+str(int(pre_sn[9:13]) + 1).zfill(4)
 
     return sn
 

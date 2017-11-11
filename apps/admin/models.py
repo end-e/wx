@@ -260,6 +260,7 @@ class ShopOrder(models.Model):
     save_time = models.DateTimeField(default=datetime.now,verbose_name=u'下单时间')
     sign_time = models.DateTimeField(verbose_name=u'签收时间',blank=True,null=True)
     remark = models.TextField(verbose_name=u'备注留言',blank=True,null=True)
+    is_del = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'shop_order'
@@ -282,6 +283,7 @@ class ShopKgMoneyOrder(models.Model):
     customer = models.CharField(max_length=50, verbose_name=u'用户openID', default='0')
     status = models.CharField(max_length=1, verbose_name=u'订单状态', default='0')
     save_time = models.DateTimeField(default=datetime.now, verbose_name=u'下单时间')
+    is_del = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'shop_kgmoney_order'

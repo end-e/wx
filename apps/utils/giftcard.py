@@ -41,7 +41,7 @@ def order_batchget(access_token,begin,end,offset=0,count=100):
         "count": count
     }
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data, timeout=1)
+    rep = requests.post(url, data=data)
     rep_data = json.loads(rep.text)
 
     return rep_data
@@ -87,7 +87,7 @@ def doChangeBalance(access_token,code,card_id,balance):
     }
 
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
-    rep = requests.post(url, data=data, timeout=1)
+    rep = requests.post(url, data=data)
     rep_data = json.loads(rep.text)
     return rep_data
 
@@ -124,7 +124,7 @@ def getOrder(access_token,order_id):
     data = {"order_id": order_id}
     data = json.dumps(data, ensure_ascii=False).encode('utf-8')
     client = requests.Session()
-    rep = client.post(url, data=data, timeout=0.5)
+    rep = client.post(url, data=data)
     rep_data = json.loads(rep.text)
 
     return  rep_data
