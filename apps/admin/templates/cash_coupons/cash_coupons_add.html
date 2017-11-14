@@ -1,0 +1,353 @@
+{% extends 'base/commont.html' %}
+{% block current_page %}
+    <a href="{% url 'admin:cash_coupons:img_list' %}">代金券管理</a>
+    <a href="#" class="current">新建代金券</a>
+{% endblock %}
+{% block content_r %}
+    <div class="row-fluid">
+        <div class="box span12">
+            <div class="box-header">
+                <h2>
+                    <i class="icon-edit"></i>基本信息
+                </h2>
+            </div>
+            <div class="box-content">
+                <div id="MyWizard" class="wizard">
+                    <ul class="steps">
+                        <li data-target="#step1"><span class="badge badge-info">1</span></li>
+                        <li data-target="#step2"><span class="badge badge-info">2</span></li>
+                        <li data-target="#step3"><span class="badge badge-info">3</span></li>
+                    </ul>
+                </div>
+                <form class="form-horizontal" id="SignupForm" method="post" action="{% url 'admin:cash_coupons:add' %}" >
+                    {% csrf_token %}
+                    <div class="step-content">
+                        <fieldset>
+                            <div class="alert alert-block">
+                                <button type="button" class="close" data-dismiss="alert">×</button>
+                                <h4 class="alert-heading">请注意!</h4>
+                                <p>CouponTypeID由数据管理部提供</p>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="brand_name">CouponTypeID</label>
+                                <div class="controls">
+                                    <input class="input-xlarge focused" id="coupon_type_id" name="coupon_type_id" type="text" maxlength="12" value="erp带过来的数据">
+                                    <span class="help-inline">*</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <div class="alert alert-block">
+                                <button type="button" class="close" data-dismiss="alert">×</button>
+                                <h4 class="alert-heading">请注意!</h4>
+                                <p>当前（setp 2）页面字段为必填字段。</p>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="brand_name">商户名称</label>
+                                <div class="controls">
+                                    <input class="input-xlarge focused" id="brand_name" name="brand_name"
+                                           type="text"
+                                           maxlength="12" value="宽广超市" readonly>
+                                    <span class="help-inline">*</span>
+                                    <p class="help-block">商户名字，字数上限为12个汉字。</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="title">券名</label>
+                                <div class="controls">
+                                    <input class="input-xlarge focused" id="title" name="title" type="text" maxlength="9" value="erp带过来的值" readonly>
+                                    <span class="help-inline">*</span>
+                                    <p class="help-block">券名，字数上限为9个汉字(建议涵盖卡券属性、服务及金额)，此券名用于内部标识，在用户侧不可见。</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">卡券颜色</label>
+                                <input type="hidden" name="color" id="color-input">
+                                <div class="controls" id="color">
+                                    <span class="btn btn-large btn-round" data-color="#63b359" style="background: #63b359;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#2c9f67" style="background: #2c9f67;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#509fc9" style="background: #509fc9;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#5885cf" style="background: #5885cf;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#9062c0" style="background: #9062c0;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#d09a45" style="background: #d09a45;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#e4b138" style="background: #e4b138;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#ee903c" style="background: #ee903c;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#f08500" style="background: #f08500;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#a9d92d" style="background: #a9d92d;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#dd6549" style="background: #dd6549;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#cc463d" style="background: #cc463d;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#cf3e36" style="background: #cf3e36;">
+                                    </span>
+                                    <span class="btn btn-large btn-round" data-color="#5E6671" style="background: #5E6671;">
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="notice">券使用提醒</label>
+                                <div class="controls">
+                                    <input name="notice" id="notice" type="text" maxlength="16" value="请出示二维码">
+                                    <span class="help-inline">*</span>
+                                    <p class="help-block">卡券使用提醒，字数上限为16个汉字。</p>
+                                </div>
+                            </div>
+                            <div class="control-group hidden-phone">
+                                <label class="control-label" for="description">券使用说明</label>
+                                <div class="controls">
+                                    <textarea name="description" id="description" rows="3"></textarea>
+                                    <span class="help-inline">*</span>
+                                    <p class="help-block">卡券使用说明，字数上限为1024个汉字。</p>
+                                    <p class="help-block">举个栗子：不可与其他优惠同享</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">二维码类型</label>
+                                <div class="controls" id="code_type">
+                                    <label class="radio" for="code_type_text">
+                                        <input type="radio" name="code_type" id="code_type_text"
+                                               value="CODE_TYPE_TEXT">
+                                        文本
+                                    </label>
+                                    <div style="clear:both"></div>
+                                    <label class="radio" for="code_type_barcode">
+                                        <input type="radio" name="code_type" id="code_type_barcode" value="CODE_TYPE_BARCODE">
+                                        一维码
+                                    </label>
+                                    <div style="clear:both"></div>
+                                    <label class="radio" for="code_type_qrcode">
+                                        <input type="radio" name="code_type" id="code_type_qrcode" value="CODE_TYPE_QRCODE" checked>
+                                        二维码
+                                    </label>
+                                    <div style="clear:both"></div>
+                                    <label class="radio" for="code_type_only_qrcode">
+                                        <input type="radio" name="code_type" id="code_type_only_qrcode" value="CODE_TYPE_ONLY_QRCODE">
+                                        二维码无code显示
+                                    </label>
+                                    <div style="clear:both"></div>
+                                    <label class="radio" for="code_type_only_barcode">
+                                        <input type="radio" name="code_type" id="code_type_only_barcode" value="CODE_TYPE_ONLY_BARCODE">
+                                        一维码无code显示
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="least_cost">起用金额</label>
+                                <div class="controls">
+                                    <input name="least_cost" id="least_cost" type="number" min="0" value="5000" step="100" readonly>
+                                    <p class="help-block">（单位：分）如果无起用门槛则填0</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="title">减免金额</label>
+                                <div class="controls">
+                                    <input name="reduce_cost" id="reduce_cost" type="number" min="100" step="100" value="1000" readonly>
+                                    <span class="help-inline">*</span>
+                                    <p class="help-block">（单位：分）代金券本身面值，1元填写100，10元填写1000</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="date01">开始时间</label>
+                                <div class="controls">
+                                    <input  id="date01" type="text" name="begin_time" value="erp带过来的时间" readonly/>
+                                    <span class="help-inline">*</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="date02">结束时间</label>
+                                <div class="controls">
+                                    <input  id="date02" type="text" name="end_time" value="erp带过来的时间" readonly/>
+                                    <span class="help-inline">*</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <div class="alert alert-block">
+                                <button type="button" class="close" data-dismiss="alert">×</button>
+                                <h4 class="alert-heading">请注意!</h4>
+                                <p>1.指定商品类目必须提前与数据管理部沟通，生成券类型。<br>2.填写其中一项即可。</p>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="accept_category">指定可用的商品类目</label>
+                                <div class="controls">
+                                    <input class="input-xlarge focused" id="accept_category" name="accept_category" type="text" maxlength="512">
+                                    <p class="help-block">填入后将在券面显示适用于xxx</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="reject_category">指定不可用的商品类目</label>
+                                <div class="controls">
+                                    <input class="input-xlarge focused" id="reject_category" name="reject_category" type="text" maxlength="512">
+                                    <p class="help-block">填入后将在券面显示不适用于xxxx</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <div class="controls">
+                                    <button type="submit" class="btn btn-primary" onclick="submitForm();return false;">
+                                        保存
+                                    </button>
+                                    <button type="reset" class="btn">取消</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block common_js %}
+    <script>
+        var res_status = {{ res.status | safe | default:-1 }};
+        if (res_status === 1) {
+            alert("数据提交失败");
+        }else if(res_status === 0){
+            alert("数据提交成功");
+            window.location.href="{% url 'admin:giftcard:cards' %}";
+        }
+
+        var steps = $('#SignupForm fieldset');
+        var count = steps.length;
+
+        steps.each(function (i) {
+            $(this).wrap('<div id="step' + i + '"></div>');
+            $(this).append('<div class="form-actions" id="step' + i + 'commands"></p>');
+
+            if (i == 0) {
+                createNextButton(i);
+                selectStep(i);
+            } else if (i == count - 1) {
+                $('#step' + i).hide();
+                createPrevButton(i);
+            } else {
+                $('#step' + i).hide();
+                createPrevButton(i);
+                createNextButton(i);
+            }
+        });
+
+        function createPrevButton(i) {
+            var stepName = 'step' + i;
+            $('#' + stepName + 'commands').append(
+                '<button type="button" class="btn btn-success btn-prev" id="' + stepName + 'Prev">' +
+                '<i class="icon-arrow-left"></i>上一步' +
+                '</button>'
+            );
+
+            $('#' + stepName + 'Prev').on('click', function (e) {
+                $('#' + stepName).hide();
+                $('#step' + (i - 1)).show();
+                selectStep(i);
+                if (i == 1) {
+                    $('#MyWizard ul li').eq(1).removeClass('active');
+                    $('#MyWizard ul li').eq(0).removeClass('complete');
+                    $('#MyWizard ul li').eq(0).addClass('active');
+                } else if (i == 2) {
+                    $('#MyWizard ul li').eq(1).removeClass('complete');
+                    $('#MyWizard ul li').eq(2).removeClass('active');
+                    $('#MyWizard ul li').eq(1).addClass('active');
+                }
+            });
+        }
+
+        function createNextButton(i) {
+            var stepName = 'step' + i;
+            $('#' + stepName + 'commands').append(
+                '<button type="button" class="btn btn-success btn-next" id="' + stepName + 'Next">' +
+                '下一步 <i class="icon-arrow-right"></i>' +
+                '</button>'
+            );
+            $('#' + stepName + 'Next').on('click', function (e) {
+                $('#' + stepName).hide();
+                $('#step' + (i + 1)).show();
+                selectStep(i + 1);
+            });
+        }
+
+        function selectStep(i) {
+            if (i == 0) {
+                $('#MyWizard ul li').eq(0).addClass('active');
+            } else if (i == 1) {
+                $('#MyWizard ul li').eq(0).removeClass('active');
+                $('#MyWizard ul li').eq(0).addClass('complete');
+                $('#MyWizard ul li').eq(1).addClass('active');
+            } else if (i == 2) {
+                $('#MyWizard ul li').eq(1).removeClass('active');
+                $('#MyWizard ul li').eq(1).addClass('complete');
+                $('#MyWizard ul li').eq(2).addClass('active');
+            }
+        }
+
+        function submitForm() {
+            var brand_name = $('#brand_name').val();
+            var title = $('#title').val();
+            var notice = $('#notice').val();
+            var description = $('#description').val();
+            var code_type_text = $('input[name="code_type"]:checked').val();
+            var least_cost = $('#least_cost').val();
+            var reduce_cost = $('#reduce_cost').val();
+            var date01 = $('#date01').val();
+            var date02 = $('#date02').val();
+            if (!brand_name || !title || !notice || !description || !code_type_text || !least_cost || !reduce_cost || !reduce_cost || !date01 || !date02) {
+                noty({"text": "补全信息后，再次提交", "layout": "bottom", "type": "error"});
+                return false;
+            } else {
+                $('#SignupForm').submit();
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('form :input').on('blur', function () {
+                var $item = $(this).parents().parents();
+                $item.removeClass('error');
+                $('#step0Next').removeAttr('disabled');
+                $('#step0Next').addClass('btn-success');
+                // 第2步最后两项为非必填项，在判断中去掉，感觉这种方式很不好，但还没想到更好的实现
+                if (this.value == '' && this.id !== 'accept_category' && this.id !== 'reject_category' && this.id !== 'coupon_type_id') {
+                    $item.addClass('error');
+                    $('#step0Next').removeClass('btn-success').attr('disabled', 'disabled');
+                }
+            });
+        });
+        $(document).ready(function () {
+            var $buttons = $('#color > span');
+            var color_value;
+            $buttons.click(function (event) {
+                event.preventDefault();
+                $buttons.html(null);
+                $(this).append('<i class="icon-ok"></i>');
+                color_value = $(this).data('color');
+                $("#color-input").val(color_value);
+            });
+        });
+
+        $('#step0Next').click(function () {
+            var data = {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                coupon_type_id : $('#coupon_type_id').val()
+            };
+            $.post("{% url 'admin:cash_coupons:info2'%}",data,function(res){
+                if(res.errcode == 0){
+                    var coupon = res.data.coupon;
+                    $("#least_cost").val(coupon.Value);
+                    $("#reduce_cost").val(coupon.PayValue);
+                    $("#date01").val(coupon.StartDate);
+                    $("#date02").val(coupon.EndDate);
+                    $("#title").val(coupon.CouponTypeName);
+                }
+
+            },'json')
+        })
+    </script>
+{% endblock %}
