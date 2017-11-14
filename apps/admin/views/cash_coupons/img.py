@@ -15,32 +15,9 @@ from apps.admin.utils.myClass import MyViewIkg
 from .forms import UploadFileForm
 
 
-# class CashCouponsListView(View):
-#     def get(self, request):
-#         return render(request, 'cash_coupons/cash_coupons_list.html', {})
 
 
-class CashCouponsStoreListView(View):
-    """
-    获取微信后台的门店列表
-    """
-
-    def get(self, request):
-        access_token = MyViewIkg().token
-        url = 'https://api.weixin.qq.com/cgi-bin/poi/getpoilist?access_token={access_token}'.format(
-            access_token=access_token)
-        params = {'begin': 0, 'limit': 50}
-        json_params = json.dumps(params, ensure_ascii=False).encode('utf-8')
-        response = requests.post(url, data=json_params)
-        response_dict = response.json()
-
-        if 'business_list' in response_dict:
-            business_list = response_dict['business_list']
-
-        return render(request, 'cash_coupons/store_list.html', locals())
-
-
-class CashCouponsImgListView(View):
+class CouponsImgListView(View):
     """
     图片素材列表
     """
@@ -64,7 +41,7 @@ class CashCouponsImgListView(View):
         })
 
 
-class CashCouponsImgUploadView(View):
+class CouponsImgUploadView(View):
     """
     素材图片详情
     """
@@ -108,7 +85,7 @@ class CashCouponsImgUploadView(View):
             return render(request, 'cash_coupons/cash_coupons_img_upload.html', locals())
 
 
-class CashCouponsImgDetailView(View):
+class CouponsImgDetailView(View):
     def get(self, request, img_id):
         img = CashCouponsImg.objects.get(id=int(img_id))
         return render(request, 'cash_coupons/cash_coupons_img_upload.html', {
@@ -116,7 +93,7 @@ class CashCouponsImgDetailView(View):
         })
 
 
-class CashCouponsImgStatusView(View):
+class CouponsImgStatusView(View):
     def get(self, request, status, img_id):
         img_status = CashCouponsImg.objects.filter(id=int(img_id)).update(status=status)
         res = {}

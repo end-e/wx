@@ -1,15 +1,15 @@
 # -*-  coding:utf-8 -*-
 __author__ = ''
 __date__ = '2017/8/24 14:36'
-import datetime,traceback
+import datetime,json
 
 from django.core.cache import caches
 from django.db import transaction
+from django.http import HttpResponse
 
 from user.models import WechatMembers
-from utils import db
+from utils import db,method as mth
 from admin.utils import method
-from admin.utils.myClass import MyException
 from admin.models import GiftOrder, GiftOrderInfo, GiftCardCode, GiftBalanceChangeLog
 from api.models import LogWx
 
@@ -35,20 +35,14 @@ def get_user_order():
               " WHERE " + whereStr + " AND a.cardno=b.cardno AND  b.cardtype = c.cardtype AND  c.flag = 0" \
               " ORDER BY a.PurchSerial"
 
-
         cur.execute(sql)
         orders = cur.fetchall()
         cur.close()
         conn.close()
         return orders
     except Exception as e:
-
-        traceback.print_exc()
         print(e)
         return []
-
-
-
 
 
 def get_wechat_users(orders):
@@ -122,11 +116,11 @@ def getGiftBalance():
     return res
 
 
-
 def local_save_gift_order(wx_orders,diff):
     for order in wx_orders:
         if order['order_id'] in diff:
             saveAndUpdateLocalData(order)
+
 
 @transaction.atomic
 def saveAndUpdateLocalData(order):
@@ -188,6 +182,7 @@ def getCodeBySheetID(sheetid, price, count=100):
 
     return data
 
+
 def getCardsBalance(code_list):
     codes = "'" + "','".join(code_list) + "'"
     conn = db.getMsSqlConn()
@@ -200,3 +195,58 @@ def getCardsBalance(code_list):
     conn.close()
 
     return data
+
+
+def getCouponInfo(request):
+    coupon_type_id = request.POST.get('coupon_type_id','').strip()
+    conn = db.getMsSqlConn22()
+    sql = "SELECT StartDate,EndDate,PayValue,Value,CouponTypeName FROM MyShop_CouponType WHERE CouponTypeID='{id}'"\
+        .format(id=coupon_type_id)
+    with conn :
+        cur = conn.cursor()
+        cur.execute(sql)
+        coupon = cur.fetchone()
+        coupon['PayValue'] = float(coupon['PayValue']) if coupon['PayValue'] else 0
+        coupon['Value'] = float(coupon['Value']) if coupon['Value'] else 0
+        coupon['StartDate'] = datetime.datetime.strftime(coupon['StartDate'],'%Y-%m-%d')
+        coupon['EndDate'] = datetime.datetime.strftime(coupon['EndDate'],'%Y-%m-%d')
+        if coupon :
+            res = mth.createResult('0','ok',{'coupon':coupon})
+        else:
+            res = mth.createResult('1','no data')
+
+    return HttpResponse(json.dumps(res))
+
+def insertCoupon(coupon):
+    conn = db.getMsSqlConn22()
+    cur = conn.cursor()
+    # 插入临时MyShop_Coupon99
+    sql = "Insert into MyShop_Coupon99" \
+          "(CouponID,ShopID,CouponNO,CouponTypeID,StartDate,EndDate," \
+          "CPWdFlag,CPwd,UseTime,MaxUseTime,Value," \
+          "Discount,Flag,FromSheetType,FromSDate,FromListNO," \
+          "FromPOSID,SerialID,ClearFlag) " \
+          "Values({coupon},{shop},{sn},{type},GETdate(),{end},0,null ,0,1,{value},0,0,220,{create},null,{name},{batch},0)" \
+        .format(coupon='%s', shop='%s', sn='%s', type='%s', end='%s', value='%s', create='%s', name='%s', batch='%s')
+
+    params = []
+
+    for item in list:
+        param = (coupon[6], coupon[0], item['voucher'], type, coupon[3], coupon[4], coupon[2], coupon[7],
+                 coupon[6])
+        params.append(param)
+    try:
+        cur.executemany(sql, params)
+        conn.commit()
+    except:
+        conn.rollback()
+
+    cur.close()
+    cursor = conn.cursor()
+    # 读取99表调用存储过程插入正式表
+    sql = "exec IF_MyShop_Coupon99 @CouponID='" + cardinfo[6] + "'"
+    cursor.execute(sql)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return

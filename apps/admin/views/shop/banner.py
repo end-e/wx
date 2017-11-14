@@ -8,7 +8,7 @@ from django.views.generic.base import View
 
 
 from admin.models import ShopBanner,ShopBannerInfo
-from admin.forms import ShopBannerForm,ShopBannerInfoForm
+from admin.views.shop.forms import ShopBannerForm,ShopBannerInfoForm
 from admin.utils.paginator import MyPaginator
 
 class BannerView(View):

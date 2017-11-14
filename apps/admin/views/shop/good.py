@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 
 from admin.models import ShopGood,ShopCategory,ShopGoodImg,ShopGoodProperty
-from admin.forms import ShopGoodForm
+from admin.views.shop.forms import ShopGoodForm
 from admin.utils.paginator import MyPaginator
 
 class GoodView(View):

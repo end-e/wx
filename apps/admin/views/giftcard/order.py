@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.views.generic.base import View
 
 from admin.models import  GiftOrder, GiftOrderInfo,GiftCardCode
-from admin.forms import GiftRefundForm
+from admin.views.giftcard.forms import GiftRefundForm
 from admin.utils.myClass import MyView,MyException
 from admin.utils import method
 from utils import giftcard,data

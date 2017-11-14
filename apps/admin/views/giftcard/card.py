@@ -13,7 +13,7 @@ from admin.models import GiftCard, GiftImg, GiftTheme, GiftThemeItem, GiftCardCo
 from admin.utils.myClass import MyView, MyException
 from admin.utils import method
 from utils import data,giftcard
-from admin.forms import GiftCardForm, GiftCardEditForm
+from admin.views.giftcard.forms import GiftCardForm, GiftCardEditForm
 from api.models import LogWx
 
 

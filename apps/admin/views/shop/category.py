@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.generic.base import View
 
 from admin.models import ShopCategory
-from admin.forms import ShopCategoryForm
+from admin.views.shop.forms import ShopCategoryForm
 
 class CategoryView(View):
     def get(self,request):

@@ -1,6 +1,6 @@
 {% extends 'base/commont.html' %}
 {% block current_page %}
-    <a href="{% url 'wxapp:cash_coupons_list' %}">代金券管理</a>
+    <a href="{% url 'admin:cash_coupons:coupons' %}">代金券管理</a>
     <a href="#" class="current">代金券列表</a>
 {% endblock %}
 {% block content_r %}
@@ -12,33 +12,7 @@
                     券验证码列表
                 </h2>
             </div>
-            <form class="form-horizontal" id="batchForm" action="{% url 'wxapp:discode_query' %}" style="margin-top: 20px; width: 500px;">
-                <fieldset>
-                    {% csrf_token %}
-                    <div class="control-group">
-                        <label class="control-label" for="batch">批次号</label>
-                        <div class="controls">
-                            <input class="span6" id="batch" name="batch" type="text" placeholder="输入批次号" maxlength="2"
-                                   value="{{ batch }}" style="color: #555!important;">
-                            {#  <span class="help-inline">批次号错误提示</span>  #}
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="discode">验证码</label>
-                        <div class="controls">
-                            <input class="span6" id="discode" name="discode" type="text" placeholder="输入验证码"
-                                   maxlength="6"
-                                   style="color: #555!important;">
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <div class="controls">
-                            <label for="sub"></label>
-                            <input type="submit" class="btn btn-primary" value="查询">
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
+
             <div class="box-content">
                 <div class="span12">
                     <a class="btn btn-primary" href="{% url 'wxapp:discode_create' %}">

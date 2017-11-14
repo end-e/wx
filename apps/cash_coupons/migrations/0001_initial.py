@@ -12,18 +12,44 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CashCouponsImg',
+            name='CashCoupon',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('title', models.CharField(max_length=12, verbose_name='资源名称')),
-                ('url', models.CharField(max_length=128, verbose_name='资源地址')),
-                ('create_time', models.DateField(max_length=128, verbose_name='添加时间', default=datetime.datetime.now)),
-                ('shop_code', models.CharField(max_length=5, verbose_name='所属门店', choices=[('C001', '德汇店'), ('C002', '商城店'), ('C003', '双百店'), ('C004', '滦河店'), ('C005', '宽城广场店'), ('C006', '宽城购物店'), ('C008', '围场店'), ('C009', '丰润店'), ('C010', '丰白店'), ('C013', '平泉店'), ('C014', '滦平店'), ('C015', '隆华店'), ('C016', '双滦广场店'), ('C017', '安定里店'), ('C018', '奥体店'), ('C019', '天山店'), ('C020', '美神店'), ('C023', '丰宁二店'), ('C024', '嘉和店'), ('C025', '名都店'), ('C026', '下板城店'), ('T001', '迁安店')], default='0')),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('code_type', models.CharField(verbose_name='码型', choices=[('CODE_TYPE_TEXT', '文本'), ('CODE_TYPE_BARCODE', '一维码'), ('CODE_TYPE_QRCODE', '二维码'), ('CODE_TYPE_ONLY_QRCODE', '二维码无code显示'), ('CODE_TYPE_ONLY_BARCODE', '一维码无code显示')], max_length=128)),
+                ('brand_name', models.CharField(verbose_name='商户名字', max_length=36)),
+                ('title', models.CharField(verbose_name='卡券名', max_length=27)),
+                ('color', models.CharField(verbose_name='券颜色', max_length=16)),
+                ('notice', models.CharField(verbose_name='卡券使用提醒', max_length=48)),
+                ('description', models.CharField(verbose_name='卡券使用说明', max_length=3072)),
+                ('type', models.CharField(verbose_name='使用时间类型', choices=[('DATE_TYPE_FIX_TIME_RANGE', '固定日期'), ('DATE_TYPE_FIX_TERM', '领取后计算固定日期')], default='DATE_TYPE_FIX_TIME_RANGE', max_length=128)),
+                ('begin_time', models.DateField(verbose_name='起用时间')),
+                ('end_time', models.DateField(verbose_name='结束时间')),
+                ('get_limit', models.IntegerField(verbose_name='每人可领券的数量限制', default=1)),
+                ('use_limit', models.IntegerField(verbose_name='每人可核销的数量限制', default=1)),
+                ('least_cost', models.IntegerField(verbose_name='代金券起用金额，单位分')),
+                ('reduce_cost', models.IntegerField(verbose_name='代金券减免金额，单位分')),
+                ('card_id', models.CharField(verbose_name='微信端卡券ID', blank=True, null=True, max_length=32)),
+                ('is_passing', models.CharField(verbose_name='是否通过微信审核', default='0', max_length=1)),
             ],
             options={
+                'verbose_name': '微信卡券详情',
+                'verbose_name_plural': '微信卡券详情',
+                'db_table': 'cash_coupon',
+            },
+        ),
+        migrations.CreateModel(
+            name='CashCouponsImg',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('title', models.CharField(verbose_name='资源名称', max_length=50)),
+                ('url', models.CharField(verbose_name='资源地址', max_length=128)),
+                ('create_time', models.DateField(verbose_name='添加时间', default=datetime.datetime.now, max_length=128)),
+                ('status', models.CharField(verbose_name='可用状态', default=1, max_length=1)),
+            ],
+            options={
+                'verbose_name': '微信卡券素材资源',
+                'verbose_name_plural': '微信卡券素材资源',
                 'db_table': 'cash_coupons_img',
-                'verbose_name': '微信卡券面素材资源',
-                'verbose_name_plural': '微信卡券面素材资源',
             },
         ),
     ]

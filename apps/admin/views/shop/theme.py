@@ -10,7 +10,7 @@ from django.db import transaction
 from django.core.urlresolvers import reverse
 
 from admin.models import ShopTheme, ShopCategory, ShopGood, ShopThemeInfo
-from admin.forms import ShopThemeForm
+from admin.views.shop.forms import ShopThemeForm
 
 
 class ThemeView(View):
